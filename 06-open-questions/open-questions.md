@@ -27,7 +27,7 @@
 | 9 | Which teams use the Grafana dashboards — engineering, ops, client-facing? | High | Unknown | **Partial** — DB engineering confirmed. Client-facing TBC — ask tashvir.babulal / rayhaan.suleyman |
 | 10 | Are any dashboards client-facing or SLA-related? | Critical | tashvir.babulal / rayhaan.suleyman | Open — Month End Reporting and KAPP Client reports are strong candidates |
 | 11 | What datasources does Grafana use — does it read from DBA_VCC_* databases directly? | High | Unknown | **Closed** — 21 datasources confirmed: DBA_VCC (localhost MSSQL), KAPP MySQL (Dev/Rel/UK/EU/US Prod), SingleStore (Dev/Rel/UK/EU/US Prod), Zabbix MySQL (x4), NiFi JSON API, CloudWatch, InfluxDB |
-| 12 | Are there alert notification channels configured in Grafana? Who receives them? | High | Unknown | **Partial** — 3 alert rules found (Failed Read Queries/sec, KAPP Client Config, KAPP Auth Config). Contact points not in db — check Grafana UI |
+| 12 | Are there alert notification channels configured in Grafana? Who receives them? | High | Unknown | **Closed** — 2 Slack channels: `alerts-data-operations` (default) and `alert-app-allow2fa-disabled` (Client Auth alerts). Email contact point is a placeholder — not configured. |
 
 ---
 

@@ -138,7 +138,21 @@
 | KAPP Client Config Alert | C | OK | Error | No | 2025-03-04 |
 | KAPP Client Application Auth Config Alert | C | OK | Error | No | 2025-03-04 |
 
-> Alert notification channels returned no data — notification routing likely configured at the alert rule level or via contact points not stored in alert_notification table (Grafana unified alerting).
+## Alert Contact Points
+
+| Receiver | Type | Destination | Notes |
+|---|---|---|---|
+| grafana-default-email | Email | `<example@email.com>` | **Placeholder — not configured. No real email set.** |
+| alerts-data-operations | Slack | Encrypted token/URL | Active Slack channel — default route for all alerts |
+| alert-app-allow2fa-disabled | Slack | Encrypted token/URL | Separate Slack channel — only fires when `Client Auth = Yes` |
+
+## Alert Routing
+
+- Default route → `alerts-data-operations` Slack channel
+- If alert label `Client Auth = Yes` → `alert-app-allow2fa-disabled` Slack channel
+- Grouped by `grafana_folder` and `alertname`
+
+> The email contact point has a placeholder address and will not deliver. All active alerts route to Slack. The actual Slack webhook URLs are encrypted in the database — need Grafana admin login to view.
 
 ---
 
