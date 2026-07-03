@@ -71,71 +71,131 @@ Core monitoring framework — tracks all monitored SQL Server instances.
 
 ## SQL Agent Jobs
 
-| Job Name | Enabled | Schedule | Alert Target | Notes |
+### DBA Maintenance Jobs
+
+| Job Name | Enabled | Schedule | Alert Target | Purpose |
 |---|---|---|---|---|
-| BASELINE_CONNECTIONS | Yes | Sched1 | None | Captures connection baselines |
-| BASELINE_TABLE_SIZES | Yes | SCHED1 | None | Captures table size baselines |
-| DBA - AUDIT - KAPP_Schema_details_Capture | Yes | Everyday once | None | Captures KAPP schema details daily |
-| DBA - Maintenance - CHECKDB | Yes | Daily @ 22:00 | dba@kurtosys.com | Ola Hallengren integrity checks |
-| DBA - Maintenance - History Cleanup | Yes | Daily @ 00:00 | dba@kurtosys.com | Cleans up job/backup history |
-| DBA - Maintenance - ReIndex and Statistics - Local | Yes | Weekly @ 01:00 | dba@kurtosys.com | Index maintenance |
-| DBA - Maintenance - SQL Backup EW1P-OCT | Yes | Sched1 | None | Backs up RDS instance EW1P-OCT |
-| DBA - Maintenance - SQL Backups DIFF | Yes | Daily @ 00:05 | dba@kurtosys.com | Differential backups |
-| DBA - Maintenance - SQL Backups FULL | Yes | Weekly @ 00:05 | dba@kurtosys.com | Full backups |
-| DBA - Maintenance - SQL Backups LOG | Yes | Hourly | dba@kurtosys.com | Log backups |
-| DBA - MemSQL Range Stats Candidates | No | Every 8 hours | dba@kurtosys.com | Disabled — MemSQL stats |
-| DBA - ObjectIDValidationReport | No | Weekly | dba@kurtosys.com | Disabled |
-| DBA - Production Logon Report | No | Weekly | dba@kurtosys.com | Disabled |
-| DBA - SSISStatusCheck | Yes | SCHED1 | dba@kurtosys.com | Checks SSIS package status |
-| DBA - UtilitiesCleanupHistoryTables | No | Daily 11 PM | dba@kurtosys.com | Disabled |
-| DBA_VCC_AWS_15MIN_CHECKS | Yes | Every 15 min | None | AWS resource checks every 15 min |
-| DBA_VCC_AWS_DAILY_CHECKS | Yes | Daily | None | Daily AWS checks |
-| DBA_VCC_AWS_WEEKLY_CHECKS | Yes | Weekly | None | Weekly AWS checks |
-| DBA_VCC_DAILY_CHECKS | Yes | Daily | None | Core VCC daily checks |
-| DBA_VCC_HOURLY_CHECKS | Yes | Hourly | None | Core VCC hourly checks |
-| DBA_VCC_WEEKLY_CHECKS | Yes | Weekly | None | Core VCC weekly checks |
-| DBA_VCC_COST_Entity_Count_Collection | Yes | SCHED1 | None | Cost data collection per entity |
-| DBA_VCC_JIRA_MONTHEND_CHECKS | Yes | Monthly | None | Jira month-end integration |
-| DBA_VCC_MEMSQL_AUDIT_BACKUP_INFO_DETAILED | No | SCHED1 | None | Disabled — MemSQL backup audit |
-| DBA_VCC_MEMSQL_DAILY_CHECKS | No | SCHED1 | None | Disabled — MemSQL daily checks |
-| DBA_VCC_MEMSQL_GLOBAL_STATUS_CAPTURE | No | Every minute | None | Disabled — was running every minute |
-| DBA_VCC_MEMSQL_HOURLY_CHECKS | No | SCHED1 | None | Disabled |
-| DBA_VCC_MEMSQL_MON_PING_STATS | No | SCHED1 | None | Disabled |
-| DBA_VCC_MEMSQL_MON_SQL_STATUS | No | SCHED1 | None | Disabled |
-| DBA_VCC_MEMSQL_WEEKLY_CHECKS | No | SCHED1 | None | Disabled |
-| DBA_VCC_MYSQL_DAILY_CHECKS | Yes | Daily | None | MySQL/RDS daily checks |
-| DBA_VCC_MYSQL_WEEKLY_CHECKS | Yes | Weekly | None | MySQL/RDS weekly checks |
-| DBA_VCC_MYSQL_MON_PING_STATS | Yes | SCHED1 | None | MySQL ping monitoring |
-| DBA_VCC_MYSQL_MON_SQL_STATUS | Yes | SCHED1 | None | MySQL status monitoring |
-| DBA_VCC_MYSQL_MON_SQL_VERSION_CHECK | Yes | SCHED1 | None | MySQL version checks |
-| DBA_VCC_MYSQL_AUDIT_BACKUP_INFO_DETAILED | Yes | SCHED1 | None | MySQL backup audit |
-| DBA_VCC_MYSQL_AUDIT_DXM_CLIENT_DETAILED | Yes | Daily | None | DXM client audit via MySQL |
-| DBA_VCC_MON_BASE_SERVER_MEMORY_CHECK | Yes | SCHED1 | None | Memory pressure monitoring |
-| DBA_VCC_MON_CHECKS_SERV_DATA_COLLECT | Yes | SCHED1 | None | Server data collection |
-| DBA_VCC_MON_CONNECTION_CHECK | Yes | SCHED1 | None | Connection monitoring |
-| DBA_VCC_MON_Eventlog_CHECK | Yes | SCHED1 | None | Windows event log monitoring |
-| DBA_VCC_MON_LOCAL_DRIVE_CHECK | Yes | SCHED1 | None | Disk space monitoring |
-| DBA_VCC_MON_SQL_DAILY_BACKUPS_CHECK | Yes | Daily | None | Backup verification |
-| DBA_VCC_MON_SQL_SERVER_INFO_CHECK | Yes | SCHED1 | None | SQL Server info collection |
-| DBA_VCC_MON_VLF_COUNT_CHECK | Yes | Daily | None | VLF count monitoring |
-| DBA_VCC_AUDIT_* (12 jobs) | Yes | SCHED1 | None | Full audit data collection suite |
-| DBA_VCC_BASE_SERVER_MEMORY_PRESSURE_DETAILED | Yes | SCHED1 | None | Memory pressure detail |
-| syspolicy_purge_history | Yes | System | None | System policy cleanup |
+| BASELINE_CONNECTIONS | Yes | Sched1 | None | Captures connection baselines across MemSQL, MSSQL, and MySQL via stored procs into KURTOSYS_BASELINE |
+| BASELINE_TABLE_SIZES | Yes | SCHED1 | None | Captures table size baselines across MemSQL, MySQL, and MSSQL into KURTOSYS_BASELINE |
+| DBA - AUDIT - KAPP_Schema_details_Capture | Yes | Daily | None | Executes USP_KAPP_Schema_details_Capture in Utilities — captures KAPP schema metadata daily |
+| DBA - Maintenance - CHECKDB | Yes | Daily @ 22:00 | dba@kurtosys.com | Ola Hallengren DBCC CHECKDB on all read-write databases, logs to CommandLog |
+| DBA - Maintenance - History Cleanup | Yes | Daily @ 00:00 | dba@kurtosys.com | 5-step cleanup: cycles error logs, purges job history (30d), cleans output files (30d), cleans CommandLog (30d), deletes backup history (30d) |
+| DBA - Maintenance - ReIndex and Statistics - Local | Yes | Weekly @ 01:00 | dba@kurtosys.com | Ola Hallengren IndexOptimize on all local databases excluding AG databases |
+| DBA - Maintenance - SQL Backup EW1P-OCT | Yes | Sched1 | None | Backs up RDS instance EW1P-OCT directly to S3 via ARN — custom backup proc in master |
+| DBA - Maintenance - SQL Backups DIFF | Yes | Daily @ 00:05 | dba@kurtosys.com | Ola Hallengren DIFF backup to D:\SQL\Backup\, then copies to S3 via USP_DatabaseBackupMoveToS3 |
+| DBA - Maintenance - SQL Backups FULL | Yes | Weekly @ 00:05 | dba@kurtosys.com | Ola Hallengren FULL backup to D:\SQL\Backup\, then copies to S3 via USP_DatabaseBackupMoveToS3 |
+| DBA - Maintenance - SQL Backups LOG | Yes | Hourly | dba@kurtosys.com | Ola Hallengren LOG backup to D:\SQL\Backup\, then copies to S3 via USP_DatabaseBackupMoveToS3 |
+| DBA - MemSQL Range Stats Candidates | No | Every 8 hours | dba@kurtosys.com | DISABLED — finds range statistics candidates in MemSQL via Utilities USP |
+| DBA - ObjectIDValidationReport | No | Weekly | dba@kurtosys.com | DISABLED — queries EW1R-MSSQL-01 via linked server, emails report to dba@kurtosys.com, cleans data older than 90 days |
+| DBA - Production Logon Report | No | Weekly | dba@kurtosys.com | DISABLED — generates and emails production logon report |
+| DBA - SSISStatusCheck | Yes | SCHED1 | dba@kurtosys.com | Executes SP_MON_SSIS_Long_Running_Packages_Slack in DBA_VCC — sends Slack alert for long-running SSIS packages |
+| DBA - UtilitiesCleanupHistoryTables | No | Daily 11 PM | dba@kurtosys.com | DISABLED — cleans MemSQL query length history tables older than 90 days in Utilities |
+
+### VCC AWS Jobs
+
+| Job Name | Enabled | Schedule | Alert Target | Purpose |
+|---|---|---|---|---|
+| DBA_VCC_AWS_15MIN_CHECKS | Yes | Every 15 min | None | 12-step job: pulls KAPP API query logs, NiFi loader API logs, KAPP dataset logs, Lambda timeout logs, and dataset metrics from CloudWatch log streams via Python (SP_AUDIT_AWS_PY_CALL_DETAILED). Runs ETL cleanup after each. Core KAPP observability job. |
+| DBA_VCC_AWS_DAILY_CHECKS | Yes | Daily | None | Collects S3 bucket sizes, AWS costs per entity, and regional data transfer bytes via Python API calls. Runs ETL cleanup after each. |
+| DBA_VCC_AWS_WEEKLY_CHECKS | Yes | Weekly | None | Collects RDS inventory, RDS maintenance windows, RDS security group rules, S3 lifecycle/encryption, EC2 inventory, IAM key details. Archives data older than 90 days. |
+
+### VCC Core Monitoring Jobs
+
+| Job Name | Enabled | Schedule | Alert Target | Purpose |
+|---|---|---|---|---|
+| DBA_VCC_DAILY_CHECKS | Yes | Daily | None | Executes SP_AUDIT_ENCORE_DOCUMENT_PRODUCTION_DETAILED — tracks Encore document production metrics daily |
+| DBA_VCC_HOURLY_CHECKS | Yes | Hourly | None | Collects BNY IIS logs from CloudWatch (iis_logstream) and runs ETL cleanup — Encore/BNY IIS log ingestion |
+| DBA_VCC_WEEKLY_CHECKS | Yes | Weekly | None | Archives DBA_VCC tables older than 90 days and runs index fragmentation audit |
+| DBA_VCC_BASE_SERVER_MEMORY_PRESSURE_DETAILED | Yes | SCHED1 | None | Checks server memory pressure and sends mail alert if threshold breached |
+
+### VCC Audit Collection Jobs (all enabled, no alert target)
+
+| Job Name | Purpose |
+|---|---|
+| DBA_VCC_AUDIT_BACKUP_INFO_DETAILED | Collects backup info detail across monitored servers |
+| DBA_VCC_AUDIT_DATABASE_CREATION | Audits database creation dates |
+| DBA_VCC_AUDIT_DATABASE_INFO_DETAILED | Collects detailed database info |
+| DBA_VCC_AUDIT_DATABASE_USERS_DETAILED | Audits database users across servers |
+| DBA_VCC_AUDIT_DBINFO_DETAILED | Collects DB-level info detail |
+| DBA_VCC_AUDIT_ERRORLOG_SIZES_DETAILED | Audits error log sizes; sends mail if logs are oversized or need cycling |
+| DBA_VCC_AUDIT_FAILED_LOGIN_SQL_CHECK | Audits failed SQL login attempts |
+| DBA_VCC_AUDIT_JOB_INFO_DETAILED | Collects SQL Agent job info across monitored servers |
+| DBA_VCC_AUDIT_LOGIN_SQL_CHECK | Audits SQL logins; cleans data older than 120 days |
+| DBA_VCC_AUDIT_LOW_RUNNING_DRIVES_FILES_DETAILED | Audits low disk space; sends mail alert if drives are low |
+| DBA_VCC_AUDIT_SERVER_RESTART_REQUIRED_DETAILED | Checks if servers require restart; sends mail alert |
+| DBA_VCC_AUDIT_SQL_DATABASE_USAGE_DETAILED | Audits SQL database usage |
+| DBA_VCC_AUDIT_SQL_LOGINS_INFO_DETAILED | Collects SQL login info detail |
+| DBA_VCC_AUDIT_SQL_SERVER_DEFAULT_LOCATIONS_DETAILED | Audits SQL Server default file locations |
+| DBA_VCC_AUDIT_TOP5_TABLES_PER_DATABASE_DETAILED | Collects top 5 largest tables per database |
+| DBA_VCC_AUDIT_TRACE_FLAGS_DETAILED | Audits trace flags across monitored servers |
+
+### VCC Server Monitoring Jobs
+
+| Job Name | Enabled | Schedule | Alert Target | Purpose |
+|---|---|---|---|---|
+| DBA_VCC_MON_BASE_SERVER_MEMORY_CHECK | Yes | SCHED1 | None | Monitors server memory pressure |
+| DBA_VCC_MON_CHECKS_SERV_DATA_COLLECT | Yes | SCHED1 | None | Collects server check data and moves to MON tables via SP_VCC_MOVE_MON_SERV2_DATA |
+| DBA_VCC_MON_CONNECTION_CHECK | Yes | SCHED1 | None | Runs connection checks and moves data to MON tables. Open tran check steps are commented out. |
+| DBA_VCC_MON_Eventlog_CHECK | Yes | SCHED1 | None | Monitors Windows event log for errors |
+| DBA_VCC_MON_LOCAL_DRIVE_CHECK | Yes | SCHED1 | None | Monitors local disk space |
+| DBA_VCC_MON_SQL_DAILY_BACKUPS_CHECK | Yes | Daily | None | Verifies daily backups completed successfully |
+| DBA_VCC_MON_SQL_SERVER_INFO_CHECK | Yes | SCHED1 | None | Collects SQL Server instance info |
+| DBA_VCC_MON_VLF_COUNT_CHECK | Yes | Daily | None | Checks VLF counts and sends mail report |
+
+### VCC MySQL / DXM Jobs
+
+| Job Name | Enabled | Schedule | Alert Target | Purpose |
+|---|---|---|---|---|
+| DBA_VCC_MYSQL_AUDIT_BACKUP_INFO_DETAILED | Yes | SCHED1 | None | Audits MySQL backup info |
+| DBA_VCC_MYSQL_AUDIT_DXM_CLIENT_DETAILED | Yes | Daily | None | Audits DXM client details and WPv2 client details via MySQL linked servers |
+| DBA_VCC_MYSQL_DAILY_CHECKS | Yes | Daily | None | Collects WPv2 and DXM client sizes, DXM Lambda backup details, database table sizes. Slow query and top100 steps commented out. |
+| DBA_VCC_MYSQL_MON_PING_STATS | Yes | SCHED1 | None | Pings MySQL targets and records stats |
+| DBA_VCC_MYSQL_MON_SQL_STATUS | Yes | SCHED1 | None | Checks MySQL instance status |
+| DBA_VCC_MYSQL_MON_SQL_VERSION_CHECK | Yes | SCHED1 | None | Checks MySQL version across targets |
+| DBA_VCC_MYSQL_WEEKLY_CHECKS | Yes | Weekly | None | DXM post tracking. Most steps commented out. Archives data older than 90 days. |
+
+### VCC Cost and Atlassian Jobs
+
+| Job Name | Enabled | Schedule | Alert Target | Purpose |
+|---|---|---|---|---|
+| DBA_VCC_COST_Entity_Count_Collection | Yes | SCHED1 | None | Collects KAPP client entity counts: allocations, disclaimers/commentaries, documents, and other entity types via stored procs in DBA_VCC_COST |
+| DBA_VCC_JIRA_MONTHEND_CHECKS | Yes | Monthly | None | Pulls Jira sprint data via Python API call (jira_sprint logstream) and runs ETL cleanup into DBA_VCC_AWS |
+
+### VCC MemSQL Jobs (ALL DISABLED)
+
+| Job Name | Schedule | Purpose |
+|---|---|---|
+| DBA_VCC_MEMSQL_AUDIT_BACKUP_INFO_DETAILED | SCHED1 | Would audit MemSQL backup info |
+| DBA_VCC_MEMSQL_DAILY_CHECKS | SCHED1 | Would collect top queries, FP duplicate data, loader/snapshot history, client sizes, orphaned data, KAPP workflow history |
+| DBA_VCC_MEMSQL_GLOBAL_STATUS_CAPTURE | Every minute | Would capture MemSQL global status every minute — very high frequency |
+| DBA_VCC_MEMSQL_HOURLY_CHECKS | SCHED1 | Would collect KAPP workflow run history and timing |
+| DBA_VCC_MEMSQL_MON_PING_STATS | SCHED1 | Would ping MemSQL nodes |
+| DBA_VCC_MEMSQL_MON_SQL_STATUS | SCHED1 | Would check MemSQL status |
+| DBA_VCC_MEMSQL_WEEKLY_CHECKS | SCHED1 | Would archive MemSQL tables older than 90 days |
+
+> All MemSQL jobs disabled. 77 GB of historical data remains in DBA_VCC_MEMSQL. Monitoring likely moved elsewhere — needs confirmation.
+
+### System Job
+
+| Job Name | Enabled | Purpose |
+|---|---|---|
+| syspolicy_purge_history | Yes | Standard SQL Server system job — purges policy history and phantom health records |
 
 ### Job Summary
+
 | Category | Total | Enabled | Disabled |
 |---|---|---|---|
-| DBA Maintenance | 9 | 7 | 2 |
+| DBA Maintenance | 10 | 7 | 3 |
 | VCC AWS Checks | 3 | 3 | 0 |
-| VCC Core Checks | 3 | 3 | 0 |
-| VCC Audit Collection | 12 | 12 | 0 |
-| VCC MySQL Monitoring | 6 | 6 | 0 |
-| VCC MemSQL Monitoring | 7 | 0 | 7 |
+| VCC Core Checks | 4 | 4 | 0 |
+| VCC Audit Collection | 16 | 16 | 0 |
+| VCC MySQL / DXM | 7 | 7 | 0 |
+| VCC MemSQL | 7 | 0 | 7 |
 | VCC Server Monitoring | 8 | 8 | 0 |
-| VCC Cost/Jira | 2 | 2 | 0 |
-| Baseline/KAPP | 3 | 3 | 0 |
+| VCC Cost / Atlassian | 2 | 2 | 0 |
+| Baseline / KAPP | 2 | 2 | 0 |
 | System | 1 | 1 | 0 |
-| **Total** | **54** | **45** | **9** |
+| **Total** | **60** | **50** | **10** |
 
 ---
 
