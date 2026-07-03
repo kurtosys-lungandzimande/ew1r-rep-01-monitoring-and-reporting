@@ -4,13 +4,31 @@
 
 ---
 
-## Known Alert Recipients
+## Alert Mechanisms
 
-| Recipient | Channel | What They Receive |
+### SQL Server Alerts
+All 17 SQL Server alerts (severity 19-25, IO errors 823-825, AG errors) are defined but have `has_notification = 0` — **no operator is notified when these fire. They are silent.**
+
+### SQL Agent Job Alerts
+One operator is configured:
+
+| Operator | Email | Pager |
 |---|---|---|
-| dba@kurtosys.com | Email | CHECKDB failures, backup failures, low disk alerts, server restart required, errorlog size alerts, VLF count reports, memory pressure alerts, SSIS long-running package alerts (Slack) |
+| dba@kurtosys.com | dba@kurtosys.com | None |
 
-> Note: DBA - SSISStatusCheck sends alerts via **Slack** (SP_MON_SSIS_Long_Running_Packages_Slack). Slack channel name unknown — needs confirmation.
+| Job Alert Category | Alert Target | Channel |
+|---|---|---|
+| CHECKDB failures | dba@kurtosys.com | Email |
+| Backup failures (FULL/DIFF/LOG) | dba@kurtosys.com | Email |
+| Low disk space | dba@kurtosys.com | Email |
+| Server restart required | dba@kurtosys.com | Email |
+| Errorlog size alerts | dba@kurtosys.com | Email |
+| VLF count report | dba@kurtosys.com | Email |
+| Memory pressure | dba@kurtosys.com | Email |
+| SSIS long-running packages | Slack | Slack (channel unknown — needs confirmation) |
+| Most VCC monitoring jobs | None | No alert configured — data written to DB tables only |
+
+> Critical gap: SQL Server severity alerts are all silent. If the server hits a fatal error (severity 19-25) or IO failure, no one is automatically notified.
 
 ---
 
@@ -34,8 +52,9 @@
 ### Service Accounts
 | Service | Account | Notes |
 |---|---|---|
-| SQL Server Agent | Unknown | Needs confirmation — check vault |
-| SQL Server Engine | Unknown | Needs confirmation — check vault |
+| SQL Server Engine | SHNONPRD\sqlsrv | Domain service account on SHNONPRD domain |
+| SQL Server Agent | SHNONPRD\sqlagent | Domain service account on SHNONPRD domain |
+| SQL Server Launchpad | NT Service\MSSQLLaunchpad | Built-in service account |
 | Linked server credentials (ODBC/MSDASQL) | Unknown | Used for all SingleStore, MySQL, Zabbix, PMM connections — check vault |
 | Linked server credentials (SQLNCLI) | Unknown | Used for SQL Server linked servers — likely Windows auth or SQL auth |
 | AWS API access (Python calls) | Unknown | SP_AUDIT_AWS_PY_CALL_DETAILED makes Python API calls — IAM role or key stored somewhere on server |
@@ -52,10 +71,17 @@
 ### DNS
 | Name | Resolves To | Notes |
 |---|---|---|
-| EW1R-REP-01 | Unknown IP | Needs DNS lookup confirmation |
-| Grafana URL/DNS | Unknown | Pending discovery |
+| EW1R-REP-01 | 10.72.8.216 | Confirmed IP from netstat |
+| Grafana URL | https://10.72.8.216 or https://ew1r-rep-01 | Grafana running on port 443 (HTTPS) — browser access pending confirmation |
 
-> Run `nslookup ew1r-rep-01` from within the network to confirm DNS entry.
+### Additional Services Confirmed Running
+| Service | Port | PID | Notes |
+|---|---|---|---|
+| Grafana | 443 | 3844 | Running as grafana.exe — HTTPS |
+| Zabbix Agent | 10050 | 5700 | This server reports into Zabbix |
+| SQL Server | 1433 | 3096 | Standard SQL Server port |
+| RDP | 3389 | 360 | Remote desktop enabled |
+| WinRM | 5985 | 4 | Windows Remote Management |
 
 ### Firewall Rules
 | Direction | Source | Destination | Port | Purpose |
