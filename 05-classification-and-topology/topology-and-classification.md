@@ -1,6 +1,6 @@
 # Topology & Classification — EW1R-REP-01
 
-> Status: IN PROGRESS — Grafana and consumer sections incomplete pending access
+> Status: IN PROGRESS — Grafana fully documented. Consumer team identification pending Monday.
 
 ---
 
@@ -43,12 +43,103 @@ EW1R-REP-01 (Custom VCC Monitoring Hub)
 │       ├── Jira/Confluence (DBA_VCC_JIRA_MONTHEND_CHECKS)
 │       └── dba@kurtosys.com (maintenance alerts)
 │
-└── Grafana (port TBC)
-    ├── Datasources → likely DBA_VCC_* databases (TBC)
-    ├── Dashboards → TBC (pending access)
-    ├── Alert rules → TBC
-    └── Consumers → TBC (pending team identification)
+└── Grafana 9.5.2 (port 443 HTTPS)
+    ├── READS FROM (Datasources — 21 confirmed)
+    │   ├── DBA_VCC on localhost (MSSQL)
+    │   ├── KAPP MySQL — Dev, Release, UK/EU/US Prod
+    │   ├── SingleStore — Dev, Release, UK/EU/US Prod (FundPressDataReader)
+    │   ├── Zabbix MySQL — NonProd, Prod Old, Prod New (x4)
+    │   ├── NiFi JSON API — https://10.125.9.192:8443
+    │   ├── AWS CloudWatch
+    │   └── InfluxDB
+    ├── DASHBOARDS (90 total across 16 folders)
+    │   ├── KAPP Reporting — actively updated Oct/Nov 2025 ← CRITICAL
+    │   ├── SingleStore Monitoring — updated Aug 2025 ← CRITICAL
+    │   ├── Month End Reporting — KAPP/Encore/DXM/WPv2/InvestorPress
+    │   ├── AWS Reports — S3/RDS/EC2/Cost/Security
+    │   ├── Encore Reporting
+    │   ├── Atlassian/Jira Reporting
+    │   ├── Performance Dashboards
+    │   └── Zabbix Monitoring
+    ├── ALERT RULES (3)
+    │   ├── Failed Read Queries per Second → Slack: alerts-data-operations
+    │   ├── KAPP Client Config Alert → Slack: alerts-data-operations
+    │   └── KAPP Client Application Auth Config Alert → Slack: alert-app-allow2fa-disabled
+    └── ACTIVE USERS (last seen 2026)
+        ├── tashvir.babulal (admin)
+        ├── yogeshwar.phull (admin)
+        └── rayhaan.suleyman (admin)
 ```
+
+---
+
+## What This Server Does — Value Summary
+
+> This section answers: why does this server exist, what value does it provide, and what would break without it.
+
+### What It Collects
+| Data Source | Method | Frequency | Stored In | Value |
+|---|---|---|---|---|
+| KAPP API query logs | Python API calls via SQL Agent | Every 15 min | DBA_VCC_AWS | Core KAPP observability — 563M rows |
+| AWS costs per entity | Python API calls | Daily | DBA_VCC_AWS | Cost tracking per client/entity |
+| AWS infrastructure (EC2, RDS, S3) | Python API calls | Weekly | DBA_VCC_AWS | AWS inventory and security posture |
+| Encore IIS logs | CloudWatch log stream | Hourly | DBA_VCC | Encore document production tracking |
+| BNY IIS logs | CloudWatch log stream | Hourly | DBA_VCC | BNY integration monitoring |
+| MySQL/DXM/WPv2 client sizes | MySQL linked servers | Daily | DBA_VCC_MYSQL | Client size tracking |
+| Cost entity counts | Stored procs | Scheduled | DBA_VCC_COST | Per-client entity billing/reporting |
+| Jira sprint data | Python API calls | Monthly | DBA_VCC_ATLASSIAN | Engineering sprint reporting |
+| SQL Server health (EW2P-MSSQL-01/02) | Linked servers | Scheduled | DBA_VCC | Production SQL Server monitoring |
+| Performance baselines | Linked servers | Scheduled | KURTOSYS_BASELINE | Connection and table size baselines |
+
+### What It Serves
+| Consumer | What They Get | How Critical |
+|---|---|---|
+| tashvir.babulal, yogeshwar.phull, rayhaan.suleyman | 90 Grafana dashboards across KAPP, SingleStore, AWS, Encore, Zabbix, Jira | Critical |
+| alerts-data-operations Slack channel | KAPP client config and read query failure alerts | High |
+| alert-app-allow2fa-disabled Slack channel | KAPP client auth config alerts | High |
+| dba@kurtosys.com | SQL Agent job failure alerts (backups, CHECKDB, disk space) | High |
+
+### What It Needs To Function (Inbound Dependencies)
+| Dependency | Type | Port | Purpose | Confirmed |
+|---|---|---|---|---|
+| SHNONPRD domain controller | Active Directory | 389/636 | Service account auth (sqlsrv, sqlagent) | Yes |
+| AWS APIs (CloudWatch, S3, EC2, RDS, IAM) | HTTPS outbound | 443 | Python API data collection | Yes — jobs running |
+| Jira API | HTTPS outbound | 443 | Monthly sprint data pull | Yes — job running |
+| KAPP MySQL — Dev (10.61.11.70) | MySQL outbound | 3306 | Grafana datasource | Yes — confirmed in grafana.db |
+| KAPP MySQL — Release (10.77.3.236) | MySQL outbound | 3306 | Grafana datasource | Yes — confirmed in grafana.db |
+| KAPP MySQL — UK Prod (10.121.29.82) | MySQL outbound | 3306 | Grafana datasource | Yes — confirmed in grafana.db |
+| KAPP MySQL — EU Prod (10.125.6.134) | MySQL outbound | 3306 | Grafana datasource | Yes — confirmed in grafana.db |
+| KAPP MySQL — US Prod (10.128.30.6) | MySQL outbound | 3306 | Grafana datasource | Yes — confirmed in grafana.db |
+| SingleStore UK Prod (10.121.22.219) | MySQL outbound | 3306 | Grafana datasource | Yes — confirmed in grafana.db |
+| SingleStore EU Prod (10.125.12.126) | MySQL outbound | 3306 | Grafana datasource | Yes — confirmed in grafana.db |
+| SingleStore US Prod (10.128.24.122) | MySQL outbound | 3306 | Grafana datasource | Yes — confirmed in grafana.db |
+| Zabbix Prod MySQL (10.120.8.51) | MySQL outbound | 3306 | Grafana datasource | Yes — confirmed in grafana.db |
+| Zabbix NonProd MySQL (10.72.8.186) | MySQL outbound | 3306 | Grafana datasource | Yes — confirmed in grafana.db |
+| NiFi API (10.125.9.192:8443) | HTTPS outbound | 8443 | Grafana JSON datasource | Yes — confirmed in grafana.db |
+| EW2P-MSSQL-01/02 | SQL Server outbound | 1433 | VCC monitoring collection | Yes — jobs running |
+| EW1P-OCT RDS | SQL Server outbound | 1433 | Backup job | Yes — job running |
+| S3 bucket (ARN unknown) | HTTPS outbound | 443 | Backup destination | Yes — job running, ARN TBC |
+| Slack webhook (alerts-data-operations) | HTTPS outbound | 443 | Grafana alert delivery | Yes — confirmed in grafana.db |
+| Slack webhook (alert-app-allow2fa-disabled) | HTTPS outbound | 443 | Grafana alert delivery | Yes — confirmed in grafana.db |
+| Grafana clients (browsers) | HTTPS inbound | 443 | Dashboard access | Yes — 3 active users |
+| DBA team (SSMS) | SQL Server inbound | 1433 | Server management | Yes |
+| Zabbix server | TCP inbound | 10050 | Infrastructure monitoring of this server | Yes — zabbix_agentd.exe running |
+
+### What Credentials It Uses (Locations TBC Monday)
+| Purpose | Account | Location | Confirmed |
+|---|---|---|---|
+| SQL Server Engine | SHNONPRD\sqlsrv | AD — SHNONPRD domain | Yes |
+| SQL Server Agent | SHNONPRD\sqlagent | AD — SHNONPRD domain | Yes |
+| AWS API calls | IAM role or access key | C:\DBA_Staging\AWS\ or env variable | TBC Monday |
+| Grafana → SQL Server | grafana (SQL login) | SQL Server login on localhost | Yes — confirmed in grafana.db |
+| Grafana → KAPP MySQL | root | MySQL on each KAPP environment | Yes — confirmed in grafana.db |
+| Grafana → SingleStore | FundPressDataReader | MySQL on each SingleStore cluster | Yes — confirmed in grafana.db |
+| Grafana → Zabbix MySQL | donovan.vangraan | MySQL on Zabbix servers | Yes — needs rotation (ex-employee) |
+| Linked server → SQL Server targets | Unknown | Vault — TBC Monday | TBC |
+| Linked server → MySQL/SingleStore | Unknown | Vault — TBC Monday | TBC |
+| Slack webhooks | Encrypted tokens | grafana.db alert_configuration | Yes — encrypted, need Grafana admin to rotate |
+
+> **Security flag:** Grafana Zabbix datasources use donovan.vangraan's personal credentials. This person is no longer active (last seen Nov 2024). These credentials need to be rotated immediately regardless of decommission decision.
 
 ---
 
@@ -66,7 +157,7 @@ EW1R-REP-01 (Custom VCC Monitoring Hub)
 | KURTOSYS_BASELINE | Investigate | Large (51GB) — unknown active consumer | TBC |
 | SingleStore linked servers (97) | Retire | All MemSQL jobs disabled | N/A |
 | SQL Server linked servers (active) | Move | Still needed for monitoring EW2P servers | New monitoring host |
-| Grafana dashboards | Replace/Move | TBC pending inventory | Grafana Cloud or new host |
+| Grafana dashboards | Replace/Move | 90 dashboards, 3 active admins, actively used Oct 2025 — cannot retire | Grafana Cloud or new host |
 | DBA Maintenance jobs | Move | Standard maintenance — needed on any host | New SQL Server host |
 | VCC AWS jobs (15min/daily/weekly) | Replace | AWS monitoring — move to CloudWatch/native | TECH-3428 |
 | VCC MySQL jobs | Replace | MySQL monitoring | TECH-3428 or CloudWatch |
@@ -80,11 +171,14 @@ EW1R-REP-01 (Custom VCC Monitoring Hub)
 
 | Risk | Severity | Notes |
 |---|---|---|
-| KAPP API monitoring loss | Critical | 563M rows actively collected — likely used for SLA/troubleshooting |
-| Grafana dashboard loss | High | Unknown consumers — could affect engineering/ops visibility |
-| Cost tracking loss | High | DBA_VCC_COST on FULL recovery — someone values this data |
-| MySQL/RDS monitoring loss | High | Active jobs monitoring production RDS |
-| Backup job loss (EW1P-OCT) | Medium | RDS backup may have native alternatives |
+| KAPP API monitoring loss | Critical | 563M rows actively collected — Grafana KAPP dashboards updated Oct 2025, actively used |
+| Grafana dashboard loss | Critical | 3 active admins as of June 2026 — 90 dashboards including production KAPP metrics |
+| SingleStore monitoring loss | Critical | Grafana reads directly from SingleStore UK/EU/US Prod — dashboards updated Aug 2025 |
+| Cost tracking loss | High | DBA_VCC_COST on FULL recovery — consumer TBC Monday |
+| MySQL/RDS monitoring loss | High | Active jobs monitoring production RDS + Grafana reads KAPP MySQL directly |
+| Zabbix datasource loss | High | Grafana reads 4 Zabbix MySQL databases directly — Zabbix monitoring dashboards active |
+| NiFi API reporting loss | Medium | Grafana JSON datasource reads NiFi API — NiFi API Reporting dashboard active |
+| Backup job loss (EW1P-OCT) | Medium | RDS backup may have native alternatives — confirm Monday |
 | MemSQL linked servers | Low | All jobs disabled — likely already migrated |
 
 ---
@@ -92,9 +186,15 @@ EW1R-REP-01 (Custom VCC Monitoring Hub)
 ## Recommendation (Preliminary)
 
 > **Do not decommission until:**
-> 1. Grafana consumers are identified
-> 2. KAPP monitoring data ownership is confirmed
+> 1. tashvir.babulal / rayhaan.suleyman confirm which Grafana dashboards are client-facing or SLA-related
+> 2. KAPP monitoring data ownership is confirmed — who depends on it?
 > 3. DBA_VCC_COST consumer is identified
-> 4. Replacement monitoring is in place (TECH-3428)
+> 4. Replacement monitoring is confirmed in place (TECH-3428)
+> 5. All 3 active Grafana admins are notified and have migrated to a replacement
+> 6. Slack alert channels (alerts-data-operations, alert-app-allow2fa-disabled) are re-routed
 
-This server is **not safe to decommission** based on current evidence. It is actively collecting production KAPP data and monitoring production SQL Server and MySQL instances.
+This server is **not safe to decommission** based on current evidence. It is:
+- Actively collecting production KAPP, MySQL, and AWS data every 15 minutes
+- Serving 90 Grafana dashboards to at least 3 active users as of June 2026
+- The sole source of SingleStore and Zabbix monitoring dashboards
+- Running production Slack alerts for KAPP client config and read query failures
