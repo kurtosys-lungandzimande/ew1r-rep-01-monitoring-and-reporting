@@ -125,9 +125,56 @@ The fact that there are both summary and per-client versions of every report str
 **Action required Monday:**
 Find the person who owns client billing or usage reporting — likely in finance, account management, or platform management — and ask: do you use data from this server for invoicing or client reporting? If yes, this database cannot be decommissioned until a confirmed replacement is in place.
 
----
+### DBA_VCC_MEMSQL — Month-End Reporting Database (Critical Finding)
 
-### Other Known Data Consumers
+> This database was assumed inactive because all its collection jobs are disabled. Investigation has revealed it is still the backbone of the Grafana month-end reporting dashboards.
+
+**What the Grafana month-end dashboards actually read from:**
+The KAPP Month End Reporting Grafana dashboard does not read from DBA_VCC_COST as initially assumed. It calls stored procedures in DBA_VCC_MEMSQL which in turn read from:
+- `DBA_VCC_MEMSQL.dbo.INFO_ClientSizes_Sizes_FP` — KAPP client sizes per SingleStore environment
+- `DBA_VCC_MEMSQL.dbo.ARC_INFO_ClientSizes_Sizes_FP` — archived KAPP client sizes
+- `DBA_VCC_MEMSQL.dbo.INFO_ClientSizes_Sizes_IP` — InvestorPress client sizes
+- `DBA_VCC_MEMSQL.dbo.ARC_INFO_ClientSizes_Sizes_IP` — archived InvestorPress client sizes
+- `DBA_VCC_COST.dbo.INFO_AWS_DE_Entity_Cost` — AWS cost per entity per environment
+- `DBA_VCC_COST.dbo.LU_EntityList` — entity lookup table
+
+**Current data freshness — confirmed by querying the tables directly:**
+
+| Table | Last Data Collected | Row Count | Status |
+|---|---|---|---|
+| INFO_ClientSizes_Sizes_FP (KAPP) | May 2026 | 2,903,660 | Live until recently |
+| INFO_ClientSizes_Sizes_IP (InvestorPress) | May 2026 | 42,364 | Live until recently |
+| ARC_INFO_ClientSizes_Sizes_FP (KAPP archive) | February 2026 | 33,293,391 | Archiving regularly |
+| ARC_INFO_ClientSizes_Sizes_IP (IP archive) | February 2026 | 690,058 | Archiving regularly |
+| INFO_AWS_DE_Entity_Cost (AWS costs) | November 2024 | 4,382 | **STALE — 18 months out of date** |
+
+**Why the jobs show as disabled but data was still current until May 2026:**
+All DBA_VCC_MEMSQL jobs are marked disabled (enabled = 0) but their last run history shows they were running until May 2026:
+
+| Job | Last Run | Last Outcome |
+|---|---|---|
+| DBA_VCC_MEMSQL_DAILY_CHECKS | 8 May 2026 | **Failed** |
+| DBA_VCC_MEMSQL_HOURLY_CHECKS | 8 May 2026 | Succeeded |
+| DBA_VCC_MEMSQL_MON_PING_STATS | 8 May 2026 | Succeeded |
+| DBA_VCC_MEMSQL_MON_SQL_STATUS | 8 May 2026 | Succeeded |
+| DBA_VCC_MEMSQL_AUDIT_BACKUP_INFO_DETAILED | 8 May 2026 | Succeeded |
+| DBA_VCC_MEMSQL_WEEKLY_CHECKS | 3 May 2026 | Succeeded |
+
+This means someone **disabled these jobs in or around May 2026**. The jobs were running fine until then. The daily checks job failed on its last run before being disabled — that failure may be the reason they were turned off.
+
+**The impact of disabling these jobs:**
+The Grafana month-end dashboards for KAPP, InvestorPress, Encore, DXM, and WPv2 all depend on this data. Since the jobs were disabled in May 2026, anyone opening these dashboards for June 2026 month-end reporting will see **no data or incomplete data** for the current month.
+
+The AWS cost portion of the reports has been stale since **November 2024** — meaning the cost figures shown in the month-end reports have been wrong for 18 months. This may have gone unnoticed.
+
+**Action required Monday — urgent:**
+1. Find out who disabled the DBA_VCC_MEMSQL jobs in May 2026 and why — ask yogeshwar.phull or tashvir.babulal
+2. Find out if anyone noticed the month-end Grafana dashboards stopped showing current data
+3. Find out if the daily checks job failure on 8 May 2026 was investigated — that failure likely caused the jobs to be disabled
+4. Confirm whether the AWS cost data (stale since Nov 2024) was ever flagged as incorrect by anyone using the reports
+5. Do not re-enable these jobs without understanding why the daily checks failed first
+
+---
 
 | Data | Likely Consumer | Confidence | Notes |
 |---|---|---|---|
