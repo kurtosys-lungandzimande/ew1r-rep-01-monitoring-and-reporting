@@ -90,6 +90,7 @@ Core monitoring framework — tracks all monitored SQL Server instances.
 | DBA - Production Logon Report | No | Weekly | dba@kurtosys.com | DISABLED — generates and emails production logon report |
 | DBA - SSISStatusCheck | Yes | SCHED1 | dba@kurtosys.com | Executes SP_MON_SSIS_Long_Running_Packages_Slack in DBA_VCC — sends Slack alert for long-running SSIS packages |
 | DBA - UtilitiesCleanupHistoryTables | No | Daily 11 PM | dba@kurtosys.com | DISABLED — cleans MemSQL query length history tables older than 90 days in Utilities |
+| DBA - Production Logon Report | No | Weekly | dba@kurtosys.com | DISABLED — generates and emails production logon report |
 
 ### VCC AWS Jobs
 
@@ -170,6 +171,7 @@ Core monitoring framework — tracks all monitored SQL Server instances.
 | DBA_VCC_MEMSQL_GLOBAL_STATUS_CAPTURE | Every minute | Would capture MemSQL global status every minute — very high frequency |
 | DBA_VCC_MEMSQL_HOURLY_CHECKS | SCHED1 | Would collect KAPP workflow run history and timing |
 | DBA_VCC_MEMSQL_MON_PING_STATS | SCHED1 | Would ping MemSQL nodes |
+| DBA_VCC_MEMSQL_MON_SQL_STATUS | SCHED1 | Would check MemSQL instance status |
 | DBA_VCC_MEMSQL_MON_SQL_STATUS | SCHED1 | Would check MemSQL status |
 | DBA_VCC_MEMSQL_WEEKLY_CHECKS | SCHED1 | Would archive MemSQL tables older than 90 days |
 
@@ -185,7 +187,7 @@ Core monitoring framework — tracks all monitored SQL Server instances.
 
 | Category | Total | Enabled | Disabled |
 |---|---|---|---|
-| DBA Maintenance | 10 | 7 | 3 |
+| DBA Maintenance | 11 | 7 | 4 |
 | VCC AWS Checks | 3 | 3 | 0 |
 | VCC Core Checks | 4 | 4 | 0 |
 | VCC Audit Collection | 16 | 16 | 0 |
@@ -195,7 +197,8 @@ Core monitoring framework — tracks all monitored SQL Server instances.
 | VCC Cost / Atlassian | 2 | 2 | 0 |
 | Baseline / KAPP | 2 | 2 | 0 |
 | System | 1 | 1 | 0 |
-| **Total** | **60** | **50** | **10** |
+| VCC Weekly | 1 | 1 | 0 |
+| **Total** | **63** | **52** | **11** |
 
 ---
 
@@ -215,9 +218,12 @@ Core monitoring framework — tracks all monitored SQL Server instances.
 | Region | Aggregator Nodes | Leaf Nodes | DXM Nodes |
 |---|---|---|---|
 | EC1 (eu-central-1) | ec1p-aggr-01/02/03/04 | ec1p-leaf-01/02/03/04/51/52/53/54 | ec1p-dxm, ec1p-dxm-logging |
-| EW1 (eu-west-1) | ew1r-aggr-01/02/03/04/05 | ew1r-leaf-01-08, ew1r-leaf-11/12/14 | ew1r-dxm, ew1r-dxm-logging |
-| EW2 (eu-west-2) | ew2p-aggr-01/02/03/04/10/11 | ew2p-leaf-01-06/21-24/51-56/61 | ew2p-dxm, ew2p-dxm-logging, ew2p-dxm-repl |
+| EW1 (eu-west-1) | ew1r-aggr-01/02/03/04, ew1r-aggr-03.gen-rel, ew1r-aggr-05.gen-rel | ew1r-leaf-01/02/03/04/05/06/07/08, ew1r-leaf-11.gen-rel, ew1r-leaf-12.gen-rel, ew1r-leaf-14.gen-rel | ew1r-dxm, ew1r-dxm-logging |
+| EW1 Dev | — | — | ew1d-dxm, ew1d-dxm-logging |
+| EW2 (eu-west-2) | ew2p-aggr-01/02/03/04, ew2p-aggr-01.gen-prd, ew2p-aggr-02.gen-prd, ew2p-aggr-10.gen-prd, ew2p-aggr-11.gen-prd | ew2p-leaf-01/02/03/04/05/06, ew2p-leaf-01-04.gen-prd, ew2p-leaf-11-14.gen-prd, ew2p-leaf-21-24.gen-prd, ew2p-leaf-51-54/51-54.gen-prd, ew2p-leaf-55/56, ew2p-leaf-61.gen-prd | ew2p-dxm, ew2p-dxm-logging, ew2p-dxm-repl |
 | UE1 (us-east-1) | ue1p-aggr-01/02/03/04 | ue1p-leaf-01/02/03/04/51/52/53/54 | ue1p-dxm, ue1p-dxm-logging, ue1p-dxm-repl |
+
+> Note: `.gen-rel` and `.gen-prd` suffixed nodes are generation-tagged variants of existing nodes — confirmed present in sys.servers as separate linked server entries.
 
 ### Other Linked Servers (MSDASQL)
 | Server | Type | Notes |
@@ -233,7 +239,7 @@ Core monitoring framework — tracks all monitored SQL Server instances.
 | ew2p-wpv2 / ew2r-wpv2 | Web Platform v2 | EW2 web platform |
 | ue1p-wpv2 / ue1r-wpv2 | Web Platform v2 | UE1 web platform |
 
-**Total linked servers: 97**
+**Total linked servers: 109**
 
 ---
 
