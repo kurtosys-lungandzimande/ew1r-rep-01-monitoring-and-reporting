@@ -74,6 +74,7 @@
 | 31 | Why does BASELINE_CONNECTIONS still have steps for ew1d-aggr-05 and ew1d-aggr-15 — were these ever decommissioned or just unreachable? | Medium | Unknown | Open |
 | 32 | Are the gen-rel and gen-prd SingleStore nodes permanently retired or just a different generation still in use somewhere? | High | SingleStore / Platform team | Open |
 | 33 | **MERGE performance on INFO_AWS_KAPP_Query_API_Detail (563M rows) is already taking 9+ minutes per run on a 30-minute schedule** — SP_AUDIT_KAPP_QUERY_ETL_CLEANUP does a full DISTINCT scan + MERGE with no partitioning. As the table grows this will exceed the schedule interval and runs will overlap. Needs redesign before RDS migration. Written by donovan.vangraan (Feb 2024) who is no longer active. | High | DBA team | Open — decommission blocker for RDS migration |
+| 34 | **AWS cost ETL silently failing since September 2024 — 2.4M rows stuck in MON_AWS_Entity_Cost staging table** — SP_AUDIT_COST_ETL_CLEANUP does `convert(decimal(20,10), Cost)` but Cost column is nvarchar. Suspected bad data causing full MERGE rollback. CATCH block swallows the error so job reports Succeeded. TRUNCATE never runs so staging table keeps growing. INFO_AWS_Entity_Cost stale since 22 Sept 2024. INFO_AWS_DE_Entity_Cost in DBA_VCC_COST stale since 5 Dec 2024 via separate path. Neither failure has been noticed. | High | DBA team | Open — raise as separate ticket, out of scope for TECH-3535 |
 
 ---
 

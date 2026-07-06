@@ -5,6 +5,155 @@ This is the readable audit trail of every discovery made during TECH-3535.
 
 ---
 
+## 2026-07-06 — AWS cost data stale since Sept 2024 — silent ETL failure, 2.4M rows stuck in staging
+
+**Question:** Is AWS cost data still being collected and why is INFO_AWS_DE_Entity_Cost stale since November 2024?
+
+**Query 1 — When did each cost table last receive data:**
+```sql
+SELECT
+    'INFO_AWS_DE_Entity_Cost'   AS table_name,
+    MAX(Period)                 AS last_collected,
+    COUNT(*)                    AS total_rows
+FROM DBA_VCC_COST.dbo.INFO_AWS_DE_Entity_Cost;
+```
+
+**Evidence returned:**
+```
+INFO_AWS_DE_Entity_Cost    2024-11-01    4,382 rows
+```
+
+**Query 2 — Daily job steps — is the cost collection step still present:**
+```sql
+SELECT j.name, j.enabled, s.step_id, s.step_name, s.command
+FROM msdb.dbo.sysjobs j
+JOIN msdb.dbo.sysjobsteps s ON j.job_id = s.job_id
+WHERE j.name = 'DBA_VCC_AWS_DAILY_CHECKS'
+ORDER BY s.step_id;
+```
+
+**Evidence returned:**
+```
+Step 1  SP_AUDIT_AWS_PY_CALL_DETAILED 'bucketsizes'          enabled
+Step 2  SP_AUDIT_S3_ETL_CLEANUP                              enabled
+Step 3  SP_AUDIT_AWS_PY_CALL_DETAILED 'costs'                enabled
+Step 4  SP_AUDIT_COST_ETL_CLEANUP                            enabled
+Step 5  SP_AUDIT_AWS_PY_CALL_DETAILED 'region_data_transfer' enabled
+Step 6  SP_AUDIT_DATATRANSFER_REGIONAL_BYTES_ETL_CLEANUP     enabled
+```
+
+**Query 3 — Last 5 runs of the daily job:**
+```sql
+SELECT TOP 5 j.name, h.run_date, h.run_time,
+    CASE h.run_status WHEN 0 THEN 'Failed' WHEN 1 THEN 'Succeeded' ELSE 'Other' END AS status,
+    h.message
+FROM msdb.dbo.sysjobhistory h
+JOIN msdb.dbo.sysjobs j ON h.job_id = j.job_id
+WHERE j.name = 'DBA_VCC_AWS_DAILY_CHECKS' AND h.step_id = 0
+ORDER BY h.run_date DESC, h.run_time DESC;
+```
+
+**Evidence returned:**
+```
+DBA_VCC_AWS_DAILY_CHECKS  20260706  060000  Succeeded  Last step: step 6
+DBA_VCC_AWS_DAILY_CHECKS  20260705  060000  Succeeded  Last step: step 6
+DBA_VCC_AWS_DAILY_CHECKS  20260704  060000  Succeeded  Last step: step 6
+DBA_VCC_AWS_DAILY_CHECKS  20260703  060000  Succeeded  Last step: step 6
+DBA_VCC_AWS_DAILY_CHECKS  20260702  060000  Succeeded  Last step: step 6
+```
+
+**Query 4 — Compare both cost tables across both databases:**
+```sql
+SELECT
+    'DBA_VCC_AWS - INFO_AWS_Entity_Cost'     AS table_name,
+    MAX(DateChecked)                         AS last_collected,
+    COUNT(*)                                 AS total_rows
+FROM DBA_VCC_AWS.dbo.INFO_AWS_Entity_Cost
+UNION ALL
+SELECT
+    'DBA_VCC_COST - INFO_AWS_DE_Entity_Cost',
+    MAX(DateChecked),
+    COUNT(*)
+FROM DBA_VCC_COST.dbo.INFO_AWS_DE_Entity_Cost;
+```
+
+**Evidence returned:**
+```
+DBA_VCC_AWS  - INFO_AWS_Entity_Cost      2024-09-22 06:02:28   60,045 rows
+DBA_VCC_COST - INFO_AWS_DE_Entity_Cost   2024-12-05 12:56:42    4,382 rows
+```
+
+**Query 5 — What is in the staging table right now:**
+```sql
+SELECT COUNT(*) AS row_count FROM DBA_VCC_AWS.dbo.MON_AWS_Entity_Cost;
+```
+
+**Evidence returned:**
+```
+2,478,382 rows
+```
+
+**Query 6 — What columns does the staging table have:**
+```sql
+SELECT column_name, data_type
+FROM DBA_VCC_AWS.information_schema.columns
+WHERE table_name = 'MON_AWS_Entity_Cost'
+ORDER BY ordinal_position;
+```
+
+**Evidence returned:**
+```
+AccountId      nvarchar
+EntityName     nvarchar
+Cost           nvarchar
+Unit           nvarchar
+EstimatedCost  nvarchar
+Period         nvarchar
+```
+
+**Query 7 — What does SP_AUDIT_COST_ETL_CLEANUP actually do:**
+```sql
+SELECT o.name, m.definition
+FROM DBA_VCC_AWS.sys.sql_modules m
+JOIN DBA_VCC_AWS.sys.objects o ON m.object_id = o.object_id
+WHERE o.name = 'SP_AUDIT_COST_ETL_CLEANUP';
+```
+
+**Evidence returned (key section):**
+```sql
+MERGE [DBA_VCC_AWS].[dbo].[INFO_AWS_Entity_Cost] WITH (HOLDLOCK) AS Target
+USING (SELECT DISTINCT [AccountId],[EntityName],[Cost],[Unit],[EstimatedCost],[Period]
+       FROM [DBA_VCC_AWS].[dbo].[MON_AWS_Entity_Cost]) AS Source
+ON (Target.[AccountId]=Source.[AccountId]
+    AND Target.[EntityName]=Source.[EntityName]
+    AND Target.[Period]=Source.[Period])
+WHEN NOT MATCHED BY TARGET THEN
+    INSERT ([AccountId],[EntityName],[Cost],[Unit],[EstimatedCost],[Period],DateChecked)
+    VALUES (Source.[AccountId],Source.[EntityName],
+            convert(decimal(20,10),Source.[Cost]),   -- <-- converts nvarchar to decimal
+            Source.[Unit],Source.[EstimatedCost],
+            convert(date,Source.[Period]),getdate());
+TRUNCATE TABLE [DBA_VCC_AWS].[dbo].[MON_AWS_Entity_Cost];  -- only runs if MERGE succeeds
+```
+
+**Finding:**
+The Python `costs` call is working — 2,478,382 rows have accumulated in the staging table `MON_AWS_Entity_Cost` since September 2024. The data is arriving. The problem is in `SP_AUDIT_COST_ETL_CLEANUP`.
+
+The MERGE does `convert(decimal(20,10), Source.[Cost])` but Cost is stored as nvarchar. If any single row contains a non-numeric value (null, empty string, currency symbol, or malformed number) the entire MERGE rolls back inside the CATCH block. The CATCH block prints the error message but does not re-raise it — so the job step returns success, the job reports Succeeded, and nobody is notified.
+
+Because the TRUNCATE is inside the same transaction and only runs after a successful MERGE, the staging table is never cleared. It has been accumulating rows since September 2024 — now at 2.4 million rows and growing daily.
+
+Two separate cost tables are affected:
+- `INFO_AWS_Entity_Cost` in DBA_VCC_AWS — stale since **22 September 2024**
+- `INFO_AWS_DE_Entity_Cost` in DBA_VCC_COST — stale since **5 December 2024** (separate collection path, separate failure)
+
+This is a discovery finding only — root cause is suspected but not yet confirmed. Next step is to inspect the staging table data for non-numeric Cost values to confirm the conversion failure theory.
+
+**Action required (not in scope for TECH-3535 — raise as separate ticket):**
+Inspect MON_AWS_Entity_Cost for bad Cost values. Fix SP_AUDIT_COST_ETL_CLEANUP to handle conversion errors per row rather than rolling back the entire batch. Clear the 2.4M row backlog once the fix is in place.
+
+---
+
 ## 2026-07-06 — DBA_VCC_AWS_15MIN_CHECKS: MERGE performance problem on 563M row table
 
 **Question:** Is the 15-minute KAPP collection job still running on schedule?
