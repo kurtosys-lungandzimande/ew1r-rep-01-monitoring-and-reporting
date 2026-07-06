@@ -464,6 +464,51 @@ FROM DBA_VCC_COST.sys.objects
 WHERE type IN ('P', 'V', 'U')
 ORDER BY type, name;
 
+-- 5.4 When did AWS cost data last land in INFO_AWS_DE_Entity_Cost?
+-- This table is known stale since November 2024 — confirm exact last date.
+-- If MAX(Period) is November 2024 or earlier, the AWS cost collection
+-- step has not written data in over 8 months.
+SELECT
+    'INFO_AWS_DE_Entity_Cost'   AS table_name,
+    MAX(Period)                 AS last_collected,
+    COUNT(*)                    AS total_rows
+FROM DBA_VCC_COST.dbo.INFO_AWS_DE_Entity_Cost;
+
+-- 5.5 Is the AWS cost collection step still inside DBA_VCC_AWS_DAILY_CHECKS?
+-- The daily job runs successfully but we need to confirm whether the cost
+-- collection step is still present, still enabled, and what it actually does.
+-- Look for any step referencing INFO_AWS_DE_Entity_Cost or AWS cost.
+SELECT
+    j.name          AS job_name,
+    j.enabled,
+    s.step_id,
+    s.step_name,
+    s.command
+FROM msdb.dbo.sysjobs j
+JOIN msdb.dbo.sysjobsteps s ON j.job_id = s.job_id
+WHERE j.name = 'DBA_VCC_AWS_DAILY_CHECKS'
+ORDER BY s.step_id;
+
+-- 5.6 Last 5 runs of DBA_VCC_AWS_DAILY_CHECKS — confirm it is succeeding
+-- The job shows Succeeded in sysjobservers but that is the overall outcome.
+-- Check step-level history to confirm every step inside it is passing.
+-- A job can show Succeeded overall even if individual steps are skipped.
+SELECT TOP 5
+    j.name,
+    h.run_date,
+    h.run_time,
+    CASE h.run_status
+        WHEN 0 THEN 'Failed'
+        WHEN 1 THEN 'Succeeded'
+        ELSE 'Other'
+    END             AS status,
+    h.message
+FROM msdb.dbo.sysjobhistory h
+JOIN msdb.dbo.sysjobs j ON h.job_id = j.job_id
+WHERE j.name = 'DBA_VCC_AWS_DAILY_CHECKS'
+AND h.step_id = 0
+ORDER BY h.run_date DESC, h.run_time DESC;
+
 
 -- ============================================================
 -- SECTION 6 — DBA_VCC_MEMSQL DATA FRESHNESS (CRITICAL)
@@ -651,3 +696,156 @@ EXEC xp_cmdshell 'dir "C:\Users\sqlsrv\.aws\" /b';
 -- dashboards, users, alert rules, and contact points.
 -- Back this up before any migration or decommission work.
 EXEC xp_cmdshell 'dir "C:\Program Files\GrafanaLabs\grafana\data\grafana.db"';
+
+
+-- ============================================================
+-- SECTION 11 — JOB TO LINKED SERVER MAPPING
+-- The 63 jobs exist because the VCC framework monitors multiple
+-- platforms (KAPP, SingleStore, MySQL, AWS, Zabbix, Atlassian)
+-- each at different frequencies (15min, hourly, daily, weekly).
+-- This section answers two questions:
+--   1. Which jobs actually USE which linked servers?
+--   2. Which linked servers are referenced by NO job at all?
+-- The second question identifies candidates for immediate removal.
+-- ============================================================
+
+-- 11.1 Which job steps reference each linked server by name?
+-- Searches the command text of every job step for linked server names.
+-- This is the direct evidence map: job → step → linked server.
+-- A linked server that appears here is actively used by at least one job.
+-- A linked server that does NOT appear here is an orphan — safe to investigate for removal.
+SELECT
+    j.name          AS job_name,
+    j.enabled,
+    s.step_id,
+    s.step_name,
+    s.database_name,
+    s.command
+FROM msdb.dbo.sysjobs j
+JOIN msdb.dbo.sysjobsteps s ON j.job_id = s.job_id
+WHERE s.command LIKE '%aggr%'
+   OR s.command LIKE '%wpv2%'
+   OR s.command LIKE '%dxm%'
+   OR s.command LIKE '%memsql%'
+   OR s.command LIKE '%mysql%'
+   OR s.command LIKE '%zabbix%'
+   OR s.command LIKE '%marketing%'
+   OR s.command LIKE '%nifi%'
+ORDER BY j.name, s.step_id;
+
+-- 11.2 Which stored procedures reference linked servers?
+-- Job steps call stored procedures. The procs contain the actual linked server names.
+-- This searches procedure bodies across all user databases for linked server references.
+-- Run this for each database: DBA_VCC, DBA_VCC_AWS, DBA_VCC_MYSQL, KURTOSYS_BASELINE, Utilities.
+SELECT
+    o.name          AS proc_name,
+    m.definition
+FROM DBA_VCC.sys.sql_modules m
+JOIN DBA_VCC.sys.objects o ON m.object_id = o.object_id
+WHERE o.type = 'P'
+AND (
+    m.definition LIKE '%aggr%'
+    OR m.definition LIKE '%wpv2%'
+    OR m.definition LIKE '%dxm%'
+    OR m.definition LIKE '%memsql%'
+    OR m.definition LIKE '%marketing%'
+)
+ORDER BY o.name;
+
+-- Repeat for DBA_VCC_MYSQL
+SELECT
+    o.name          AS proc_name,
+    m.definition
+FROM DBA_VCC_MYSQL.sys.sql_modules m
+JOIN DBA_VCC_MYSQL.sys.objects o ON m.object_id = o.object_id
+WHERE o.type = 'P'
+AND (
+    m.definition LIKE '%aggr%'
+    OR m.definition LIKE '%wpv2%'
+    OR m.definition LIKE '%dxm%'
+    OR m.definition LIKE '%memsql%'
+    OR m.definition LIKE '%marketing%'
+)
+ORDER BY o.name;
+
+-- Repeat for KURTOSYS_BASELINE
+SELECT
+    o.name          AS proc_name,
+    m.definition
+FROM KURTOSYS_BASELINE.sys.sql_modules m
+JOIN KURTOSYS_BASELINE.sys.objects o ON m.object_id = o.object_id
+WHERE o.type = 'P'
+AND (
+    m.definition LIKE '%aggr%'
+    OR m.definition LIKE '%wpv2%'
+    OR m.definition LIKE '%dxm%'
+    OR m.definition LIKE '%memsql%'
+    OR m.definition LIKE '%marketing%'
+)
+ORDER BY o.name;
+
+-- 11.3 Which linked servers appear in NO stored procedure and NO job step?
+-- These are true orphans — configured but never called.
+-- Cross-reference this list against the confirmed stale servers from Section 4.
+-- Any server on this list AND confirmed unreachable = safe to drop.
+-- Any server on this list but reachable = was it ever used? Check create_date.
+SELECT
+    s.name          AS linked_server,
+    s.provider,
+    s.data_source,
+    s.modify_date   AS last_modified
+FROM sys.servers s
+WHERE s.is_linked = 1
+AND s.name NOT IN (
+    -- Linked servers referenced in job step commands
+    SELECT DISTINCT
+        CASE
+            WHEN js.command LIKE '%ew2p-wpv2%'  THEN 'ew2p-wpv2'
+            WHEN js.command LIKE '%ew2r-wpv2%'  THEN 'ew2r-wpv2'
+            WHEN js.command LIKE '%ue1p-wpv2%'  THEN 'ue1p-wpv2'
+            WHEN js.command LIKE '%ue1r-wpv2%'  THEN 'ue1r-wpv2'
+            WHEN js.command LIKE '%marketing%'  THEN 'EW2P-MARKETING-DB'
+        END
+    FROM msdb.dbo.sysjobsteps js
+    WHERE js.command LIKE '%wpv2%' OR js.command LIKE '%marketing%'
+)
+ORDER BY s.name;
+
+-- 11.4 Count how many job steps reference each linked server
+-- Gives you a usage score per linked server.
+-- linked_server with count = 0 after a LEFT JOIN = orphan.
+-- linked_server with count > 0 = actively used, must be migrated or replaced before decommission.
+SELECT
+    srv.name                                AS linked_server,
+    COUNT(js.step_id)                       AS job_step_references
+FROM sys.servers srv
+LEFT JOIN msdb.dbo.sysjobsteps js
+    ON js.command LIKE '%' + srv.name + '%'
+WHERE srv.is_linked = 1
+GROUP BY srv.name
+ORDER BY job_step_references DESC, srv.name;
+
+-- 11.5 Job classification — what does each job actually feed?
+-- This maps every enabled job to its output destination.
+-- Use this to answer: if this job stops, what breaks?
+SELECT
+    j.name                                  AS job_name,
+    j.enabled,
+    s.step_name,
+    s.database_name                         AS runs_in_database,
+    CASE
+        WHEN s.command LIKE '%DBA_VCC_AWS%'      THEN 'Feeds DBA_VCC_AWS'
+        WHEN s.command LIKE '%DBA_VCC_MEMSQL%'   THEN 'Feeds DBA_VCC_MEMSQL'
+        WHEN s.command LIKE '%DBA_VCC_MYSQL%'    THEN 'Feeds DBA_VCC_MYSQL'
+        WHEN s.command LIKE '%DBA_VCC_COST%'     THEN 'Feeds DBA_VCC_COST'
+        WHEN s.command LIKE '%DBA_VCC_ATLASSIAN%' THEN 'Feeds DBA_VCC_ATLASSIAN'
+        WHEN s.command LIKE '%KURTOSYS_BASELINE%' THEN 'Feeds KURTOSYS_BASELINE'
+        WHEN s.command LIKE '%DBA_VCC%'          THEN 'Feeds DBA_VCC'
+        WHEN s.command LIKE '%xp_cmdshell%'      THEN 'Runs OS command / Python'
+        WHEN s.command LIKE '%BACKUP%'           THEN 'Backup job'
+        ELSE 'Other / check manually'
+    END                                     AS feeds
+FROM msdb.dbo.sysjobs j
+JOIN msdb.dbo.sysjobsteps s ON j.job_id = s.job_id
+WHERE j.enabled = 1
+ORDER BY j.name, s.step_id;
