@@ -201,9 +201,13 @@ FROM sys.dm_server_services;
 
 -- ============================================================
 -- SECTION 2 — SQL AGENT JOBS
--- 60 jobs total. Many are disabled. The active ones are the
--- critical data collection pipelines that feed Grafana and
--- the DBA_VCC_* databases.
+-- 63 jobs total — 52 enabled, 11 disabled (confirmed 2026-07-06).
+-- Active ones are the critical data collection pipelines that
+-- feed Grafana and the DBA_VCC_* databases.
+-- KNOWN FAILURES: DBA_VCC_MYSQL_DAILY_CHECKS and
+-- DBA_VCC_MYSQL_AUDIT_DXM_CLIENT_DETAILED failing daily since
+-- 25 June 2026 — WPv2 linked servers point to decommissioned
+-- RDS instances. No alert configured — silent failures.
 -- ============================================================
 
 -- 2.1 All jobs with schedule, last run, and alert target
@@ -351,16 +355,22 @@ LEFT JOIN msdb.dbo.sysoperators o ON sn.operator_id = o.id;
 
 -- ============================================================
 -- SECTION 4 — LINKED SERVERS
--- 97 linked servers total: mostly SingleStore (MSDASQL/ODBC),
--- plus SQL Server targets and MySQL instances.
--- All SingleStore linked servers may be stale — jobs are disabled.
+-- 109 linked servers total (confirmed 2026-07-06).
+-- Mostly SingleStore (MSDASQL/ODBC), plus SQL Server targets
+-- and MySQL instances.
+-- KNOWN STALE: All 4 WPv2 linked servers (ew2p-wpv2, ew2r-wpv2,
+-- ue1p-wpv2, ue1r-wpv2) point to decommissioned RDS instances.
+-- Additional stale nodes: ew1d-aggr-05, ew1d-aggr-15,
+-- ew1r-aggr-03.gen-rel (ODBC misconfigured), ew1r-aggr-05.gen-rel,
+-- ew2p-aggr-01.gen-prd, ew2p-aggr-02.gen-prd, EW2P-MARKETING-DB.
+-- Full reachability audit needed before decommission.
 -- ============================================================
 
 -- 4.1 All linked servers
--- 97 total. Grouped by provider:
+-- 109 total. Grouped by provider:
 --   SQLNCLI  = SQL Server targets (EW2P-MSSQL-01/02, EW1P-OCT RDS)
 --   MSDASQL  = SingleStore (ODBC), MySQL, Clickhouse, Zabbix, NiFi, WPv2
--- The SingleStore ones are likely stale since all MemSQL jobs are disabled.
+-- WPv2 linked servers confirmed decommissioned — DNS no longer resolves.
 SELECT
     name,
     product,
@@ -371,7 +381,26 @@ FROM sys.servers
 WHERE is_linked = 1
 ORDER BY name;
 
--- 4.2 Linked server login mappings
+-- 4.2 Job failure investigation — get actual error messages for failing jobs
+-- Use this to diagnose why a job is failing. Filter by job name.
+-- CONFIRMED: DBA_VCC_MYSQL_DAILY_CHECKS and DBA_VCC_MYSQL_AUDIT_DXM_CLIENT_DETAILED
+-- both fail on step SP_AUDIT_WPv2_CLIENTS_DETAILED with:
+-- Error 7303 / 7412 — Unknown MySQL server host for ew2p-wpv2 and ew2r-wpv2
+-- (DNS failure — RDS instances decommissioned). All 4 WPv2 linked servers
+-- confirmed dead as of 2026-07-06. BASELINE_CONNECTIONS also shows
+-- ew1d-aggr-05, ew1d-aggr-15, gen-rel and gen-prd nodes unreachable.
+SELECT TOP 50
+    j.name          AS job_name,
+    h.step_name,
+    h.run_date,
+    h.run_time,
+    h.message
+FROM msdb.dbo.sysjobhistory h
+JOIN msdb.dbo.sysjobs j ON h.job_id = j.job_id
+WHERE h.run_status = 0  -- 0 = Failed
+ORDER BY h.run_date DESC, h.run_time DESC;
+
+-- 4.3 Linked server login mappings
 -- Shows what credentials are used to connect to each linked server.
 -- uses_self_credential = 1 means it passes through the calling account.
 -- uses_self_credential = 0 means a mapped remote login is used.
