@@ -5,6 +5,141 @@ This is the readable audit trail of every discovery made during TECH-3535.
 
 ---
 
+## 2026-07-06 — DBA_VCC_AWS_15MIN_CHECKS: MERGE performance problem on 563M row table
+
+**Question:** Is the 15-minute KAPP collection job still running on schedule?
+
+**Query 1 — Last 10 runs from job history:**
+```sql
+SELECT TOP 10
+    j.name,
+    h.run_date,
+    h.run_time,
+    CASE h.run_status
+        WHEN 0 THEN 'Failed'
+        WHEN 1 THEN 'Succeeded'
+        ELSE 'Other'
+    END AS status,
+    h.message
+FROM msdb.dbo.sysjobhistory h
+JOIN msdb.dbo.sysjobs j ON h.job_id = j.job_id
+WHERE j.name = 'DBA_VCC_AWS_15MIN_CHECKS'
+AND h.step_id = 0
+ORDER BY h.run_date DESC, h.run_time DESC;
+```
+
+**Evidence returned:**
+```
+DBA_VCC_AWS_15MIN_CHECKS  20260706  130000  Succeeded  The job succeeded. Invoked by Schedule 78 (Sched 10). Last step: step 12 (SP_AUDIT_KAPP_QUERY_DATASETS_MATRICS_ETL_CLEANUP)
+DBA_VCC_AWS_15MIN_CHECKS  20260706  123000  Succeeded
+DBA_VCC_AWS_15MIN_CHECKS  20260706  120000  Succeeded
+DBA_VCC_AWS_15MIN_CHECKS  20260706  113000  Succeeded
+DBA_VCC_AWS_15MIN_CHECKS  20260706  110000  Succeeded
+DBA_VCC_AWS_15MIN_CHECKS  20260706  103000  Succeeded
+DBA_VCC_AWS_15MIN_CHECKS  20260706  100000  Succeeded
+DBA_VCC_AWS_15MIN_CHECKS  20260706  93000   Succeeded
+DBA_VCC_AWS_15MIN_CHECKS  20260706  90000   Succeeded
+DBA_VCC_AWS_15MIN_CHECKS  20260706  83000   Succeeded
+```
+
+**Query 2 — Is the job currently running or stuck:**
+```sql
+SELECT
+    j.name,
+    a.start_execution_date,
+    a.stop_execution_date,
+    a.last_executed_step_id,
+    a.last_executed_step_date
+FROM msdb.dbo.sysjobs j
+JOIN msdb.dbo.sysjobactivity a ON j.job_id = a.job_id
+WHERE j.name = 'DBA_VCC_AWS_15MIN_CHECKS'
+AND a.session_id = (SELECT MAX(session_id) FROM msdb.dbo.sysjobactivity);
+```
+
+**Evidence returned:**
+```
+DBA_VCC_AWS_15MIN_CHECKS  start=2026-07-06 13:30:00  stop=NULL  last_step=3  last_step_date=2026-07-06 13:30:11
+```
+
+**Query 3 — What is step 3:**
+```sql
+SELECT step_id, step_name, command, database_name
+FROM msdb.dbo.sysjobsteps
+WHERE job_id = (SELECT job_id FROM msdb.dbo.sysjobs WHERE name = 'DBA_VCC_AWS_15MIN_CHECKS')
+AND step_id = 3;
+```
+
+**Evidence returned:**
+```
+step_id  step_name                      database_name
+3        SP_AUDIT_AWS_PY_CALL_DETAILED  DBA_VCC_AWS
+command: EXEC DBA_VCC_AWS..SP_AUDIT_AWS_PY_CALL_DETAILED 'kapp_query_api_logstream'
+```
+
+**Query 4 — Active session detail:**
+```sql
+SELECT
+    s.session_id, s.status, s.last_request_start_time,
+    r.command, r.wait_type, r.wait_time / 1000 AS wait_seconds,
+    r.total_elapsed_time / 1000 AS elapsed_seconds,
+    r.reads, r.writes, r.logical_reads,
+    t.text AS sql_text
+FROM sys.dm_exec_sessions s
+LEFT JOIN sys.dm_exec_requests r ON s.session_id = r.session_id
+OUTER APPLY sys.dm_exec_sql_text(r.sql_handle) t
+WHERE s.login_name LIKE '%sqlagent%' OR s.login_name LIKE '%sqlsrv%'
+ORDER BY s.last_request_start_time;
+```
+
+**Evidence returned:**
+```
+session_id  status   last_request_start_time      command  wait_type  wait_seconds  elapsed_seconds  reads      writes  logical_reads
+51          sleeping 2026-02-12 10:11:10.660       NULL     NULL       NULL          NULL             NULL       NULL    NULL
+54          sleeping 2026-02-12 10:11:11.660       NULL     NULL       NULL          NULL             NULL       NULL    NULL
+52          sleeping 2026-05-14 05:31:05.603       NULL     NULL       NULL          NULL             NULL       NULL    NULL
+61          sleeping 2026-07-06 13:30:00.660       NULL     NULL       NULL          NULL             NULL       NULL    NULL
+67          running  2026-07-06 13:30:39.747       MERGE    NULL       0             534              3,461,771  1       3,633,605
+55          sleeping 2026-07-06 13:37:56.457       NULL     NULL       NULL          NULL             NULL       NULL    NULL
+
+SQL text for session 67 (truncated):
+CREATE PROCEDURE [dbo].[SP_AUDIT_KAPP_QUERY_ETL_CLEANUP]
+  MERGE [DBA_VCC_AWS].[dbo].[INFO_AWS_KAPP_Query_API_Detail] WITH (HOLDLOCK) AS Target
+  USING (SELECT DISTINCT [Region],[LogGroup],[LogStream],[QueryName],...
+  FROM [DBA_VCC_AWS].[dbo].[MON_AWS_KAPP_Query_API_Detail]) AS Source
+  ON (Target.[Region]=Source.[Region] AND ... AND Target.[QueryTimestamp]=Source.[QueryTimestamp])
+  WHEN NOT MATCHED BY TARGET THEN INSERT ...
+  TRUNCATE TABLE [DBA_VCC_AWS].[dbo].[MON_AWS_KAPP_Query_API_Detail];
+```
+
+**Query 5 — MERGE progress check:**
+```sql
+SELECT
+    r.session_id, r.command, r.status,
+    r.percent_complete,
+    r.estimated_completion_time / 1000 AS est_seconds_remaining,
+    r.cpu_time / 1000                  AS cpu_seconds,
+    r.total_elapsed_time / 1000        AS elapsed_seconds,
+    r.reads, r.writes, r.logical_reads
+FROM sys.dm_exec_requests r
+WHERE r.session_id = 67;
+```
+
+**Evidence returned:**
+```
+session_id  command  status   percent_complete  est_seconds_remaining  cpu_seconds  elapsed_seconds  reads      writes  logical_reads
+67          MERGE    running  0                 0                      531          534              3,461,771  1       3,633,605
+```
+
+**Finding:** The job is not hung — it is actively working. The MERGE is running against INFO_AWS_KAPP_Query_API_Detail which has 563 million rows. After 534 seconds (nearly 9 minutes) it has done 3.4M reads and only 1 write — it is still scanning the target table to find matches before it can insert. No blocking detected (blocking_session_id = 0). The job will complete but this is a growing performance problem.
+
+The schedule runs every 30 minutes (not 15 as originally noted — runs at :00 and :30). The MERGE is already taking close to 9+ minutes per run. As INFO_AWS_KAPP_Query_API_Detail continues to grow beyond 563M rows, the MERGE time will increase. Eventually it will exceed 30 minutes and runs will start overlapping.
+
+The root cause is architectural — SP_AUDIT_KAPP_QUERY_ETL_CLEANUP does a DISTINCT select from the staging table and merges into a 563M row table with no partitioning. Written by Donovan van Graan (2024-02-16) — he is no longer active.
+
+**Action required:** This is a decommission blocker for RDS migration. The MERGE pattern on a 563M row unpartitioned table will not scale on RDS Standard. Needs redesign before migration — raise as open question.
+
+---
+
 ## 2026-07-06 — Job failure root cause confirmed: WPv2 DNS gone
 
 **Question:** Why are DBA_VCC_MYSQL_DAILY_CHECKS and DBA_VCC_MYSQL_AUDIT_DXM_CLIENT_DETAILED failing every day?

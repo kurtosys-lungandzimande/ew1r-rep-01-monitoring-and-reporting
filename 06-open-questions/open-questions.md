@@ -64,6 +64,19 @@
 
 ---
 
+## Jobs & Linked Server Mapping
+
+| # | Question | Priority | Assigned To | Status |
+|---|---|---|---|---|
+| 28 | Which linked servers are referenced by zero job steps or stored procedures — true orphans safe to drop? | High | DBA team | Open — run query 11.3 and 11.4 |
+| 29 | Which stored procedures inside DBA_VCC, DBA_VCC_MYSQL, and KURTOSYS_BASELINE reference the stale linked servers (WPv2, gen-rel, gen-prd, EW2P-MARKETING-DB)? | High | DBA team | Open — run query 11.2 |
+| 30 | For each enabled job — what database does it feed and what breaks if it stops? | Critical | DBA team | Open — run query 11.5 |
+| 31 | Why does BASELINE_CONNECTIONS still have steps for ew1d-aggr-05 and ew1d-aggr-15 — were these ever decommissioned or just unreachable? | Medium | Unknown | Open |
+| 32 | Are the gen-rel and gen-prd SingleStore nodes permanently retired or just a different generation still in use somewhere? | High | SingleStore / Platform team | Open |
+| 33 | **MERGE performance on INFO_AWS_KAPP_Query_API_Detail (563M rows) is already taking 9+ minutes per run on a 30-minute schedule** — SP_AUDIT_KAPP_QUERY_ETL_CLEANUP does a full DISTINCT scan + MERGE with no partitioning. As the table grows this will exceed the schedule interval and runs will overlap. Needs redesign before RDS migration. Written by donovan.vangraan (Feb 2024) who is no longer active. | High | DBA team | Open — decommission blocker for RDS migration |
+
+---
+
 ## Decommission Risk
 
 | # | Question | Priority | Assigned To | Status |
