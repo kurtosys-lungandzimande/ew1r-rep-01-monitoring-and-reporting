@@ -2,14 +2,25 @@
 -- EW1R-REP-01 — Discovery & Verification Queries
 -- All queries are READ-ONLY. No changes are made to any data.
 -- Run these in SSMS connected to EW1R-REP-01 to verify findings.
+--
+-- Purpose : Structured discovery of what this server runs, what
+--           it monitors, who depends on it, and what breaks if
+--           it is decommissioned.
+-- Author  : DBA Discovery Pass — 2026
+-- Status  : Investigation complete. Pending consumer confirmation.
 -- ============================================================
 
 
 -- ============================================================
 -- SECTION 1 — SERVER BASICS
+-- Confirm the SQL Server version, edition, databases, and
+-- service accounts before doing anything else.
 -- ============================================================
 
 -- 1.1 Server version, edition, and collation
+-- Confirms SQL Server 2019 Developer Edition (15.0.4455.2).
+-- Developer Edition means this is NOT a licensed production engine —
+-- important context if a migration or licensing review is needed.
 SELECT
     @@SERVERNAME                            AS server_name,
     SERVERPROPERTY('ProductVersion')        AS version,
@@ -19,7 +30,93 @@ SELECT
     SERVERPROPERTY('IsClustered')           AS is_clustered,
     SERVERPROPERTY('IsHadrEnabled')         AS is_ag_enabled;
 
--- 1.2 All databases with size and recovery model
+-- ============================================================
+-- QUERY 1.2 — All Databases with Size and Recovery Model
+--
+-- WHY THIS QUERY EXISTS:
+-- This proves exactly how many databases exist on this server,
+-- how large each one is, and what recovery model each uses.
+-- Recovery model is the single most important signal for whether
+-- a database is treated as business-critical or not.
+-- Anyone challenging your findings can run this and get the
+-- exact same numbers.
+--
+-- WHAT EACH COLUMN PROVES:
+--
+-- name
+--   The database name. Expected: 8 user databases.
+--   DBA_VCC_AWS, DBA_VCC_MEMSQL, KURTOSYS_BASELINE,
+--   DBA_VCC_MYSQL, DBA_VCC, DBA_VCC_COST, DBA_VCC_ATLASSIAN,
+--   Utilities. System databases (master, model, msdb, tempdb)
+--   also appear because the query joins sys.master_files which
+--   includes all databases. They are not part of the investigation
+--   scope but confirm the server is a standard standalone instance.
+--
+-- state_desc
+--   All user databases returned ONLINE — the server is healthy.
+--   No SUSPECT, RESTORING, or OFFLINE states. If any appear
+--   when you re-run this, that is a separate incident requiring
+--   immediate escalation before any decommission work proceeds.
+--
+-- recovery_model_desc
+--   THIS IS THE MOST IMPORTANT COLUMN IN THIS QUERY.
+--   Every database on this server uses SIMPLE recovery EXCEPT
+--   DBA_VCC_COST which uses FULL recovery.
+--
+--   SIMPLE = SQL Server automatically reclaims log space.
+--   Transaction log backups are not taken. If the server
+--   crashes you lose everything since the last FULL or DIFF
+--   backup. This is acceptable for monitoring data that can
+--   be re-collected.
+--
+--   FULL = Every single transaction is logged and retained
+--   until a log backup runs. This means point-in-time restore
+--   is possible. Someone deliberately changed DBA_VCC_COST
+--   to FULL recovery — that is not a default, it is a
+--   conscious decision that says we cannot afford to lose
+--   even one transaction from this database.
+--   This is the strongest evidence that DBA_VCC_COST contains
+--   business-critical data, likely tied to client billing.
+--   It is the only database on this server treated this way.
+--
+-- size_mb / size_gb
+--   The physical size of each database including all data and
+--   log files. Use this to size the target replacement host.
+--   Total across all user databases: ~363 GB.
+--   DBA_VCC_AWS is the largest at 189 GB and is actively growing —
+--   it increased ~8 GB since the initial investigation, confirming
+--   data collection is still running every 15 minutes.
+--   DBA_VCC_MEMSQL is 77 GB and has NOT grown — confirming all
+--   its collection jobs are disabled and no new data is coming in.
+--
+-- WHY sys.master_files IS USED INSTEAD OF sys.databases:
+--   sys.databases does not store file sizes directly.
+--   sys.master_files has one row per file (data + log) per
+--   database. The SUM aggregates all files for each database
+--   to give the true total size. The * 8.0 / 1024 converts
+--   SQL Server internal 8KB page units into megabytes.
+--
+-- ACTUAL OUTPUT CONFIRMED (run during investigation):
+--   DBA_VCC_AWS        189,088 MB  184.66 GB  ONLINE  SIMPLE  <- actively growing
+--   DBA_VCC_MEMSQL      77,316 MB   75.50 GB  ONLINE  SIMPLE  <- static, jobs disabled
+--   KURTOSYS_BASELINE   52,224 MB   51.00 GB  ONLINE  SIMPLE
+--   DBA_VCC_MYSQL       27,262 MB   26.62 GB  ONLINE  SIMPLE
+--   DBA_VCC             24,625 MB   24.05 GB  ONLINE  SIMPLE  <- actively growing
+--   DBA_VCC_COST         5,120 MB    5.00 GB  ONLINE  FULL    <- only FULL recovery
+--   DBA_VCC_ATLASSIAN    2,048 MB    2.00 GB  ONLINE  SIMPLE
+--   Utilities              201 MB    0.20 GB  ONLINE  SIMPLE
+--   Total user databases: ~363 GB
+--   Replacement host minimum storage requirement: 400 GB+
+--
+-- IF OUTPUT DIFFERS WHEN YOU RE-RUN:
+--   DBA_VCC_COST not on FULL = someone changed it, investigate why.
+--   DBA_VCC_AWS still growing = collection pipeline is healthy.
+--   DBA_VCC_AWS stopped growing = 15-min collection job has failed silently.
+--   DBA_VCC_MEMSQL growing again = someone re-enabled the MemSQL jobs.
+--   A database missing = it was dropped, confirm with DBA team.
+--   A new database present = undocumented workload, investigate
+--   before proceeding with any decommission decision.
+-- ============================================================
 SELECT
     d.name,
     d.state_desc,
@@ -31,7 +128,69 @@ JOIN sys.master_files f ON d.database_id = f.database_id
 GROUP BY d.name, d.state_desc, d.recovery_model_desc
 ORDER BY size_mb DESC;
 
--- 1.3 Services running on this server
+-- ============================================================
+-- QUERY 1.3 — Services Running on This Server
+--
+-- WHY THIS QUERY EXISTS:
+-- This confirms exactly which service accounts are running the
+-- SQL Server engine, SQL Agent, and the Python extensibility
+-- service. These accounts are what the server uses to connect
+-- to external systems, run jobs, and call AWS APIs.
+-- Anyone reviewing your findings needs to know these accounts
+-- exist before they can plan credential rotation or migration.
+--
+-- WHAT EACH COLUMN PROVES:
+--
+-- servicename
+--   The name of the Windows service. Three services matter here:
+--   SQL Server (MSSQLSERVER) — the database engine itself.
+--   SQL Server Agent (MSSQLSERVER) — runs all 60 SQL Agent jobs.
+--   SQL Server Launchpad (MSSQLSERVER) — runs Python scripts
+--   called by the AWS and Jira data collection jobs.
+--   If Launchpad is stopped, all Python API calls fail silently
+--   and no error is raised in SQL Server — the jobs just return
+--   empty results with no indication of why.
+--
+-- service_account
+--   The Windows account running each service.
+--   SHNONPRD\sqlsrv runs the engine — this account needs network
+--   access to all linked servers and AWS endpoints.
+--   SHNONPRD\sqlagent runs the jobs — this is the account whose
+--   permissions determine what the jobs can actually do.
+--   NT Service\MSSQLLaunchpad is a built-in sandboxed account —
+--   it runs Python in the extensibility framework.
+--   All three accounts must be documented before decommission
+--   because they may have firewall rules, vault entries, and AD
+--   permissions tied to them that need to be cleaned up.
+--
+-- status_desc
+--   All three services returned Running — confirmed healthy.
+--   If SQL Server Agent shows anything other than Running,
+--   all 60 jobs have stopped and no data is being collected.
+--   If Launchpad shows anything other than Running, the AWS
+--   and Jira Python jobs are failing silently.
+--
+-- startup_type_desc
+--   All three services returned Automatic — confirmed.
+--   This means all three services restart automatically after
+--   a server reboot. If any showed Manual or Disabled, a reboot
+--   would silently break monitoring until someone noticed.
+--
+-- ACTUAL OUTPUT CONFIRMED (run during investigation):
+--   SQL Server (MSSQLSERVER)          SHNONPRD\sqlsrv            Running  Automatic
+--   SQL Server Agent (MSSQLSERVER)    SHNONPRD\sqlagent          Running  Automatic
+--   SQL Server Launchpad (MSSQLSERVER) NT Service\MSSQLLaunchpad Running  Automatic
+--
+-- NOTE — no SQL Full-text Filter Daemon Launcher appeared.
+-- This means full-text search is either not installed or not
+-- in use on this server. Not relevant to this investigation.
+--
+-- IF OUTPUT DIFFERS WHEN YOU RE-RUN:
+--   Agent not Running = all 60 jobs have stopped, data collection halted.
+--   Launchpad not Running = Python jobs failing, AWS and Jira data stale.
+--   Startup = Manual = server reboot will silently break monitoring.
+--   Different service account = someone changed it, check vault and AD.
+-- ============================================================
 SELECT
     servicename,
     service_account,
@@ -42,9 +201,15 @@ FROM sys.dm_server_services;
 
 -- ============================================================
 -- SECTION 2 — SQL AGENT JOBS
+-- 60 jobs total. Many are disabled. The active ones are the
+-- critical data collection pipelines that feed Grafana and
+-- the DBA_VCC_* databases.
 -- ============================================================
 
 -- 2.1 All jobs with schedule, last run, and alert target
+-- Use this to get a full picture of what is enabled vs disabled,
+-- when each job last ran, and whether failures go anywhere.
+-- Most jobs alert to dba@kurtosys.com — confirm who monitors that mailbox.
 SELECT
     j.name                                          AS job_name,
     j.enabled,
@@ -66,6 +231,9 @@ LEFT JOIN msdb.dbo.sysoperators n ON j.notify_email_operator_id = n.id
 ORDER BY j.name;
 
 -- 2.2 All job steps with commands (what each job actually does)
+-- Reveals the actual T-SQL or Python commands inside each job step.
+-- Key things to look for: Python scripts calling AWS APIs, stored proc
+-- calls into DBA_VCC_* databases, and SSIS package references.
 SELECT
     j.name      AS job_name,
     j.enabled,
@@ -78,6 +246,10 @@ JOIN msdb.dbo.sysjobsteps s ON j.job_id = s.job_id
 ORDER BY j.name, s.step_id;
 
 -- 2.3 DBA_VCC_MEMSQL jobs — confirm disabled and last run dates
+-- All SingleStore/MemSQL collection jobs were disabled in May 2026
+-- after a daily checks failure. This is why the Grafana month-end
+-- dashboards have shown no current data since then.
+-- Expected: all rows show enabled = 0 and last_run_date in May 2026.
 SELECT
     j.name,
     j.enabled,
@@ -94,6 +266,10 @@ WHERE j.name LIKE '%MEMSQL%'
 ORDER BY js.last_run_date DESC;
 
 -- 2.4 DBA_VCC_COST collection job — confirm schedule and last run
+-- This job runs every Sunday at 08:00 and collects entity counts
+-- per KAPP client across UK, EU, and US production environments.
+-- It tracks 9 entity types used for cost/billing reporting.
+-- Last confirmed successful run: 29 June 2026.
 SELECT
     j.name,
     j.enabled,
@@ -119,6 +295,8 @@ WHERE j.name = 'DBA_VCC_COST_Entity_Count_Collection'
 ORDER BY s.step_id;
 
 -- 2.5 Recent job history for DBA_VCC_COST collection
+-- Verify the job is running successfully each Sunday.
+-- If you see failures here, the cost/billing data may be stale.
 SELECT TOP 20
     j.name          AS job_name,
     h.step_name,
@@ -137,9 +315,15 @@ ORDER BY h.run_date DESC, h.run_time DESC;
 
 -- ============================================================
 -- SECTION 3 — ALERT MECHANISMS
+-- SQL Server has 17 severity alerts defined but NONE of them
+-- are wired to notify anyone. Only SQL Agent job failures
+-- send email to dba@kurtosys.com.
 -- ============================================================
 
 -- 3.1 SQL Server alert operators
+-- Should show one operator: dba@kurtosys.com.
+-- Confirm who actually monitors this mailbox — is it a team inbox
+-- or an individual? Is it actively watched?
 SELECT
     name,
     email_address,
@@ -147,6 +331,10 @@ SELECT
 FROM msdb.dbo.sysoperators;
 
 -- 3.2 SQL Server alerts — confirm all have has_notification = 0 (silent)
+-- Expected: all 17 severity alerts show has_notification = 0.
+-- This means fatal errors (severity 19-25), IO failures, and AG issues
+-- will fire silently with no one getting paged or emailed.
+-- This is a monitoring gap that needs to be addressed.
 SELECT
     a.name          AS alert_name,
     a.message_id,
@@ -163,9 +351,16 @@ LEFT JOIN msdb.dbo.sysoperators o ON sn.operator_id = o.id;
 
 -- ============================================================
 -- SECTION 4 — LINKED SERVERS
+-- 97 linked servers total: mostly SingleStore (MSDASQL/ODBC),
+-- plus SQL Server targets and MySQL instances.
+-- All SingleStore linked servers may be stale — jobs are disabled.
 -- ============================================================
 
 -- 4.1 All linked servers
+-- 97 total. Grouped by provider:
+--   SQLNCLI  = SQL Server targets (EW2P-MSSQL-01/02, EW1P-OCT RDS)
+--   MSDASQL  = SingleStore (ODBC), MySQL, Clickhouse, Zabbix, NiFi, WPv2
+-- The SingleStore ones are likely stale since all MemSQL jobs are disabled.
 SELECT
     name,
     product,
@@ -177,6 +372,10 @@ WHERE is_linked = 1
 ORDER BY name;
 
 -- 4.2 Linked server login mappings
+-- Shows what credentials are used to connect to each linked server.
+-- uses_self_credential = 1 means it passes through the calling account.
+-- uses_self_credential = 0 means a mapped remote login is used.
+-- The actual passwords/vault locations are unknown — confirm Monday.
 SELECT
     ls.name         AS linked_server,
     ll.remote_name  AS remote_login,
@@ -189,9 +388,15 @@ ORDER BY ls.name;
 
 -- ============================================================
 -- SECTION 5 — DBA_VCC_COST DATA FRESHNESS
+-- Weekly entity count collection per KAPP client.
+-- This database is on FULL recovery model — treat as business-critical.
+-- Consumer (Finance / billing) still needs to be confirmed Monday.
 -- ============================================================
 
 -- 5.1 Confirm weekly collection is running — check last date per entity type
+-- Each row shows the last time data was collected for that entity type.
+-- If any MAX(DateChecked) is more than 7 days old, the Sunday job may have failed.
+-- INFO_AWS_DE_Entity_Cost is known stale since November 2024 — AWS cost data.
 SELECT 'INFO_KAPP_Client_Allocations_Counts'             AS table_name, MAX(DateChecked) AS last_collected, COUNT(*) AS rows FROM DBA_VCC_COST.dbo.INFO_KAPP_Client_Allocations_Counts
 UNION ALL
 SELECT 'INFO_KAPP_Client_Document_Counts',                MAX(DateChecked), COUNT(*) FROM DBA_VCC_COST.dbo.INFO_KAPP_Client_Document_Counts
@@ -213,9 +418,14 @@ UNION ALL
 SELECT 'INFO_AWS_DE_Entity_Cost (STALE)',                  MAX(Period),      COUNT(*) FROM DBA_VCC_COST.dbo.INFO_AWS_DE_Entity_Cost;
 
 -- 5.2 Sample of current client list in DBA_VCC_COST
+-- Shows which KAPP clients are being tracked.
+-- Use this to understand the scope of the cost/billing data.
 SELECT TOP 20 * FROM DBA_VCC_COST.dbo.LU_KAPP_ClientList;
 
 -- 5.3 All stored procedures in DBA_VCC_COST
+-- 19 REP_MONTHEND_* procedures exist here — summary and per-client versions.
+-- These are called by an unknown consumer (Finance / account management).
+-- Identifying who calls these is a critical Monday action.
 SELECT
     name,
     type_desc,
@@ -228,9 +438,16 @@ ORDER BY type, name;
 
 -- ============================================================
 -- SECTION 6 — DBA_VCC_MEMSQL DATA FRESHNESS (CRITICAL)
+-- All collection jobs were disabled in May 2026 after a failure.
+-- The Grafana month-end dashboards (KAPP, InvestorPress, Encore,
+-- DXM, WPv2) read from this database — they have shown no current
+-- data since May 2026. Nobody has flagged this yet.
 -- ============================================================
 
 -- 6.1 Confirm when data collection stopped — this feeds the Grafana month-end dashboards
+-- Expected: MAX(DateChecked) will be somewhere in May 2026 for all tables.
+-- This confirms the month-end dashboards are showing stale data.
+-- Raise this with yogeshwar.phull / tashvir.babulal on Monday.
 SELECT 'INFO_ClientSizes_Sizes_FP (KAPP)'          AS table_name, MAX(DateChecked) AS last_collected, COUNT(*) AS rows FROM DBA_VCC_MEMSQL.dbo.INFO_ClientSizes_Sizes_FP
 UNION ALL
 SELECT 'ARC_INFO_ClientSizes_Sizes_FP (KAPP arc)',  MAX(DateChecked), COUNT(*) FROM DBA_VCC_MEMSQL.dbo.ARC_INFO_ClientSizes_Sizes_FP
@@ -240,6 +457,8 @@ UNION ALL
 SELECT 'ARC_INFO_ClientSizes_Sizes_IP (IP arc)',    MAX(DateChecked), COUNT(*) FROM DBA_VCC_MEMSQL.dbo.ARC_INFO_ClientSizes_Sizes_IP;
 
 -- 6.2 All stored procedures in DBA_VCC_MEMSQL — confirm REP_MONTHEND procedures exist
+-- These are the month-end reporting procedures that Grafana dashboards depend on.
+-- They exist but have no fresh data to work with since May 2026.
 SELECT
     name,
     type_desc,
@@ -253,9 +472,15 @@ ORDER BY name;
 
 -- ============================================================
 -- SECTION 7 — DBA_VCC_AWS DATA FRESHNESS
+-- Core KAPP observability database. 180 GB.
+-- KAPP API data is collected every 15 minutes via Python jobs.
+-- This is actively growing and Grafana KAPP dashboards read from it.
 -- ============================================================
 
 -- 7.1 Confirm KAPP API data is still being collected every 15 minutes
+-- Expected: MAX(DateChecked) should be within the last 15-30 minutes
+-- if the collection job is healthy. 563M rows as of discovery.
+-- If this is stale, the KAPP observability pipeline has broken silently.
 SELECT
     'INFO_AWS_KAPP_Query_API_Detail'    AS table_name,
     MAX(DateChecked)                    AS last_collected,
@@ -263,6 +488,8 @@ SELECT
 FROM DBA_VCC_AWS.dbo.INFO_AWS_KAPP_Query_API_Detail;
 
 -- 7.2 Top tables in DBA_VCC_AWS by size
+-- Shows what is taking up the most space in the 180 GB database.
+-- INFO_AWS_KAPP_Query_API_Detail will be the largest by far.
 SELECT
     t.name                                                          AS table_name,
     SUM(p.rows)                                                     AS row_count,
@@ -276,69 +503,122 @@ ORDER BY size_mb DESC;
 
 -- ============================================================
 -- SECTION 8 — MONITORED SERVERS
+-- The VCC framework tracks which servers it actively monitors.
+-- Active = 1 means the server is still in scope for collection.
 -- ============================================================
 
 -- 8.1 Active monitored servers
+-- Shows only servers currently being monitored.
+-- EW2P-MSSQL-01 and EW2P-MSSQL-02 (EU-West-2 production) should appear here.
 SELECT * FROM DBA_VCC.dbo.LU_Serverlist WHERE Active = 1;
 
 -- 8.2 All monitored servers including inactive
+-- Shows the full history of servers that were ever monitored.
+-- Inactive entries may include decommissioned servers or migrated instances.
 SELECT * FROM DBA_VCC.dbo.LU_Serverlist ORDER BY Active DESC;
 
 
 -- ============================================================
 -- SECTION 9 — GRAFANA (run via xp_cmdshell)
--- These use Python to query the Grafana SQLite database directly
+-- Grafana stores its config in a SQLite database at:
+--   C:\Program Files\GrafanaLabs\grafana\data\grafana.db
+-- These queries use Python (via xp_cmdshell) to read it directly
+-- since there is no SQL Server-native way to query SQLite.
+-- Python path: C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\
+-- NOTE: xp_cmdshell must be enabled. Run as sysadmin.
 -- ============================================================
 
 -- 9.1 Confirm Grafana is running on port 443
+-- Expected: grafana.exe listening on 0.0.0.0:443
+-- If nothing shows, Grafana is down and all dashboards are inaccessible.
 EXEC xp_cmdshell 'netstat -ano | findstr ":443"';
 
 -- 9.2 Confirm grafana.exe process
+-- Replace PID 3844 with the current PID if it has changed since discovery.
+-- Use tasklist without a filter first if unsure of the current PID.
 EXEC xp_cmdshell 'tasklist /FI "PID eq 3844"';
 
 -- 9.3 List all Grafana datasources
+-- Expected: 21 datasources including DBA_VCC (localhost MSSQL), KAPP MySQL
+-- (Dev/Rel/UK/EU/US Prod), SingleStore (Dev/Rel/UK/EU/US Prod), Zabbix MySQL (x4),
+-- NiFi JSON API, CloudWatch, and InfluxDB.
+-- The Zabbix datasources use donovan.vangraan credentials — flag for rotation.
 EXEC xp_cmdshell 'echo import sqlite3 > C:\temp\gf.py && echo conn = sqlite3.connect(r"C:\Program Files\GrafanaLabs\grafana\data\grafana.db") >> C:\temp\gf.py && echo rows = conn.execute("SELECT name, type, url, user FROM data_source").fetchall() >> C:\temp\gf.py && echo [print(r) for r in rows] >> C:\temp\gf.py';
 EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python.exe C:\temp\gf.py';
 
 -- 9.4 List all Grafana users and last login
+-- Expected: 8 users. 3 active admins (tashvir.babulal, yogeshwar.phull,
+-- rayhaan.suleyman) last seen June 2026. donovan.vangraan last seen Nov 2024
+-- and is no longer active — his credentials are still used in datasources.
 EXEC xp_cmdshell 'echo import sqlite3 > C:\temp\gf.py && echo conn = sqlite3.connect(r"C:\Program Files\GrafanaLabs\grafana\data\grafana.db") >> C:\temp\gf.py && echo rows = conn.execute("SELECT login, email, name, is_admin, last_seen_at FROM user").fetchall() >> C:\temp\gf.py && echo [print(r) for r in rows] >> C:\temp\gf.py';
 EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python.exe C:\temp\gf.py';
 
 -- 9.5 List all Grafana dashboards
+-- Expected: 90 dashboards across 16 folders. Sorted by most recently updated.
+-- KAPP and SingleStore dashboards updated Oct/Nov 2025 — these are actively used.
+-- Month End Reporting dashboards exist but show stale data since May 2026.
 EXEC xp_cmdshell 'echo import sqlite3 > C:\temp\gf.py && echo conn = sqlite3.connect(r"C:\Program Files\GrafanaLabs\grafana\data\grafana.db") >> C:\temp\gf.py && echo rows = conn.execute("SELECT title, created, updated FROM dashboard WHERE is_folder=0 ORDER BY updated DESC").fetchall() >> C:\temp\gf.py && echo [print(r) for r in rows] >> C:\temp\gf.py';
 EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python.exe C:\temp\gf.py';
 
 -- 9.6 List all Grafana folders
+-- Expected: 16 folders including KAPP Reporting, SingleStore Monitoring,
+-- Month End Reporting, AWS Reports, Encore, Atlassian, Performance, Zabbix.
 EXEC xp_cmdshell 'echo import sqlite3 > C:\temp\gf.py && echo conn = sqlite3.connect(r"C:\Program Files\GrafanaLabs\grafana\data\grafana.db") >> C:\temp\gf.py && echo rows = conn.execute("SELECT title, uid, created, updated FROM dashboard WHERE is_folder=1").fetchall() >> C:\temp\gf.py && echo [print(r) for r in rows] >> C:\temp\gf.py';
 EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python.exe C:\temp\gf.py';
 
 -- 9.7 List Grafana alert rules
+-- Expected: 3 alert rules:
+--   1. Failed Read Queries per Second → alerts-data-operations (Slack)
+--   2. KAPP Client Config Alert → alerts-data-operations (Slack)
+--   3. KAPP Client Application Auth Config Alert → alert-app-allow2fa-disabled (Slack)
 EXEC xp_cmdshell 'echo import sqlite3 > C:\temp\gf.py && echo conn = sqlite3.connect(r"C:\Program Files\GrafanaLabs\grafana\data\grafana.db") >> C:\temp\gf.py && echo rows = conn.execute("SELECT title, condition, no_data_state, exec_err_state, is_paused, updated FROM alert_rule").fetchall() >> C:\temp\gf.py && echo [print(r) for r in rows] >> C:\temp\gf.py';
 EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python.exe C:\temp\gf.py';
 
 -- 9.8 List Grafana alert contact points
+-- Expected: 2 Slack channels and 1 email placeholder (not configured).
+-- The email contact point has no address set — it will not deliver alerts.
+-- Slack webhooks are encrypted in grafana.db — a Grafana admin must rotate them.
 EXEC xp_cmdshell 'echo import sqlite3 > C:\temp\gf.py && echo conn = sqlite3.connect(r"C:\Program Files\GrafanaLabs\grafana\data\grafana.db") >> C:\temp\gf.py && echo rows = conn.execute("SELECT alertmanager_configuration FROM alert_configuration").fetchall() >> C:\temp\gf.py && echo [print(r) for r in rows] >> C:\temp\gf.py';
 EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python.exe C:\temp\gf.py';
 
 
 -- ============================================================
 -- SECTION 10 — INFRASTRUCTURE VERIFICATION
+-- Confirm what is running on this server, what ports are open,
+-- and where credentials and staging files are stored.
 -- ============================================================
 
 -- 10.1 Confirm all listening ports
+-- Key ports to look for:
+--   443   — Grafana HTTPS
+--   1433  — SQL Server
+--   10050 — Zabbix agent (this server is monitored by Zabbix)
 EXEC xp_cmdshell 'netstat -ano | findstr LISTENING';
 
 -- 10.2 Confirm Zabbix agent is running
+-- Replace PID 5700 with the current PID if it has changed.
+-- The Zabbix agent means this server is being monitored externally —
+-- if it goes offline, Zabbix will detect it.
 EXEC xp_cmdshell 'tasklist /FI "PID eq 5700"';
 
 -- 10.3 Confirm Python location
+-- Python is used by SQL Agent jobs to call AWS APIs and Jira APIs.
+-- Expected: C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python.exe
 EXEC xp_cmdshell 'where python';
 
 -- 10.4 Check AWS staging folder
+-- Python scripts and config files for AWS API collection are stored here.
+-- This is where AWS credentials or config files may be located.
 EXEC xp_cmdshell 'dir "C:\DBA_Staging\AWS\" /b';
 
 -- 10.5 Check for AWS credentials file
+-- If an AWS credentials file exists here, it contains the IAM access key
+-- used by the Python collection jobs. Confirm with DevOps / cloud team
+-- whether this is a key or an instance role. Rotate if it is a long-lived key.
 EXEC xp_cmdshell 'dir "C:\Users\sqlsrv\.aws\" /b';
 
 -- 10.6 Grafana database file size confirmation
+-- The grafana.db SQLite file holds all Grafana config: datasources,
+-- dashboards, users, alert rules, and contact points.
+-- Back this up before any migration or decommission work.
 EXEC xp_cmdshell 'dir "C:\Program Files\GrafanaLabs\grafana\data\grafana.db"';
