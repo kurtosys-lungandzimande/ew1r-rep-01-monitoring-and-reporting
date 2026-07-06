@@ -16,16 +16,16 @@
 
 | Database | Size (MB) | Recovery Model | Purpose |
 |---|---|---|---|
-| DBA_VCC_AWS | 180,896 | SIMPLE | AWS infrastructure and KAPP API monitoring data |
+| DBA_VCC_AWS | 189,088 | SIMPLE | AWS infrastructure and KAPP API monitoring data |
 | DBA_VCC_MEMSQL | 77,316 | SIMPLE | SingleStore/MemSQL monitoring data (jobs disabled) |
-| KURTOSYS_BASELINE | 51,200 | SIMPLE | Performance baseline captures (connections, table sizes) |
-| DBA_VCC_MYSQL | 25,918 | SIMPLE | MySQL and RDS monitoring data |
-| DBA_VCC | 21,297 | SIMPLE | Core VCC monitoring framework data |
+| KURTOSYS_BASELINE | 52,224 | SIMPLE | Performance baseline captures (connections, table sizes) |
+| DBA_VCC_MYSQL | 27,262 | SIMPLE | MySQL and RDS monitoring data |
+| DBA_VCC | 24,625 | SIMPLE | Core VCC monitoring framework data |
 | DBA_VCC_COST | 5,120 | FULL | Cost tracking per entity/client (FULL recovery — critical) |
 | DBA_VCC_ATLASSIAN | 2,048 | SIMPLE | Jira/Confluence integration data |
-| Utilities | 185 | SIMPLE | DBA utility scripts and stored procedures |
+| Utilities | 201 | SIMPLE | DBA utility scripts and stored procedures |
 
-**Total data size: ~363 GB**
+**Total data size: ~378 GB** (confirmed — last run July 2026)
 
 ---
 
@@ -90,7 +90,6 @@ Core monitoring framework — tracks all monitored SQL Server instances.
 | DBA - Production Logon Report | No | Weekly | dba@kurtosys.com | DISABLED — generates and emails production logon report |
 | DBA - SSISStatusCheck | Yes | SCHED1 | dba@kurtosys.com | Executes SP_MON_SSIS_Long_Running_Packages_Slack in DBA_VCC — sends Slack alert for long-running SSIS packages |
 | DBA - UtilitiesCleanupHistoryTables | No | Daily 11 PM | dba@kurtosys.com | DISABLED — cleans MemSQL query length history tables older than 90 days in Utilities |
-| DBA - Production Logon Report | No | Weekly | dba@kurtosys.com | DISABLED — generates and emails production logon report |
 
 ### VCC AWS Jobs
 
@@ -172,7 +171,6 @@ Core monitoring framework — tracks all monitored SQL Server instances.
 | DBA_VCC_MEMSQL_HOURLY_CHECKS | SCHED1 | Would collect KAPP workflow run history and timing |
 | DBA_VCC_MEMSQL_MON_PING_STATS | SCHED1 | Would ping MemSQL nodes |
 | DBA_VCC_MEMSQL_MON_SQL_STATUS | SCHED1 | Would check MemSQL instance status |
-| DBA_VCC_MEMSQL_MON_SQL_STATUS | SCHED1 | Would check MemSQL status |
 | DBA_VCC_MEMSQL_WEEKLY_CHECKS | SCHED1 | Would archive MemSQL tables older than 90 days |
 
 > All MemSQL jobs disabled. 77 GB of historical data remains in DBA_VCC_MEMSQL. Monitoring likely moved elsewhere — needs confirmation.
