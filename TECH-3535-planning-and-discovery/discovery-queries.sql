@@ -909,3 +909,148 @@ EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python
 -- as a JSON field for MSSQL datasources.
 EXEC xp_cmdshell 'echo import sqlite3 > C:\temp\gf_ds_uid.py && echo conn = sqlite3.connect(r"C:\Program Files\GrafanaLabs\grafana\data\grafana.db") >> C:\temp\gf_ds_uid.py && echo rows = conn.execute("SELECT uid, name, type, url, json_data FROM data_source ORDER BY name").fetchall() >> C:\temp\gf_ds_uid.py && echo [print(r) for r in rows] >> C:\temp\gf_ds_uid.py';
 EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python.exe C:\temp\gf_ds_uid.py';
+
+
+-- ============================================================
+-- SECTION 13 — REMAINING DATABASE COVERAGE
+-- Purpose: Complete the discovery pass across all user databases.
+-- Sections 5, 6, and 7 covered DBA_VCC_COST, DBA_VCC_MEMSQL,
+-- and DBA_VCC_AWS. This section covers the remaining databases:
+-- DBA_VCC_MYSQL, DBA_VCC_ATLASSIAN, DBA_VCC, and KURTOSYS_BASELINE.
+-- Also captures the full stored procedure inventory across all
+-- databases and confirms the total Grafana dashboard count.
+-- ============================================================
+
+
+-- ============================================================
+-- 13.1 — DBA_VCC_MYSQL data freshness
+-- DBA_VCC_MYSQL holds MySQL and DXM client monitoring data.
+-- Two jobs feed it: DBA_VCC_MYSQL_DAILY_CHECKS (currently failing
+-- due to WPv2 linked servers) and DBA_VCC_MYSQL_WEEKLY_CHECKS.
+-- This confirms what data is still landing and what has gone stale.
+-- ============================================================
+SELECT
+    'MON_MySQL_Client_Sizes'        AS table_name,
+    MAX(DateChecked)                AS last_collected,
+    COUNT(*)                        AS row_count
+FROM DBA_VCC_MYSQL.dbo.MON_MySQL_Client_Sizes
+UNION ALL
+SELECT
+    'INFO_MySQL_Client_Sizes',
+    MAX(DateChecked),
+    COUNT(*)
+FROM DBA_VCC_MYSQL.dbo.INFO_MySQL_Client_Sizes
+UNION ALL
+SELECT
+    'INFO_DXM_Client_Sizes',
+    MAX(DateChecked),
+    COUNT(*)
+FROM DBA_VCC_MYSQL.dbo.INFO_DXM_Client_Sizes
+UNION ALL
+SELECT
+    'INFO_WPv2_Client_Sizes',
+    MAX(DateChecked),
+    COUNT(*)
+FROM DBA_VCC_MYSQL.dbo.INFO_WPv2_Client_Sizes;
+
+-- 13.2 — All tables in DBA_VCC_MYSQL with row counts
+-- Use this to understand the full scope of what this database holds.
+-- Any table with 0 rows or a very old last_collected date is a candidate
+-- for cleanup or confirmation that the feed has stopped.
+SELECT
+    t.name                                                          AS table_name,
+    SUM(p.rows)                                                     AS row_count,
+    CAST(SUM(a.total_pages * 8.0 / 1024) AS DECIMAL(10,2))         AS size_mb
+FROM DBA_VCC_MYSQL.sys.tables t
+JOIN DBA_VCC_MYSQL.sys.partitions p ON t.object_id = p.object_id
+JOIN DBA_VCC_MYSQL.sys.allocation_units a ON p.partition_id = a.container_id
+GROUP BY t.name
+ORDER BY size_mb DESC;
+
+
+-- ============================================================
+-- 13.3 — DBA_VCC_ATLASSIAN data freshness
+-- DBA_VCC_ATLASSIAN holds Jira and Confluence integration data.
+-- Fed by DBA_VCC_JIRA_MONTHEND_CHECKS (confirmed running — last
+-- successful run 2026-07-01). This confirms what is in the database
+-- and when it was last updated.
+-- ============================================================
+SELECT
+    t.name                                                          AS table_name,
+    SUM(p.rows)                                                     AS row_count,
+    CAST(SUM(a.total_pages * 8.0 / 1024) AS DECIMAL(10,2))         AS size_mb
+FROM DBA_VCC_ATLASSIAN.sys.tables t
+JOIN DBA_VCC_ATLASSIAN.sys.partitions p ON t.object_id = p.object_id
+JOIN DBA_VCC_ATLASSIAN.sys.allocation_units a ON p.partition_id = a.container_id
+GROUP BY t.name
+ORDER BY size_mb DESC;
+
+-- 13.4 — DBA_VCC_ATLASSIAN freshness check
+-- Confirm when Jira data was last collected.
+SELECT
+    'INFO_DBE_JIRA_Sprint_Detail'   AS table_name,
+    MAX(DateChecked)                AS last_collected,
+    COUNT(*)                        AS row_count
+FROM DBA_VCC_ATLASSIAN.dbo.INFO_DBE_JIRA_Sprint_Detail
+UNION ALL
+SELECT
+    'MON_DBE_JIRA_Sprint_Detail',
+    MAX(DateChecked),
+    COUNT(*)
+FROM DBA_VCC_ATLASSIAN.dbo.MON_DBE_JIRA_Sprint_Detail;
+
+
+-- ============================================================
+-- 13.5 — DBA_VCC core database — top tables by size
+-- DBA_VCC is the core monitoring framework database.
+-- It holds Encore IIS logs, index fragmentation history,
+-- SQL error logs, connection history, and the server list.
+-- This confirms what is actively growing vs static.
+-- ============================================================
+SELECT
+    t.name                                                          AS table_name,
+    SUM(p.rows)                                                     AS row_count,
+    CAST(SUM(a.total_pages * 8.0 / 1024) AS DECIMAL(10,2))         AS size_mb
+FROM DBA_VCC.sys.tables t
+JOIN DBA_VCC.sys.partitions p ON t.object_id = p.object_id
+JOIN DBA_VCC.sys.allocation_units a ON p.partition_id = a.container_id
+GROUP BY t.name
+ORDER BY size_mb DESC;
+
+
+-- ============================================================
+-- 13.6 — Stored procedure inventory across all user databases
+-- Lists all stored procedures in every user database.
+-- This is a discovery-level inventory only — not diving into
+-- definitions. The goal is to know what exists in each database
+-- so the deeper tickets (TECH-3478 onwards) have a starting point.
+-- ============================================================
+SELECT 'DBA_VCC'           AS database_name, name, create_date, modify_date FROM DBA_VCC.sys.objects           WHERE type = 'P' AND is_ms_shipped = 0
+UNION ALL
+SELECT 'DBA_VCC_AWS',                         name, create_date, modify_date FROM DBA_VCC_AWS.sys.objects       WHERE type = 'P' AND is_ms_shipped = 0
+UNION ALL
+SELECT 'DBA_VCC_MEMSQL',                      name, create_date, modify_date FROM DBA_VCC_MEMSQL.sys.objects    WHERE type = 'P' AND is_ms_shipped = 0
+UNION ALL
+SELECT 'DBA_VCC_MYSQL',                       name, create_date, modify_date FROM DBA_VCC_MYSQL.sys.objects     WHERE type = 'P' AND is_ms_shipped = 0
+UNION ALL
+SELECT 'DBA_VCC_COST',                        name, create_date, modify_date FROM DBA_VCC_COST.sys.objects      WHERE type = 'P' AND is_ms_shipped = 0
+UNION ALL
+SELECT 'DBA_VCC_ATLASSIAN',                   name, create_date, modify_date FROM DBA_VCC_ATLASSIAN.sys.objects WHERE type = 'P' AND is_ms_shipped = 0
+UNION ALL
+SELECT 'KURTOSYS_BASELINE',                   name, create_date, modify_date FROM KURTOSYS_BASELINE.sys.objects WHERE type = 'P' AND is_ms_shipped = 0
+UNION ALL
+SELECT 'Utilities',                           name, create_date, modify_date FROM Utilities.sys.objects         WHERE type = 'P' AND is_ms_shipped = 0
+ORDER BY database_name, name;
+
+
+-- ============================================================
+-- 13.7 — Full Grafana dashboard count and list
+-- Confirms the total number of dashboards in grafana.db.
+-- Run confirmed 2026-07-07: 74 dashboards total.
+-- Several dashboard names appear more than once — these are
+-- older versions sitting in different folders, not duplicates
+-- of the same dashboard. The deeper Grafana ticket (TECH-3479)
+-- will determine which are active and which can be cleaned up.
+-- ============================================================
+EXEC xp_cmdshell 'echo import sqlite3 > C:\temp\gf.py && echo conn = sqlite3.connect(r"C:\Program Files\GrafanaLabs\grafana\data\grafana.db") >> C:\temp\gf.py && echo rows = conn.execute("SELECT title, updated FROM dashboard WHERE is_folder=0 ORDER BY updated DESC").fetchall() >> C:\temp\gf.py && echo print(len(rows), "dashboards total") >> C:\temp\gf.py && echo [print(r) for r in rows] >> C:\temp\gf.py';
+EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python.exe C:\temp\gf.py';
