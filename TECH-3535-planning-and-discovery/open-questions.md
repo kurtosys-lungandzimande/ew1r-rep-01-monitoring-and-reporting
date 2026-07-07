@@ -148,3 +148,4 @@
 | Q21 | If this server went offline today, what would break immediately? | yogeshwar.phull / tashvir.babulal | Required for decommission risk assessment |
 | Q22 | Is any alerting dependent solely on this server? | yogeshwar.phull / tashvir.babulal | Required for decommission risk assessment |
 | Q23 | Is the VCC framework replicated anywhere else? | DBA team | If not replicated — this is a single point of failure |
+| Q35 | Who disabled the DBA_VCC_MEMSQL jobs in May 2026 and why? Was the daily checks failure on 8 May 2026 ever investigated? | yogeshwar.phull / tashvir.babulal | Jobs must not be re-enabled without understanding the root cause — re-enabling a broken job could cause data corruption or cascading failures |
