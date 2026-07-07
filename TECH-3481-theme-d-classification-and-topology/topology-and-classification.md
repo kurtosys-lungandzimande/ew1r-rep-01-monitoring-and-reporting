@@ -52,7 +52,7 @@ EW1R-REP-01 (Custom VCC Monitoring Hub)
     │   ├── NiFi JSON API — https://10.125.9.192:8443
     │   ├── AWS CloudWatch
     │   └── InfluxDB
-    ├── DASHBOARDS (90 total across 16 folders)
+    ├── DASHBOARDS (74 total across 16 folders)
     │   ├── KAPP Reporting — actively updated Oct/Nov 2025 ← CRITICAL
     │   ├── SingleStore Monitoring — updated Aug 2025 ← CRITICAL
     │   ├── Month End Reporting — KAPP/Encore/DXM/WPv2/InvestorPress
@@ -94,7 +94,7 @@ EW1R-REP-01 (Custom VCC Monitoring Hub)
 ### What It Serves
 | Consumer | What They Get | How Critical |
 |---|---|---|
-| tashvir.babulal, yogeshwar.phull, rayhaan.suleyman | 90 Grafana dashboards across KAPP, SingleStore, AWS, Encore, Zabbix, Jira | Critical |
+| tashvir.babulal, yogeshwar.phull, rayhaan.suleyman | 74 Grafana dashboards across KAPP, SingleStore, AWS, Encore, Zabbix, Jira | Critical |
 | alerts-data-operations Slack channel | KAPP client config and read query failure alerts | High |
 | alert-app-allow2fa-disabled Slack channel | KAPP client auth config alerts | High |
 | dba@kurtosys.com | SQL Agent job failure alerts (backups, CHECKDB, disk space) | High |
@@ -157,7 +157,7 @@ EW1R-REP-01 (Custom VCC Monitoring Hub)
 | KURTOSYS_BASELINE | Investigate | Large (51GB) — unknown active consumer | TBC |
 | SingleStore linked servers (97) | Retire | All MemSQL jobs disabled | N/A |
 | SQL Server linked servers (active) | Move | Still needed for monitoring EW2P servers | New monitoring host |
-| Grafana dashboards | Replace/Move | 90 dashboards, 3 active admins, actively used Oct 2025 — cannot retire | Grafana Cloud or new host |
+| Grafana dashboards | Replace/Move | 74 dashboards confirmed, 3 active admins, actively used Oct 2025 — cannot retire | Grafana Cloud or new host |
 | DBA Maintenance jobs | Move | Standard maintenance — needed on any host | New SQL Server host |
 | VCC AWS jobs (15min/daily/weekly) | Replace | AWS monitoring — move to CloudWatch/native | TECH-3428 |
 | VCC MySQL jobs | Replace | MySQL monitoring | TECH-3428 or CloudWatch |
@@ -172,7 +172,7 @@ EW1R-REP-01 (Custom VCC Monitoring Hub)
 | Risk | Severity | Notes |
 |---|---|---|
 | KAPP API monitoring loss | Critical | 563M rows actively collected — Grafana KAPP dashboards updated Oct 2025, actively used |
-| Grafana dashboard loss | Critical | 3 active admins as of June 2026 — 90 dashboards including production KAPP metrics |
+| Grafana dashboard loss | Critical | 3 active admins as of June 2026 — 74 dashboards confirmed including production KAPP metrics |
 | SingleStore monitoring loss | Critical | Grafana reads directly from SingleStore UK/EU/US Prod — dashboards updated Aug 2025 |
 | Cost tracking loss | High | DBA_VCC_COST on FULL recovery — consumer TBC Monday |
 | MySQL/RDS monitoring loss | High | Active jobs monitoring production RDS + Grafana reads KAPP MySQL directly |
@@ -195,6 +195,6 @@ EW1R-REP-01 (Custom VCC Monitoring Hub)
 
 This server is **not safe to decommission** based on current evidence. It is:
 - Actively collecting production KAPP, MySQL, and AWS data every 15 minutes
-- Serving 90 Grafana dashboards to at least 3 active users as of June 2026
+- Serving 74 Grafana dashboards to at least 3 active users as of June 2026
 - The sole source of SingleStore and Zabbix monitoring dashboards
 - Running production Slack alerts for KAPP client config and read query failures

@@ -218,7 +218,7 @@ The daily checks job failed on its last run before being disabled — that failu
 | Data | Likely Consumer | Confidence | Notes |
 |---|---|---|---|
 | KAPP API query logs (DBA_VCC_AWS) | KAPP engineering / platform team | High | 563M rows actively collected every 15 min — Grafana KAPP dashboards confirmed reading this |
-| Grafana dashboards (90 total) | tashvir.babulal, yogeshwar.phull, rayhaan.suleyman | Confirmed | 3 active admins as of June 2026 — actively using dashboards updated Oct 2025 |
+| Grafana dashboards (74 total) | tashvir.babulal, yogeshwar.phull, rayhaan.suleyman | Confirmed | 3 active admins as of June 2026 — actively using dashboards updated Oct 2025 |
 | DBA_VCC_COST — Database Engineering Costs dashboard | DB engineering team | Confirmed | Dashboard JSON confirmed referencing DBA_VCC_COST — last updated Oct 2024 |
 | DBA_VCC_COST — Database Engineering Sprint Reporting | Engineering management | Confirmed | Dashboard JSON confirmed referencing DBA_VCC_COST — last updated Mar 2024 |
 | DBA_VCC_COST — KAPP Client Utilisation and Growth Report | Unknown — likely client-facing | High risk | Dashboard JSON confirmed referencing DBA_VCC_COST — name suggests client use, needs confirmation |

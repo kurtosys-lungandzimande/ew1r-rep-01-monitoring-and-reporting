@@ -26,7 +26,7 @@ EW1R-REP-01 is a non-production Windows host running SQL Server 2019 and Grafana
 
 | DoD Item | Status | Notes |
 |---|---|---|
-| All discovery queries executed and outputs captured | ✅ Done | 11 sections of discovery queries run — captured in discovery-queries.sql |
+| All discovery queries executed and outputs captured | ✅ Done | 13 sections of discovery queries run — captured in discovery-queries.sql |
 | SQL Server inventory complete (jobs, databases, linked servers) | ✅ Done | Jobs, databases, 109 linked servers inventoried — TECH-3478 owns the detail |
 | Grafana inventory complete (datasources, dashboards, users, alerts) | ✅ Done | 21 datasources, dashboards, 3 active users, 2 alert channels captured — TECH-3479 owns the detail |
 | External targets and consumers mapped | 🔄 In Progress | Data sources identified — consumer confirmation still open, TECH-3480 owns this |
@@ -39,7 +39,7 @@ EW1R-REP-01 is a non-production Windows host running SQL Server 2019 and Grafana
 
 ### 1. Discovery queries
 
-Initial discovery queries executed across 11 sections covering server basics, databases, jobs, linked servers, Grafana, AWS cost data, and job-to-linked-server mapping. All outputs captured in discovery-queries.sql.
+Initial discovery queries executed across 13 sections covering server basics, databases, jobs, linked servers, Grafana, AWS cost data, job-to-linked-server mapping, and database/stored proc coverage across all 8 databases. All outputs captured in discovery-queries.sql.
 
 ---
 
