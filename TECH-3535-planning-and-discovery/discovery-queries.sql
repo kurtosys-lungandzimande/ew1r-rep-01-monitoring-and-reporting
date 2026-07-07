@@ -1030,21 +1030,21 @@ ORDER BY size_mb DESC;
 -- definitions. The goal is to know what exists in each database
 -- so the deeper tickets (TECH-3478 onwards) have a starting point.
 -- ============================================================
-SELECT 'DBA_VCC'           AS database_name, name, create_date, modify_date FROM DBA_VCC.sys.objects           WHERE type = 'P' AND is_ms_shipped = 0
+SELECT 'DBA_VCC'           AS database_name, name COLLATE DATABASE_DEFAULT AS name, create_date, modify_date FROM DBA_VCC.sys.objects           WHERE type = 'P' AND is_ms_shipped = 0
 UNION ALL
-SELECT 'DBA_VCC_AWS',                         name, create_date, modify_date FROM DBA_VCC_AWS.sys.objects       WHERE type = 'P' AND is_ms_shipped = 0
+SELECT 'DBA_VCC_AWS',                         name COLLATE DATABASE_DEFAULT,                                   create_date, modify_date FROM DBA_VCC_AWS.sys.objects       WHERE type = 'P' AND is_ms_shipped = 0
 UNION ALL
-SELECT 'DBA_VCC_MEMSQL',                      name, create_date, modify_date FROM DBA_VCC_MEMSQL.sys.objects    WHERE type = 'P' AND is_ms_shipped = 0
+SELECT 'DBA_VCC_MEMSQL',                      name COLLATE DATABASE_DEFAULT,                                   create_date, modify_date FROM DBA_VCC_MEMSQL.sys.objects    WHERE type = 'P' AND is_ms_shipped = 0
 UNION ALL
-SELECT 'DBA_VCC_MYSQL',                       name, create_date, modify_date FROM DBA_VCC_MYSQL.sys.objects     WHERE type = 'P' AND is_ms_shipped = 0
+SELECT 'DBA_VCC_MYSQL',                       name COLLATE DATABASE_DEFAULT,                                   create_date, modify_date FROM DBA_VCC_MYSQL.sys.objects     WHERE type = 'P' AND is_ms_shipped = 0
 UNION ALL
-SELECT 'DBA_VCC_COST',                        name, create_date, modify_date FROM DBA_VCC_COST.sys.objects      WHERE type = 'P' AND is_ms_shipped = 0
+SELECT 'DBA_VCC_COST',                        name COLLATE DATABASE_DEFAULT,                                   create_date, modify_date FROM DBA_VCC_COST.sys.objects      WHERE type = 'P' AND is_ms_shipped = 0
 UNION ALL
-SELECT 'DBA_VCC_ATLASSIAN',                   name, create_date, modify_date FROM DBA_VCC_ATLASSIAN.sys.objects WHERE type = 'P' AND is_ms_shipped = 0
+SELECT 'DBA_VCC_ATLASSIAN',                   name COLLATE DATABASE_DEFAULT,                                   create_date, modify_date FROM DBA_VCC_ATLASSIAN.sys.objects WHERE type = 'P' AND is_ms_shipped = 0
 UNION ALL
-SELECT 'KURTOSYS_BASELINE',                   name, create_date, modify_date FROM KURTOSYS_BASELINE.sys.objects WHERE type = 'P' AND is_ms_shipped = 0
+SELECT 'KURTOSYS_BASELINE',                   name COLLATE DATABASE_DEFAULT,                                   create_date, modify_date FROM KURTOSYS_BASELINE.sys.objects WHERE type = 'P' AND is_ms_shipped = 0
 UNION ALL
-SELECT 'Utilities',                           name, create_date, modify_date FROM Utilities.sys.objects         WHERE type = 'P' AND is_ms_shipped = 0
+SELECT 'Utilities',                           name COLLATE DATABASE_DEFAULT,                                   create_date, modify_date FROM Utilities.sys.objects         WHERE type = 'P' AND is_ms_shipped = 0
 ORDER BY database_name, name;
 
 
