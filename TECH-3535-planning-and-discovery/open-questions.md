@@ -85,3 +85,66 @@
 | 21 | If this server went offline today, what would break immediately? | Critical | Unknown | Open |
 | 22 | Is any alerting dependent solely on this server — would anyone lose visibility? | Critical | Unknown | Open |
 | 23 | Is the VCC framework replicated anywhere else or is this the only instance? | High | Unknown | Open |
+
+---
+
+## Confirmed Findings — Answered by Query Evidence
+
+> These were open questions that have now been answered directly from the server without requiring stakeholder input.
+> Each answer is backed by a specific query run during the investigation.
+
+---
+
+### Grafana
+
+| # | Question | Answer | Evidence |
+|---|---|---|---|
+| Q7 | What is the Grafana URL/DNS? | https://ew1r-rep-01 on port 443 (HTTPS) | query 9.1 — netstat confirmed grafana.exe listening on 0.0.0.0:443, PID 3844 |
+| Q8 | Who has access to Grafana? | tashvir.babulal (last seen 2026-06-09), yogeshwar.phull (2026-06-22), rayhaan.suleyman (2026-06-30) — all active admins. donovan.vangraan last seen 2024-11-13 — inactive but credentials still used in 4 Zabbix datasources | query 9.4 — user table from grafana.db |
+| Q11 | What datasources does Grafana use? | 21 datasources confirmed — DBA_VCC (localhost MSSQL, 2 entries with different UIDs), KAPP MySQL (Dev/Rel/UK/EU/US Prod), SingleStore (Dev/Rel/UK/EU/US Prod querying UDM__ schema), Zabbix MySQL (x4), NiFi JSON API, CloudWatch, InfluxDB | query 12.6 — data_source table from grafana.db with UIDs and json_data |
+| Q12 | Are alert channels configured in Grafana? | Yes — 2 active Slack channels: `alerts-data-operations` (default route) and `alert-app-allow2fa-disabled` (Client Auth alerts only). Email contact point is a placeholder with no real address — it will not deliver | query 9.8 — alert_configuration table from grafana.db |
+
+---
+
+### Dashboards — Consumer Mapping
+
+| # | Question | Answer | Evidence |
+|---|---|---|---|
+| Q-A | Which dashboards read from DBA_VCC_COST? | 4 confirmed: Database Engineering Costs (2024-10-15), Database Engineering Sprint Reporting (2024-03-08), KAPP Client Utilisation and Growth Report (2024-02-22), AWS Cost Report Monthly (2023-10-06) | query 12.3 — full scan of all dashboard JSON in grafana.db |
+| Q-B | Which dashboards call REP_MONTHEND stored procedures? | 6 confirmed: WPv2 Month End Reporting (2024-06-20), Encore Month End Reporting (2023-08-10), DXM Month End Reporting (2023-08-10), InvestorPress Month End Reporting (2023-08-10), KAPP Month End Reporting (2023-08-10), Other Services Month End Reporting Draft (2023-07-21) | query 12.4 — full scan of all dashboard JSON in grafana.db |
+| Q-C | Which dashboards read from DBA_VCC_MEMSQL? | 14 confirmed — all currently showing stale data since May 2026 when collection jobs were disabled. Key dashboards: KAPP Dataset Query and Source Execution (2024-11-20), KAPP Client Application Auth Config (2024-10-29), KAPP Client Config (2024-09-02), KAPP Client Growth (2024-02-28), plus 10 others | query 12.5 — full scan of all dashboard JSON in grafana.db |
+| Q-D | Are there duplicate datasource entries? | Yes — DBA_VCC has two entries with different UIDs (a082f27e and e8597015) both pointing to localhost DBA_VCC. Dashboards may be split across both UIDs — must be resolved before any migration | query 12.6 — data_source table from grafana.db |
+
+---
+
+### Infrastructure
+
+| # | Question | Answer | Evidence |
+|---|---|---|---|
+| Q17 | What DNS name resolves to this server? | EW1R-REP-01 resolves to 10.72.8.216 | query 9.1 — netstat output confirmed IP |
+| Q19 | What service accounts run the SQL Agent jobs? | SHNONPRD\sqlagent (SQL Agent), SHNONPRD\sqlsrv (SQL Server engine), NT Service\MSSQLLaunchpad (Python extensibility) — all running, all set to Automatic startup | query 1.3 — sys.dm_server_services |
+
+---
+
+### Active Failures — Confirmed by Query Evidence
+
+| # | Finding | Confirmed By |
+|---|---|---|
+| F1 | DBA_VCC_MEMSQL collection jobs disabled since May 2026 — 14 Grafana dashboards showing stale data, no alert fired, no one notified | query 12.5 (dashboard JSON scan) + query 2.3 (job last run history) |
+| F2 | 6 month-end dashboards calling REP_MONTHEND procedures with no fresh data since May 2026 — June 2026 month-end reporting impacted | query 12.4 (dashboard JSON scan) |
+| F3 | DBA_VCC_COST confirmed active Grafana datasource — KAPP Client Utilisation and Growth Report is highest risk, name suggests client-facing use, consumer not yet confirmed | query 12.3 (dashboard JSON scan) |
+| F4 | All 4 WPv2 linked servers dead — DNS does not resolve. DBA_VCC_MYSQL_DAILY_CHECKS and DBA_VCC_MYSQL_AUDIT_DXM_CLIENT_DETAILED failing silently every day since 25 June 2026 | query 4.2 (job failure history — Error 7303 on ew2p-wpv2 and ew2r-wpv2) |
+| F5 | AWS cost ETL silently broken since September 2024 — SP_AUDIT_COST_ETL_CLEANUP CATCH block swallows nvarchar-to-decimal conversion error, job reports Succeeded, 2.4M rows stuck in staging, INFO_AWS_Entity_Cost stale 22 months | query 5.4 (data freshness) + stored procedure definition review |
+
+---
+
+### Still Open — Requires Stakeholder Input
+
+| # | Question | Who to Ask | Why It Blocks Decommission |
+|---|---|---|---|
+| Q2 | Who consumes DBA_VCC_COST — billing or internal reporting? | tashvir.babulal / rayhaan.suleyman | If billing — cannot decommission without a confirmed replacement |
+| Q10 | Is KAPP Client Utilisation and Growth Report client-facing? | tashvir.babulal / rayhaan.suleyman | If client-facing — decommission directly impacts clients |
+| Q13 | Who owns the KAPP monitoring data in DBA_VCC_AWS? Is it used for SLA reporting? | KAPP engineering / platform team | If SLA — cannot decommission without a confirmed replacement |
+| Q21 | If this server went offline today, what would break immediately? | yogeshwar.phull / tashvir.babulal | Required for decommission risk assessment |
+| Q22 | Is any alerting dependent solely on this server? | yogeshwar.phull / tashvir.babulal | Required for decommission risk assessment |
+| Q23 | Is the VCC framework replicated anywhere else? | DBA team | If not replicated — this is a single point of failure |
