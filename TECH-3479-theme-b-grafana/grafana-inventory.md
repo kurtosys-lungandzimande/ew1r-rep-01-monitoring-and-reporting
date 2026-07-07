@@ -98,40 +98,101 @@
 
 ## Dashboard Inventory
 
-| Dashboard | Folder | Last Updated | Business Critical | Notes |
-|---|---|---|---|---|
-| Detailed KAPP Workflow Document Generation Stats | KAPP Reporting | 2025-08-18 | **Yes** | Actively maintained |
-| Query History | SingleStore Monitoring v2 | 2025-08-07 | **Yes** | Actively maintained |
-| Historical Workload Monitoring | SingleStore Monitoring v2 | 2025-08-07 | **Yes** | Actively maintained |
-| NTAM Workflow by workflowRunId | KAPP Client Reporting | 2025-09-07 | **Yes** | Very recent — created Sep 2025 |
-| Development Document Generation Run Metrics | KAPP Reporting | 2025-10-29 | **Yes** | Actively maintained Oct 2025 |
-| Release Document Generation Run Metrics | KAPP Reporting | 2025-10-29 | **Yes** | Actively maintained Oct 2025 |
-| Prod UK Document Generation Run Metrics | KAPP Reporting | 2025-10-29 | **Yes** | Production — actively maintained |
-| Prod EU Document Generation Run Metrics | KAPP Reporting | 2025-10-29 | **Yes** | Production — actively maintained |
-| Prod US Document Generation Run Metrics | KAPP Reporting | 2025-10-29 | **Yes** | Production — actively maintained |
-| KAPP Client Utilisation and Growth Report | KAPP Reporting | 2024-02-22 | **Yes** | Client-level reporting |
-| KAPP Orphaned and Duplicated Records Report | KAPP Reporting | 2024-03-26 | Yes | Data quality reporting |
-| KAPP Dataset Query Execution | KAPP Reporting | 2024-11-07 | Yes | Query execution tracking |
-| KAPP Client Application Auth Config | KAPP Reporting | 2024-10-29 | Yes | Auth config reporting |
-| KAPP Dataset Lambdas Time Outs | KAPP Reporting | 2024-10-23 | Yes | Lambda timeout monitoring |
-| KAPP Dataset Query and Source Execution | KAPP Reporting | 2024-11-20 | Yes | Dataset execution tracking |
-| Database Engineering Costs | DB Eng Month End | 2024-10-15 | Yes | Cost tracking |
-| WPv2 Month End Reporting | DB Eng Month End | 2024-06-20 | Yes | Month-end business report |
-| Nifi API Reporting | KAPP Reporting | 2024-02-15 | Yes | NiFi pipeline reporting |
-| KAPP Client Growth | KAPP Reporting | 2024-02-28 | Yes | Client growth tracking |
-| KAPP Workflow History | KAPP Reporting | 2024-03-07 | Yes | Workflow history |
-| KAPP Workflow Times History | KAPP Reporting | 2024-06-12 | Yes | Workflow timing |
-| KAPP API Query Reporting | KAPP Reporting | 2024-02-23 | Yes | API query reporting |
-| KAPP API Error Reporting | KAPP Reporting | 2024-03-11 | Yes | API error tracking |
-| Cluster View | SingleStore Monitoring v2 | 2025-06-23 | Yes | SingleStore cluster view |
-| AWS RDS Report | DB Eng AWS Reports | 2023-08-21 | Medium | RDS inventory |
-| AWS DataTransfer AZ Bytes Report | DB Eng AWS Reports | 2024-02-20 | Medium | Data transfer costs |
-| Zabbix Monitoring | Monitoring | 2023-10-27 | Medium | Zabbix infrastructure |
-| Jira Projects Info | Atlassian Reporting | 2023-12-08 | Medium | Jira sprint data |
-| Query Performance Dashboard | Performance Dashboards | 2024-03-07 | Medium | SQL query performance |
-| Encore Document Production Runtimes | Encore Reporting | 2023-08-16 | Medium | Encore runtimes |
-| BNY IIS Log Streams | Encore | 2023-07-11 | Medium | BNY IIS log data |
-| Grafana Dashboard Exporter/Importer | — | 2024-10-29 | No | Admin utility |
+> Total: 74 dashboards confirmed — query 9.5 / query 13.7 both run 2026-07-07, results match.
+> Several dashboard names appear more than once — these are older versions sitting in different folders, not the same dashboard.
+> Duplicates are noted in the Notes column.
+
+### Actively Maintained — updated 2025
+
+| Dashboard | Last Updated | Notes |
+|---|---|---|
+| Prod US Document Generation Run Metrics | 2025-10-29 | Production — actively maintained |
+| Prod UK Document Generation Run Metrics | 2025-10-29 | Production — actively maintained |
+| Prod EU Document Generation Run Metrics | 2025-10-29 | Production — actively maintained |
+| Release Document Generation Run Metrics | 2025-10-29 | Actively maintained |
+| Development Document Generation Run Metrics | 2025-10-29 | Actively maintained |
+| NTAM Workflow by workflowRunId | 2025-09-07 | Very recent — created Sep 2025 |
+| Detailed KAPP Workflow Document Generation Stats | 2025-08-18 | Actively maintained |
+| Query History | 2025-08-07 | SingleStore — actively maintained |
+| Historical Workload Monitoring | 2025-08-07 | SingleStore v2 — actively maintained. Older copy also exists (2024-07-12) |
+| Cluster View | 2025-06-23 | SingleStore v2 — actively maintained. Older copy also exists (2024-07-12) |
+
+### KAPP Reporting — updated 2024
+
+| Dashboard | Last Updated | Notes |
+|---|---|---|
+| KAPP Dataset Query and Source Execution | 2024-11-20 | Stale data — DBA_VCC_MEMSQL jobs disabled May 2026 |
+| KAPP Dataset Query Execution | 2024-11-07 | Stale data — DBA_VCC_MEMSQL jobs disabled May 2026 |
+| Grafana Dashboard Exporter/Importer | 2024-10-29 | Admin utility |
+| KAPP Client Application Auth Config | 2024-10-29 | Stale data — DBA_VCC_MEMSQL jobs disabled May 2026 |
+| KAPP Dataset Lambdas Time Outs | 2024-10-23 | Stale data — DBA_VCC_MEMSQL jobs disabled May 2026 |
+| Database Engineering Costs | 2024-10-15 | Reads DBA_VCC_COST — active. Older copy also exists (2023-10-12) |
+| KAPP Client Config | 2024-09-02 | Stale data — DBA_VCC_MEMSQL jobs disabled May 2026 |
+| WPv2 Month End Reporting | 2024-06-20 | Calls REP_MONTHEND — stale. Older copy also exists (2023-07-07) |
+| KAPP Workflow Times History | 2024-06-12 | Stale data — DBA_VCC_MEMSQL jobs disabled May 2026 |
+| KAPP Orphaned and Duplicated Records Report | 2024-03-26 | Stale data. Older copy also exists (2023-08-10) |
+| KAPP API Error Reporting | 2024-03-11 | Stale data — DBA_VCC_MEMSQL jobs disabled May 2026 |
+| Database Engineering Sprint Reporting | 2024-03-08 | Reads DBA_VCC_COST. Older copy also exists (2023-09-15) |
+| Query Performance Dashboard | 2024-03-07 | Stale data — DBA_VCC_MEMSQL jobs disabled May 2026 |
+| KAPP Workflow History | 2024-03-07 | Stale data — DBA_VCC_MEMSQL jobs disabled May 2026 |
+| KAPP Client Growth | 2024-02-28 | Stale data. Older copy also exists (2023-11-16) |
+| KAPP API Query Reporting | 2024-02-23 | Stale data — DBA_VCC_MEMSQL jobs disabled May 2026 |
+| KAPP Client Utilisation and Growth Report | 2024-02-22 | Reads DBA_VCC_COST — **high risk, name suggests client-facing** |
+| AWS DataTransfer AZ Bytes Report | 2024-02-20 | AWS data transfer costs |
+| Nifi API Reporting | 2024-02-15 | NiFi pipeline reporting |
+
+### SingleStore Monitoring — older copies (2024-07-12)
+
+| Dashboard | Last Updated | Notes |
+|---|---|---|
+| Resource Pool Monitoring | 2024-07-12 | SingleStore monitoring |
+| Pipeline Summary | 2024-07-12 | SingleStore monitoring |
+| Pipeline Performance | 2024-07-12 | SingleStore monitoring |
+| Memory Usage | 2024-07-12 | Older copy — newer version exists (2023-09-07) |
+| Historical Workload Monitoring | 2024-07-12 | Older copy — newer version exists (2025-08-07) |
+| Disk Usage | 2024-07-12 | SingleStore monitoring |
+| Detailed Cluster View By Node | 2024-07-12 | Older copy — newer version exists (2023-09-07) |
+| Cluster View | 2024-07-12 | Older copy — newer version exists (2025-06-23) |
+
+### Other Reporting — 2023
+
+| Dashboard | Last Updated | Notes |
+|---|---|---|
+| Jira Projects Info | 2023-12-08 | Jira sprint data |
+| Zabbix Monitoring | 2023-10-27 | Zabbix infrastructure |
+| Database Engineering Costs | 2023-10-12 | Older copy — newer version exists (2024-10-15) |
+| AWS Cost Report Monthly | 2023-10-06 | Reads DBA_VCC_COST — AWS data stale since Sept 2024 |
+| Nifi API Reporting Copy | 2023-09-21 | Stale data — DBA_VCC_MEMSQL jobs disabled May 2026 |
+| Database Engineering Sprint Reporting | 2023-09-15 | Older copy — newer version exists (2024-03-08) |
+| Memory Usage | 2023-09-07 | SingleStore monitoring |
+| Detailed Cluster View By Node | 2023-09-07 | SingleStore monitoring |
+| Dashboard Servers Windows | 2023-09-05 | Zabbix — Windows server monitoring |
+| SQL SERVER | 2023-09-05 | Zabbix — SQL Server monitoring |
+| Microsoft SQL Server | 2023-09-05 | Zabbix — SQL Server monitoring |
+| Zabbix Server Dashboard | 2023-09-05 | Zabbix server dashboard |
+| AWS RDS Report | 2023-08-21 | RDS inventory. Older copy also exists (2023-08-09) |
+| Encore Document Production Runtimes | 2023-08-16 | Encore runtimes. Older copy also exists (2023-07-09) |
+| Encore Month End Reporting | 2023-08-10 | Calls REP_MONTHEND — stale. Older copy also exists (2023-07-07) |
+| DXM Month End Reporting | 2023-08-10 | Calls REP_MONTHEND — stale. Older copy also exists (2023-07-07) |
+| InvestorPress Month End Reporting | 2023-08-10 | Calls REP_MONTHEND — stale. Older copy also exists (2023-07-05) |
+| KAPP Month End Reporting | 2023-08-10 | Calls REP_MONTHEND — stale. Older copy also exists (2023-07-05) |
+| AWS Security Report | 2023-08-10 | AWS security config |
+| KAPP Orphaned and Duplicated Records Report | 2023-08-10 | Older copy — newer version exists (2024-03-26) |
+| AWS S3 Report | 2023-08-09 | S3 bucket report. Older copy also exists (2023-07-13) |
+| AWS EC2 Report | 2023-08-09 | EC2 inventory. Duplicate also exists same date |
+| AWS RDS Report | 2023-08-09 | Older copy — newer version exists (2023-08-21) |
+| Home | 2023-08-09 | Default home dashboard |
+| AWS Cost Report | 2023-08-09 | AWS cost report |
+| Other Services Month End Reporting -- Draft | 2023-07-21 | Draft — calls REP_MONTHEND |
+| AWS S3 Report | 2023-07-13 | Older copy — newer version exists (2023-08-09) |
+| BNY IIS Log Streams | 2023-07-11 | BNY IIS log data |
+| Encore Document Production Runtimes | 2023-07-09 | Older copy — newer version exists (2023-08-16) |
+| DXM Month End Reporting | 2023-07-07 | Older copy — newer version exists (2023-08-10) |
+| WPv2 Month End Reporting | 2023-07-07 | Older copy — newer version exists (2024-06-20) |
+| Encore Month End Reporting | 2023-07-07 | Older copy — newer version exists (2023-08-10) |
+| KAPP Month End Reporting | 2023-07-05 | Older copy — newer version exists (2023-08-10) |
+| InvestorPress Month End Reporting | 2023-07-05 | Older copy — newer version exists (2023-08-10) |
+| Server States | 2023-05-29 | Server state monitoring |
 
 ---
 
@@ -182,7 +243,7 @@
 
 - [x] ~~What is the Grafana URL and port?~~ — https://ew1r-rep-01 on port 443
 - [x] ~~What datasources are configured?~~ — 21 datasources confirmed, see above
-- [x] ~~Which dashboards are actively used?~~ — 9 dashboards updated Oct/Nov 2025, actively used
+- [x] ~~Which dashboards are actively used?~~ — 74 dashboards total confirmed (query 9.5, 2026-07-07). 10 updated in 2025 — actively used. Several duplicate dashboard names exist across folders — older versions not cleaned up.
 - [x] ~~Who has admin access to Grafana?~~ — tashvir.babulal, yogeshwar.phull, rayhaan.suleyman, donovan.vangraan
 - [x] ~~Is Grafana version current or end-of-life?~~ — v9.5.2, LTS, not latest but supported
 - [ ] Are any dashboards client-facing or SLA-related? — Month End Reporting and KAPP Client reports are candidates — confirm with tashvir/rayhaan
