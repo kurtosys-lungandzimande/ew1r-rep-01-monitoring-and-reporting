@@ -927,31 +927,40 @@ EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python
 -- DBA_VCC_MYSQL holds MySQL and DXM client monitoring data.
 -- Two jobs feed it: DBA_VCC_MYSQL_DAILY_CHECKS (currently failing
 -- due to WPv2 linked servers) and DBA_VCC_MYSQL_WEEKLY_CHECKS.
--- This confirms what data is still landing and what has gone stale.
+-- Table names confirmed from sys.tables query (2026-07-07).
+-- Key active tables: INFO_DXM_Client_Sizes (122K rows, 7.88 MB)
+-- and INFO_WPv2_Client_Sizes (1090 rows, 0.14 MB — near empty,
+-- WPv2 decommissioned). ARC_ tables hold archived history.
 -- ============================================================
 SELECT
-    'MON_MySQL_Client_Sizes'        AS table_name,
+    'INFO_DXM_Client_Sizes'         AS table_name,
     MAX(DateChecked)                AS last_collected,
     COUNT(*)                        AS row_count
-FROM DBA_VCC_MYSQL.dbo.MON_MySQL_Client_Sizes
-UNION ALL
-SELECT
-    'INFO_MySQL_Client_Sizes',
-    MAX(DateChecked),
-    COUNT(*)
-FROM DBA_VCC_MYSQL.dbo.INFO_MySQL_Client_Sizes
-UNION ALL
-SELECT
-    'INFO_DXM_Client_Sizes',
-    MAX(DateChecked),
-    COUNT(*)
 FROM DBA_VCC_MYSQL.dbo.INFO_DXM_Client_Sizes
 UNION ALL
 SELECT
     'INFO_WPv2_Client_Sizes',
     MAX(DateChecked),
     COUNT(*)
-FROM DBA_VCC_MYSQL.dbo.INFO_WPv2_Client_Sizes;
+FROM DBA_VCC_MYSQL.dbo.INFO_WPv2_Client_Sizes
+UNION ALL
+SELECT
+    'INFO_DXM_Clients_Detail',
+    MAX(DateChecked),
+    COUNT(*)
+FROM DBA_VCC_MYSQL.dbo.INFO_DXM_Clients_Detail
+UNION ALL
+SELECT
+    'INFO_DXM_LAMBDA_BACKUPS_Detail',
+    MAX(DateChecked),
+    COUNT(*)
+FROM DBA_VCC_MYSQL.dbo.INFO_DXM_LAMBDA_BACKUPS_Detail
+UNION ALL
+SELECT
+    'INFO_Database_Table_Sizes',
+    MAX(DateChecked),
+    COUNT(*)
+FROM DBA_VCC_MYSQL.dbo.INFO_Database_Table_Sizes;
 
 -- 13.2 — All tables in DBA_VCC_MYSQL with row counts
 -- Use this to understand the full scope of what this database holds.
@@ -985,19 +994,15 @@ JOIN DBA_VCC_ATLASSIAN.sys.allocation_units a ON p.partition_id = a.container_id
 GROUP BY t.name
 ORDER BY size_mb DESC;
 
--- 13.4 — DBA_VCC_ATLASSIAN freshness check
--- Confirm when Jira data was last collected.
-SELECT
-    'INFO_DBE_JIRA_Sprint_Detail'   AS table_name,
-    MAX(DateChecked)                AS last_collected,
-    COUNT(*)                        AS row_count
-FROM DBA_VCC_ATLASSIAN.dbo.INFO_DBE_JIRA_Sprint_Detail
-UNION ALL
-SELECT
-    'MON_DBE_JIRA_Sprint_Detail',
-    MAX(DateChecked),
-    COUNT(*)
-FROM DBA_VCC_ATLASSIAN.dbo.MON_DBE_JIRA_Sprint_Detail;
+-- 13.4 — DBA_VCC_ATLASSIAN content check
+-- Confirmed from sys.tables (2026-07-07): only 2 tables have data.
+-- Jira_Project_Issue_Field_Types (181,714 rows) and
+-- Jira_Project_Leads (657 rows). No DateChecked column exists —
+-- these are reference/lookup tables, not time-series collection tables.
+-- The DBA_VCC_JIRA_MONTHEND_CHECKS job writes to DBA_VCC_AWS not here.
+-- DBA_VCC_ATLASSIAN appears to be a Jira metadata reference store only.
+SELECT TOP 10 * FROM DBA_VCC_ATLASSIAN.dbo.Jira_Project_Issue_Field_Types;
+SELECT TOP 10 * FROM DBA_VCC_ATLASSIAN.dbo.Jira_Project_Leads;
 
 
 -- ============================================================
