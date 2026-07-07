@@ -187,7 +187,10 @@ WHERE is_folder = 0 AND data LIKE '%REP_MONTHEND%'
 ORDER BY updated DESC;
 ```
 
-**Action required:** Confirm who runs these reports at month end and whether June 2026 reporting was impacted. Escalate to management if confirmed.
+**Additional context from job history (run 2026-07-07):**
+The Grafana dashboard dates (2023/2024) reflect when the dashboards were last *edited*, not when the underlying jobs last ran. `DBA_VCC_JIRA_MONTHEND_CHECKS` ran successfully on 2026-07-01 at 08:00 — confirming the Jira month-end job completed for June 2026 close. However, dashboards referencing `DBA_VCC_MEMSQL` (Finding 1) would still have shown stale data regardless, as the MEMSQL feed jobs were disabled in May 2026.
+
+**Action required:** Confirm who runs these reports at month end and whether June 2026 reporting was impacted for the MEMSQL-dependent dashboards. Escalate to management if confirmed.
 
 ---
 
@@ -229,17 +232,23 @@ All 4 WPv2 linked servers (`ew2p-wpv2`, `ew2r-wpv2`, `ue1p-wpv2`, `ue1r-wpv2`) p
 **Why this matters for decommission:**
 This is an existing operational failure that is separate from the decommission work but must be resolved as part of it. The stale linked servers and their referencing jobs need to be cleaned up. Additionally, a full reachability audit across all 109 linked servers is needed — WPv2 is confirmed but further stale targets have also been identified beyond WPv2.
 
-**Evidence — confirmed by query 4.2 (job failure history):**
-```
-DBA_VCC_MYSQL_DAILY_CHECKS         SP_AUDIT_WPv2_CLIENTS_DETAILED
-  Error 7303 — Unknown MySQL server host 'ew2p-wpv2'
-  Error 7303 — Unknown MySQL server host 'ew2r-wpv2'
-  Failing daily since 25 June 2026
+**Evidence — confirmed by SQL Agent job history (run 2026-07-07):**
 
-DBA_VCC_MYSQL_AUDIT_DXM_CLIENT_DETAILED   SP_AUDIT_WPv2_CLIENTS_DETAILED
-  Same errors — same linked servers
-  Failing daily since 25 June 2026
+`DBA_VCC_MYSQL_AUDIT_DXM_CLIENT_DETAILED` has been failing every day at 01:00 since at least 12 June 2026. The failing step is `SP_AUDIT_WPv2_CLIENTS_DETAILED` — the WPv2 linked server dependency. The job is still enabled and still scheduled. It runs, fails, and reports failure every single day with no owner and no alert.
+
 ```
+Job: DBA_VCC_MYSQL_AUDIT_DXM_CLIENT_DETAILED
+Status: ENABLED
+Schedule: Sched1 — daily at 01:00
+Failing step: SP_AUDIT_WPv2_CLIENTS_DETAILED
+First confirmed failure in history: 2026-06-12
+Last confirmed failure: 2026-07-07
+Total confirmed consecutive daily failures: 26 days
+```
+
+For contrast, `DBA - AUDIT - KAPP_Schema_details_Capture` is running and succeeding every day at 11:00 — confirming the SQL Agent service is healthy and the WPv2 failure is isolated to the dead linked servers, not a broader infrastructure issue.
+
+`DBA_VCC_JIRA_MONTHEND_CHECKS` ran successfully on 2026-07-01 at 08:00 — confirming the Jira month-end job completed for June 2026 close.
 
 **Additional stale targets confirmed beyond WPv2:**
 - `ew1d-aggr-05`, `ew1d-aggr-15` — Not Online
