@@ -849,3 +849,63 @@ FROM msdb.dbo.sysjobs j
 JOIN msdb.dbo.sysjobsteps s ON j.job_id = s.job_id
 WHERE j.enabled = 1
 ORDER BY j.name, s.step_id;
+
+
+-- ============================================================
+-- SECTION 12 — GRAFANA DASHBOARD DATASOURCE CONFIRMATION
+-- Purpose: Confirm which Grafana dashboards read from DBA_VCC_COST
+-- and which datasource each dashboard is bound to.
+-- This directly answers whether DBA_VCC_COST is actively consumed
+-- via Grafana — no stakeholder input needed, the answer is in the
+-- dashboard JSON stored in grafana.db.
+-- ============================================================
+
+-- 12.1 Pull the full dashboard JSON for "Database Engineering Costs"
+-- The dashboard JSON contains the datasource UID each panel queries.
+-- Look for references to DBA_VCC_COST, REP_MONTHEND, or the localhost
+-- SQL Server datasource UID in the panel targets.
+-- If the dashboard JSON references DBA_VCC_COST tables or stored procs,
+-- that confirms it is an active consumer of this database.
+EXEC xp_cmdshell 'echo import sqlite3, json > C:\temp\gf_dash.py && echo conn = sqlite3.connect(r"C:\Program Files\GrafanaLabs\grafana\data\grafana.db") >> C:\temp\gf_dash.py && echo rows = conn.execute("SELECT title, data FROM dashboard WHERE is_folder=0 AND title LIKE ''%%Cost%%'' OR title LIKE ''%%cost%%''").fetchall() >> C:\temp\gf_dash.py && echo [print(r[0], r[1][:2000]) for r in rows] >> C:\temp\gf_dash.py';
+EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python.exe C:\temp\gf_dash.py';
+
+-- 12.2 List all dashboards and the datasource UID each one uses
+-- This gives a full map of dashboard → datasource.
+-- Cross-reference the datasource UID against the datasource list
+-- from query 9.3 to confirm which physical database each dashboard reads from.
+-- Any dashboard with the localhost MSSQL datasource UID is reading
+-- directly from one of the DBA_VCC_* databases on this server.
+EXEC xp_cmdshell 'echo import sqlite3, json > C:\temp\gf_ds_map.py && echo conn = sqlite3.connect(r"C:\Program Files\GrafanaLabs\grafana\data\grafana.db") >> C:\temp\gf_ds_map.py && echo rows = conn.execute("SELECT d.title, ds.name, ds.type, ds.url FROM dashboard d LEFT JOIN data_source ds ON json_extract(d.data, ''$.panels[0].datasource.uid'') = ds.uid WHERE d.is_folder=0 ORDER BY d.title").fetchall() >> C:\temp\gf_ds_map.py && echo [print(r) for r in rows] >> C:\temp\gf_ds_map.py';
+EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python.exe C:\temp\gf_ds_map.py';
+
+-- 12.3 Search all dashboard JSON for references to DBA_VCC_COST
+-- Scans every dashboard's stored JSON for the string DBA_VCC_COST.
+-- Any dashboard that appears here is confirmed reading from that database.
+-- This is the definitive answer to: is DBA_VCC_COST actively used in Grafana?
+EXEC xp_cmdshell 'echo import sqlite3 > C:\temp\gf_cost_scan.py && echo conn = sqlite3.connect(r"C:\Program Files\GrafanaLabs\grafana\data\grafana.db") >> C:\temp\gf_cost_scan.py && echo rows = conn.execute("SELECT title, updated FROM dashboard WHERE is_folder=0 AND data LIKE ''%%DBA_VCC_COST%%'' ORDER BY updated DESC").fetchall() >> C:\temp\gf_cost_scan.py && echo print(''Dashboards referencing DBA_VCC_COST:'') >> C:\temp\gf_cost_scan.py && echo [print(r) for r in rows] >> C:\temp\gf_cost_scan.py';
+EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python.exe C:\temp\gf_cost_scan.py';
+
+-- 12.4 Search all dashboard JSON for references to REP_MONTHEND stored procedures
+-- If any dashboard calls REP_MONTHEND_* procedures directly, that confirms
+-- the month-end reporting layer is actively wired into Grafana.
+-- This also tells us which dashboards will break if DBA_VCC_MEMSQL or
+-- DBA_VCC_COST are decommissioned without a replacement.
+EXEC xp_cmdshell 'echo import sqlite3 > C:\temp\gf_monthend_scan.py && echo conn = sqlite3.connect(r"C:\Program Files\GrafanaLabs\grafana\data\grafana.db") >> C:\temp\gf_monthend_scan.py && echo rows = conn.execute("SELECT title, updated FROM dashboard WHERE is_folder=0 AND data LIKE ''%%REP_MONTHEND%%'' ORDER BY updated DESC").fetchall() >> C:\temp\gf_monthend_scan.py && echo print(''Dashboards referencing REP_MONTHEND procedures:'') >> C:\temp\gf_monthend_scan.py && echo [print(r) for r in rows] >> C:\temp\gf_monthend_scan.py';
+EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python.exe C:\temp\gf_monthend_scan.py';
+
+-- 12.5 Search all dashboard JSON for references to DBA_VCC_MEMSQL
+-- Confirms which dashboards depend on the disabled MemSQL collection jobs.
+-- These are the dashboards that have been showing stale data since May 2026.
+EXEC xp_cmdshell 'echo import sqlite3 > C:\temp\gf_memsql_scan.py && echo conn = sqlite3.connect(r"C:\Program Files\GrafanaLabs\grafana\data\grafana.db") >> C:\temp\gf_memsql_scan.py && echo rows = conn.execute("SELECT title, updated FROM dashboard WHERE is_folder=0 AND data LIKE ''%%DBA_VCC_MEMSQL%%'' ORDER BY updated DESC").fetchall() >> C:\temp\gf_memsql_scan.py && echo print(''Dashboards referencing DBA_VCC_MEMSQL:'') >> C:\temp\gf_memsql_scan.py && echo [print(r) for r in rows] >> C:\temp\gf_memsql_scan.py';
+EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python.exe C:\temp\gf_memsql_scan.py';
+
+-- 12.6 Get the full datasource list with UIDs
+-- Run this alongside 12.2 to cross-reference datasource UIDs found in
+-- dashboard JSON against the actual datasource names and connection strings.
+-- The UID is what Grafana stores inside dashboard JSON — the name is what
+-- you see in the Grafana UI. You need both to make the mapping complete.
+-- NOTE: database_name column does not exist in Grafana 9.5.2 SQLite schema.
+-- Use uid, name, type, url, and json_data which contains the database name
+-- as a JSON field for MSSQL datasources.
+EXEC xp_cmdshell 'echo import sqlite3 > C:\temp\gf_ds_uid.py && echo conn = sqlite3.connect(r"C:\Program Files\GrafanaLabs\grafana\data\grafana.db") >> C:\temp\gf_ds_uid.py && echo rows = conn.execute("SELECT uid, name, type, url, json_data FROM data_source ORDER BY name").fetchall() >> C:\temp\gf_ds_uid.py && echo [print(r) for r in rows] >> C:\temp\gf_ds_uid.py';
+EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python.exe C:\temp\gf_ds_uid.py';

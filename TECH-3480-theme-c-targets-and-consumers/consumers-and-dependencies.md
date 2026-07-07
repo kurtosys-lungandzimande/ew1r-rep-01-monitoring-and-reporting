@@ -1,6 +1,6 @@
 # Consumers and Dependencies — EW1R-REP-01
 
-> Status: IN PROGRESS — team identification pending. Items marked "unknown" require escalation.
+> Status: IN PROGRESS — Grafana consumer confirmation partially complete via dashboard JSON scan (2026-07-07). DBA_VCC_COST confirmed as active Grafana datasource. Remaining open items require stakeholder input.
 
 ---
 
@@ -116,21 +116,62 @@ The fact that there are both summary and per-client versions of every report str
 - `MON_AWS_DE_Entity_Cost` — monitoring table for AWS entity costs, created August 2024.
 - `INFO_DBE_JIRA_VALUES_Detail` — Jira values detail, linked to the database engineering sprint reporting.
 
-**What we do not know yet — confirm Monday:**
+**Confirmed — Grafana dashboards reading from DBA_VCC_COST (query 12.3 result, 2026-07-07):**
+
+| Dashboard | Last Updated | Notes |
+|---|---|---|
+| Database Engineering Costs | 2024-10-15 | Most recently updated — actively maintained |
+| Database Engineering Sprint Reporting | 2024-03-08 | Sprint reporting — likely used by engineering management |
+| KAPP Client Utilisation and Growth Report | 2024-02-22 | Client-facing name — high risk, needs consumer confirmation |
+| AWS Cost Report Monthly | 2023-10-06 | AWS cost data — note this data is stale since Sept 2024 |
+
+This closes the question of whether DBA_VCC_COST is actively used in Grafana — it is confirmed. Four dashboards reference it directly in their JSON.
+
+The `KAPP Client Utilisation and Growth Report` dashboard name strongly suggests client-facing use. This is the highest priority item for stakeholder confirmation.
+
+**What still needs to be confirmed:**
 - Who calls the `REP_MONTHEND_*` procedures every month? Is it automated or does someone run them manually?
 - Do the reports get emailed to clients or used internally?
-- Is there a Grafana dashboard reading from this database? The `Database Engineering Costs` dashboard in Grafana was last updated October 2024 — it likely reads from here.
 - Is there another system already capturing this same data that we are not aware of?
 
-**Action required Monday:**
-Find the person who owns client billing or usage reporting — likely in finance, account management, or platform management — and ask: do you use data from this server for invoicing or client reporting? If yes, this database cannot be decommissioned until a confirmed replacement is in place.
+**Action required — escalate to tashvir.babulal / rayhaan.suleyman:**
+Confirm who uses the `KAPP Client Utilisation and Growth Report` dashboard and whether it is shared with clients. If yes, this database cannot be decommissioned until a confirmed replacement is in place.
 
 ### DBA_VCC_MEMSQL — Month-End Reporting Database (Critical Finding)
 
-> This database was assumed inactive because all its collection jobs are disabled. Investigation has revealed it is still the backbone of the Grafana month-end reporting dashboards.
+> This database was assumed inactive because all its collection jobs are disabled. Dashboard JSON scan (query 12.5, 2026-07-07) confirms it is still the active datasource for 10 unique Grafana dashboards — all of which are currently showing stale data.
+
+**Dashboards confirmed reading from DBA_VCC_MEMSQL (query 12.5 result):**
+
+| Dashboard | Last Updated | Status |
+|---|---|---|
+| KAPP Dataset Query and Source Execution | 2024-11-20 | Stale data since May 2026 |
+| KAPP Dataset Query Execution | 2024-11-07 | Stale data since May 2026 |
+| KAPP Client Application Auth Config | 2024-10-29 | Stale data since May 2026 |
+| KAPP Dataset Lambdas Time Outs | 2024-10-23 | Stale data since May 2026 |
+| KAPP Client Config | 2024-09-02 | Stale data since May 2026 |
+| KAPP Workflow Times History | 2024-06-12 | Stale data since May 2026 |
+| KAPP Orphaned and Duplicated Records Report | 2024-03-26 | Stale data since May 2026 |
+| KAPP API Error Reporting | 2024-03-11 | Stale data since May 2026 |
+| Query Performance Dashboard | 2024-03-07 | Stale data since May 2026 |
+| KAPP Workflow History | 2024-03-07 | Stale data since May 2026 |
+| KAPP Client Growth | 2024-02-28 | Stale data since May 2026 |
+| Nifi API Reporting Copy | 2023-09-21 | Stale data since May 2026 |
+| InvestorPress Month End Reporting | 2023-08-10 | Stale data since May 2026 |
+| KAPP Month End Reporting | 2023-08-10 | Stale data since May 2026 |
+
+**Dashboards confirmed calling REP_MONTHEND stored procedures (query 12.4 result):**
+
+| Dashboard | Last Updated | Notes |
+|---|---|---|
+| WPv2 Month End Reporting | 2024-06-20 | Calls REP_MONTHEND — WPv2 jobs also disabled, data stale |
+| Encore Month End Reporting | 2023-08-10 | Calls REP_MONTHEND — stale data since May 2026 |
+| DXM Month End Reporting | 2023-08-10 | Calls REP_MONTHEND — stale data since May 2026 |
+| InvestorPress Month End Reporting | 2023-08-10 | Calls REP_MONTHEND — stale data since May 2026 |
+| KAPP Month End Reporting | 2023-08-10 | Calls REP_MONTHEND — stale data since May 2026 |
+| Other Services Month End Reporting | 2023-07-21 | Draft — calls REP_MONTHEND |
 
 **What the Grafana month-end dashboards actually read from:**
-The KAPP Month End Reporting Grafana dashboard does not read from DBA_VCC_COST as initially assumed. It calls stored procedures in DBA_VCC_MEMSQL which in turn read from:
 - `DBA_VCC_MEMSQL.dbo.INFO_ClientSizes_Sizes_FP` — KAPP client sizes per SingleStore environment
 - `DBA_VCC_MEMSQL.dbo.ARC_INFO_ClientSizes_Sizes_FP` — archived KAPP client sizes
 - `DBA_VCC_MEMSQL.dbo.INFO_ClientSizes_Sizes_IP` — InvestorPress client sizes
@@ -142,14 +183,14 @@ The KAPP Month End Reporting Grafana dashboard does not read from DBA_VCC_COST a
 
 | Table | Last Data Collected | Row Count | Status |
 |---|---|---|---|
-| INFO_ClientSizes_Sizes_FP (KAPP) | May 2026 | 2,903,660 | Live until recently |
-| INFO_ClientSizes_Sizes_IP (InvestorPress) | May 2026 | 42,364 | Live until recently |
-| ARC_INFO_ClientSizes_Sizes_FP (KAPP archive) | February 2026 | 33,293,391 | Archiving regularly |
-| ARC_INFO_ClientSizes_Sizes_IP (IP archive) | February 2026 | 690,058 | Archiving regularly |
+| INFO_ClientSizes_Sizes_FP (KAPP) | May 2026 | 2,903,660 | Stale since jobs disabled |
+| INFO_ClientSizes_Sizes_IP (InvestorPress) | May 2026 | 42,364 | Stale since jobs disabled |
+| ARC_INFO_ClientSizes_Sizes_FP (KAPP archive) | February 2026 | 33,293,391 | Archiving stopped |
+| ARC_INFO_ClientSizes_Sizes_IP (IP archive) | February 2026 | 690,058 | Archiving stopped |
 | INFO_AWS_DE_Entity_Cost (AWS costs) | November 2024 | 4,382 | **STALE — 18 months out of date** |
 
-**Why the jobs show as disabled but data was still current until May 2026:**
-All DBA_VCC_MEMSQL jobs are marked disabled (enabled = 0) but their last run history shows they were running until May 2026:
+**Why the jobs are disabled:**
+All DBA_VCC_MEMSQL jobs were disabled in or around May 2026. Last run history:
 
 | Job | Last Run | Last Outcome |
 |---|---|---|
@@ -160,19 +201,17 @@ All DBA_VCC_MEMSQL jobs are marked disabled (enabled = 0) but their last run his
 | DBA_VCC_MEMSQL_AUDIT_BACKUP_INFO_DETAILED | 8 May 2026 | Succeeded |
 | DBA_VCC_MEMSQL_WEEKLY_CHECKS | 3 May 2026 | Succeeded |
 
-This means someone **disabled these jobs in or around May 2026**. The jobs were running fine until then. The daily checks job failed on its last run before being disabled — that failure may be the reason they were turned off.
+The daily checks job failed on its last run before being disabled — that failure is likely the reason they were turned off. Do not re-enable without understanding why it failed.
 
-**The impact of disabling these jobs:**
-The Grafana month-end dashboards for KAPP, InvestorPress, Encore, DXM, and WPv2 all depend on this data. Since the jobs were disabled in May 2026, anyone opening these dashboards for June 2026 month-end reporting will see **no data or incomplete data** for the current month.
+**Impact — confirmed broken dashboards:**
+14 dashboards referencing DBA_VCC_MEMSQL and 6 dashboards calling REP_MONTHEND procedures are all showing stale data since May 2026. Anyone using these for June 2026 month-end reporting is working with incomplete data. The AWS cost figures have been wrong since November 2024 — 18 months.
 
-The AWS cost portion of the reports has been stale since **November 2024** — meaning the cost figures shown in the month-end reports have been wrong for 18 months. This may have gone unnoticed.
-
-**Action required Monday — urgent:**
-1. Find out who disabled the DBA_VCC_MEMSQL jobs in May 2026 and why — ask yogeshwar.phull or tashvir.babulal
-2. Find out if anyone noticed the month-end Grafana dashboards stopped showing current data
-3. Find out if the daily checks job failure on 8 May 2026 was investigated — that failure likely caused the jobs to be disabled
-4. Confirm whether the AWS cost data (stale since Nov 2024) was ever flagged as incorrect by anyone using the reports
-5. Do not re-enable these jobs without understanding why the daily checks failed first
+**Action required — escalate to yogeshwar.phull / tashvir.babulal:**
+1. Who disabled the DBA_VCC_MEMSQL jobs in May 2026 and why?
+2. Has anyone noticed the month-end dashboards stopped showing current data?
+3. Was the daily checks failure on 8 May 2026 ever investigated?
+4. Has the stale AWS cost data (since Nov 2024) been flagged by anyone using the reports?
+5. Do not re-enable these jobs without understanding the root cause of the May failure.
 
 ---
 
@@ -180,6 +219,10 @@ The AWS cost portion of the reports has been stale since **November 2024** — m
 |---|---|---|---|
 | KAPP API query logs (DBA_VCC_AWS) | KAPP engineering / platform team | High | 563M rows actively collected every 15 min — Grafana KAPP dashboards confirmed reading this |
 | Grafana dashboards (90 total) | tashvir.babulal, yogeshwar.phull, rayhaan.suleyman | Confirmed | 3 active admins as of June 2026 — actively using dashboards updated Oct 2025 |
+| DBA_VCC_COST — Database Engineering Costs dashboard | DB engineering team | Confirmed | Dashboard JSON confirmed referencing DBA_VCC_COST — last updated Oct 2024 |
+| DBA_VCC_COST — Database Engineering Sprint Reporting | Engineering management | Confirmed | Dashboard JSON confirmed referencing DBA_VCC_COST — last updated Mar 2024 |
+| DBA_VCC_COST — KAPP Client Utilisation and Growth Report | Unknown — likely client-facing | High risk | Dashboard JSON confirmed referencing DBA_VCC_COST — name suggests client use, needs confirmation |
+| DBA_VCC_COST — AWS Cost Report Monthly | Unknown | Medium | Dashboard JSON confirmed referencing DBA_VCC_COST — AWS cost data stale since Sept 2024 |
 | Encore IIS logs / BNY IIS logs (DBA_VCC) | Encore team / BNY integration team | Medium | Hourly collection — BNY named explicitly in job step |
 | MySQL / DXM client sizes (DBA_VCC_MYSQL) | DXM platform team | Medium | Active daily collection of DXM and WPv2 client data |
 | Jira sprint data (DBA_VCC_ATLASSIAN) | Engineering management / delivery team | Medium | Month-end Jira sprint pull — likely used for sprint reporting |
@@ -250,12 +293,12 @@ The AWS cost portion of the reports has been stale since **November 2024** — m
 
 ## Open Items for Consumer Identification
 
-| # | Item | Who to Ask |
-|---|---|---|
-| 1 | Who owns and reads the Grafana dashboards on this server? | Engineering leads / ops team |
-| 2 | Who receives the Slack alerts from SSISStatusCheck? | DBA team / ops team |
-| 3 | Is DBA_VCC_COST data used for client billing? | Finance / platform management |
-| 4 | Who is the BNY contact for IIS log collection? | Account management / BNY integration team |
-| 5 | What IAM role/key does the Python AWS API caller use? | DevOps / cloud team |
-| 6 | What S3 bucket do backups go to? | DevOps / cloud team |
-| 7 | Are any dashboards or reports client-facing? | Platform / account management |
+| # | Item | Status | Who to Ask |
+|---|---|---|---|
+| 1 | Who owns and reads the Grafana dashboards on this server? | Partial — 3 active admins confirmed, wider consumers unknown | Engineering leads / ops team |
+| 2 | Who receives the Slack alerts from SSISStatusCheck? | Open | DBA team / ops team |
+| 3 | Is DBA_VCC_COST data used for client billing? | Open — 4 Grafana dashboards confirmed reading from it, KAPP Client Utilisation dashboard is high risk | tashvir.babulal / rayhaan.suleyman |
+| 4 | Who is the BNY contact for IIS log collection? | Open | Account management / BNY integration team |
+| 5 | What IAM role/key does the Python AWS API caller use? | Open | DevOps / cloud team |
+| 6 | What S3 bucket do backups go to? | Open | DevOps / cloud team |
+| 7 | Are any dashboards or reports client-facing? | Open — KAPP Client Utilisation and Growth Report is the prime candidate | tashvir.babulal / rayhaan.suleyman |

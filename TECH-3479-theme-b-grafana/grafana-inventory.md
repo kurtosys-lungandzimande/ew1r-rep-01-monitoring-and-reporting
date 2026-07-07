@@ -40,31 +40,36 @@
 
 ## Datasources
 
-| Name | Type | Host/Target | User | Notes |
-|---|---|---|---|---|
-| DBA_VCC | mssql | localhost | grafana | Reads from local SQL Server DBA_VCC database (x2 entries) |
-| KAPP Dev | mysql | 10.61.11.70:3306 | root | KAPP Dev MySQL |
-| KAPP Rel | mysql | 10.77.3.236 | root | KAPP Release MySQL |
-| KAPP UK Prod | mysql | 10.121.29.82 | root | KAPP UK Production MySQL |
-| KAPP EU Prod | mysql | 10.125.6.134 | root | KAPP EU Production MySQL |
-| KAPP US Prod | mysql | 10.128.30.6 | root | KAPP US Production MySQL |
-| KAPP Monitoring | mysql | 10.120.8.208 | root | KAPP monitoring database |
-| monitoring | mysql | 10.120.8.208 | root | Duplicate of KAPP Monitoring |
-| MySQL | mysql | 10.77.3.236:3306 | root | Generic MySQL — likely Release |
-| SingleStore-Dev | mysql | 10.61.0.95 | FundPressDataReader | SingleStore Dev cluster |
-| SingleStore-Release | mysql | 10.77.6.161 | FundPressDataReader | SingleStore Release cluster |
-| SingleStore-Production-UK | mysql | 10.121.22.219 | FundPressDataReader | SingleStore UK Prod cluster |
-| SingleStore-Production-EU | mysql | 10.125.12.126 | FundPressDataReader | SingleStore EU Prod cluster |
-| SingleStore-Production-US | mysql | 10.128.24.122 | FundPressDataReader | SingleStore US Prod cluster |
-| Zabbix Prod Old | mysql | 10.120.8.120 | donovan.vangraan | Old Zabbix prod MySQL |
-| zabbix-server-data.shprd.kurtosys-internal | mysql | 10.120.8.51 | donovan.vangraan | Current Zabbix prod MySQL |
-| zabbix-server-data.shnonprd.kurtosys-internal | mysql | 10.72.8.186 | donovan.vangraan | Zabbix non-prod MySQL |
-| Zabbix Nonprod old | mysql | 10.72.8.191 | donovan.vangraan | Old Zabbix non-prod MySQL |
-| JSON API | marcusolsson-json-datasource | https://10.125.9.192:8443/nifi-api/flow/process-groups/root/ | — | NiFi API — EU Prod |
-| CloudWatch | cloudwatch | — | — | AWS CloudWatch |
-| InfluxDB | influxdb | — | — | InfluxDB — URL not stored in db |
+> Confirmed from grafana.db via query 12.6 (2026-07-07). UIDs are what dashboard JSON references internally.
 
-> Critical: Grafana connects directly to production MySQL instances (KAPP UK/EU/US Prod, SingleStore Prod) using root credentials. These connections will break if this server is decommissioned or network access is removed.
+| UID | Name | Type | Host/IP | Database | Notes |
+|---|---|---|---|---|---|
+| a082f27e | DBA_VCC | mssql | localhost | DBA_VCC | Local SQL Server — primary datasource for VCC dashboards |
+| e8597015 | DBA_VCC | mssql | localhost | DBA_VCC | Duplicate entry — same target, two UIDs. Dashboards may reference either |
+| da173cae | KAPP Dev | mysql | 10.61.11.70:3306 | metrics | KAPP Dev MySQL |
+| d1679f57 | KAPP Rel | mysql | 10.77.3.236 | metrics | KAPP Release MySQL |
+| cd097e22 | KAPP UK Prod | mysql | 10.121.29.82 | metrics | KAPP UK Production MySQL |
+| e792d174 | KAPP EU Prod | mysql | 10.125.6.134 | metrics | KAPP EU Production MySQL |
+| db3d6c01 | KAPP US Prod | mysql | 10.128.30.6 | metrics | KAPP US Production MySQL |
+| f4830a0f | KAPP Monitoring | mysql | 10.120.8.208 | metrics | KAPP monitoring — tlsSkipVerify=true |
+| dce83066 | monitoring | mysql | 10.120.8.208 | metrics | Duplicate of KAPP Monitoring — same IP, same database |
+| f2ca52be | MySQL | mysql | 10.77.3.236:3306 | metrics | Generic MySQL — same IP as KAPP Rel |
+| d8b0939b | SingleStore-Dev | mysql | 10.61.0.95 | UDM__ | SingleStore Dev — queries UDM__ schema |
+| f1d911af | SingleStore-Release | mysql | 10.77.6.161 | UDM__ | SingleStore Release — queries UDM__ schema |
+| a6046586 | SingleStore-Production-UK | mysql | 10.121.22.219 | UDM__ | SingleStore UK Prod — queries UDM__ schema |
+| df309b44 | SingleStore-Production-EU | mysql | 10.125.12.126 | UDM__ | SingleStore EU Prod — queries UDM__ schema |
+| bfe8f780 | SingleStore-Production-US | mysql | 10.128.24.122 | UDM__ | SingleStore US Prod — queries UDM__ schema |
+| aafbf2f7 | Zabbix Nonprod old | mysql | 10.72.8.191 | zabbix | Old non-prod Zabbix MySQL |
+| b10bf74c | zabbix-server-data.shnonprd.kurtosys-internal | mysql | 10.72.8.186 | zabbix | Current non-prod Zabbix MySQL |
+| dbafc322 | Zabbix Prod Old | mysql | 10.120.8.120 | zabbix | Old prod Zabbix MySQL |
+| d68a35f0 | zabbix-server-data.shprd.kurtosys-internal | mysql | 10.120.8.51 | zabbix | Current prod Zabbix MySQL |
+| b7838f71 | JSON API | marcusolsson-json-datasource | 10.125.9.192:8443 | — | NiFi API — tlsSkipVerify=true |
+| bae6c95e | CloudWatch | cloudwatch | — | — | AWS CloudWatch — no URL stored |
+| aa82f021 | InfluxDB | influxdb | — | — | InfluxDB — no URL stored, needs confirmation |
+
+> Critical: Two DBA_VCC datasource entries exist with different UIDs (a082f27e and e8597015) pointing to the same localhost target. Dashboards may be split across both UIDs — this needs to be checked before any migration.
+> Critical: Grafana connects directly to production MySQL instances (KAPP UK/EU/US Prod, SingleStore Prod UK/EU/US) using the UDM__ schema. These connections will break if this server is decommissioned or network access is removed.
+> Note: All four Zabbix datasources use donovan.vangraan credentials — this account is no longer active. Credentials need rotation before or during decommission.
 
 ---
 
