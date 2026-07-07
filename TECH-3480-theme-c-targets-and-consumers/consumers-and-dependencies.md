@@ -250,8 +250,8 @@ The daily checks job failed on its last run before being disabled — that failu
 | Type | Location | Notes |
 |---|---|---|
 | Local backup staging | D:\SQL\Backup\ | Intermediate location before S3 copy |
-| S3 backup destination | Unknown — ARN referenced in job | Needs S3 bucket name confirmed |
-| EW1P-OCT RDS backup | S3 via ARN | Separate job backing up RDS instance directly to S3 |
+| S3 backup destination | Unknown — ARN referenced in job | **30-day retention policy confirmed** — backups are deleted after 30 days via S3 lifecycle rule |
+| EW1P-OCT RDS backup | S3 via ARN | Separate job backing up RDS instance directly to S3 — same 30-day retention applies |
 
 ### DNS
 | Name | Resolves To | Notes |
@@ -300,5 +300,5 @@ The daily checks job failed on its last run before being disabled — that failu
 | 3 | Is DBA_VCC_COST data used for client billing? | Open — 4 Grafana dashboards confirmed reading from it, KAPP Client Utilisation dashboard is high risk | tashvir.babulal / rayhaan.suleyman |
 | 4 | Who is the BNY contact for IIS log collection? | Open | Account management / BNY integration team |
 | 5 | What IAM role/key does the Python AWS API caller use? | Open | DevOps / cloud team |
-| 6 | What S3 bucket do backups go to? | Open | DevOps / cloud team |
+| 6 | What S3 bucket do backups go to? | **Partial** — 30-day retention confirmed. Bucket name/ARN still TBC | DevOps / cloud team |
 | 7 | Are any dashboards or reports client-facing? | Open — KAPP Client Utilisation and Growth Report is the prime candidate | tashvir.babulal / rayhaan.suleyman |
