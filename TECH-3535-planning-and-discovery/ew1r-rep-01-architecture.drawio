@@ -20,11 +20,11 @@
         </mxCell>
 
         <!-- ===== ROW 2: SQL SERVER + GRAFANA ===== -->
-        <mxCell id="20" value="SQL Server 2019 Developer Edition&#xa;60 Agent Jobs | 8 Databases | 97 Linked Servers&#xa;Service Account: SHNONPRD\sqlsrv" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+        <mxCell id="20" value="SQL Server 2019 Developer Edition&#xa;63 Agent Jobs | 8 Databases | 109 Linked Servers&#xa;Service Account: SHNONPRD\sqlsrv" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;fontStyle=1;" vertex="1" parent="1">
           <mxGeometry x="300" y="240" width="340" height="70" as="geometry" />
         </mxCell>
 
-        <mxCell id="21" value="Grafana 9.5.2 — Port 443 HTTPS&#xa;90 Dashboards | 21 Datasources | 3 Alert Rules&#xa;URL: https://ew1r-rep-01" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+        <mxCell id="21" value="Grafana 9.5.2 — Port 443 HTTPS&#xa;74 Dashboards | 21 Datasources | 3 Alert Rules&#xa;URL: https://ew1r-rep-01" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;fontStyle=1;" vertex="1" parent="1">
           <mxGeometry x="960" y="240" width="340" height="70" as="geometry" />
         </mxCell>
 
@@ -94,7 +94,7 @@
           <mxGeometry x="205" y="605" width="160" height="75" as="geometry" />
         </mxCell>
 
-        <mxCell id="ext3" value="SingleStore Clusters&#xa;EC1/EW1/EW2/UE1&#xa;97 linked servers&#xa;ALL JOBS DISABLED" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+        <mxCell id="ext3" value="SingleStore Clusters&#xa;EC1/EW1/EW2/UE1&#xa;109 linked servers (incl. stale)&#xa;ALL JOBS DISABLED" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
           <mxGeometry x="380" y="605" width="160" height="75" as="geometry" />
         </mxCell>
 
@@ -187,7 +187,7 @@
           <mxGeometry x="240" y="980" width="190" height="75" as="geometry" />
         </mxCell>
 
-        <mxCell id="rrm3" value="REPLACE → Grafana Cloud&#xa;90 dashboards&#xa;3 active admins&#xa;Re-route Slack alerts" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+        <mxCell id="rrm3" value="REPLACE → Grafana Cloud&#xa;74 dashboards confirmed&#xa;3 active admins&#xa;Re-route Slack alerts" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=1;" vertex="1" parent="1">
           <mxGeometry x="450" y="980" width="190" height="75" as="geometry" />
         </mxCell>
 
