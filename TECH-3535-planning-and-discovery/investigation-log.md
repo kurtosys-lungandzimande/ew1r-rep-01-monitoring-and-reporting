@@ -113,6 +113,156 @@ Risks identified at discovery level:
 
 ---
 
+## Critical Findings — Executive Summary
+
+This section documents the most significant findings from the discovery investigation. Each finding is supported by query evidence and has a direct impact on the decommission decision. These findings must be resolved or acknowledged before any decommission work begins.
+
+---
+
+### Finding 1 — 14 Grafana dashboards are actively broken and nobody has noticed
+
+**What was found:**
+All SQL Agent jobs feeding the `DBA_VCC_MEMSQL` database were disabled in May 2026. A Grafana dashboard JSON scan (query 12.5, run 2026-07-07) confirmed that 14 dashboards are directly reading from this database. Since the jobs were disabled, every one of these dashboards has been displaying data that is at minimum 2 months out of date. No alert was triggered. No one raised an incident.
+
+**Why this matters for decommission:**
+If 14 dashboards are broken and no one has noticed, it raises a serious question about how actively this server is being monitored and relied upon. Before decommissioning, we need to confirm whether these dashboards are still expected to be live, who depends on them, and whether the May 2026 job failure was a deliberate decision or an unresolved incident.
+
+**Affected dashboards — confirmed by query 12.5:**
+
+| Dashboard | Last Updated |
+|---|---|
+| KAPP Dataset Query and Source Execution | 2024-11-20 |
+| KAPP Dataset Query Execution | 2024-11-07 |
+| KAPP Client Application Auth Config | 2024-10-29 |
+| KAPP Dataset Lambdas Time Outs | 2024-10-23 |
+| KAPP Client Config | 2024-09-02 |
+| KAPP Workflow Times History | 2024-06-12 |
+| KAPP Orphaned and Duplicated Records Report | 2024-03-26 |
+| KAPP API Error Reporting | 2024-03-11 |
+| Query Performance Dashboard | 2024-03-07 |
+| KAPP Workflow History | 2024-03-07 |
+| KAPP Client Growth | 2024-02-28 |
+| Nifi API Reporting Copy | 2023-09-21 |
+| InvestorPress Month End Reporting | 2023-08-10 |
+| KAPP Month End Reporting | 2023-08-10 |
+
+**Query proof:**
+```sql
+-- Run on EW1R-REP-01 via xp_cmdshell + Python (query 12.5)
+-- Scans all Grafana dashboard JSON for references to DBA_VCC_MEMSQL
+SELECT title, updated FROM dashboard
+WHERE is_folder = 0 AND data LIKE '%DBA_VCC_MEMSQL%'
+ORDER BY updated DESC;
+```
+
+**Action required:** Confirm with yogeshwar.phull and tashvir.babulal — were these jobs intentionally disabled? Are these dashboards still expected to show live data?
+
+---
+
+### Finding 2 — 6 month-end reporting dashboards are calling stored procedures with no fresh data
+
+**What was found:**
+A Grafana dashboard JSON scan (query 12.4, run 2026-07-07) confirmed that 6 dashboards call `REP_MONTHEND_*` stored procedures directly. These procedures read from `DBA_VCC_MEMSQL` tables which have had no new data since May 2026. Anyone who ran June 2026 month-end reporting from these dashboards received incomplete or empty results.
+
+**Why this matters for decommission:**
+Month-end reporting dashboards are typically used by management or finance to review performance and costs at the end of each month. If these reports were run for June 2026 and returned no data, that is a business impact that needs to be acknowledged and escalated — not quietly noted in a discovery ticket.
+
+**Affected dashboards — confirmed by query 12.4:**
+
+| Dashboard | Last Updated |
+|---|---|
+| WPv2 Month End Reporting | 2024-06-20 |
+| Encore Month End Reporting | 2023-08-10 |
+| DXM Month End Reporting | 2023-08-10 |
+| InvestorPress Month End Reporting | 2023-08-10 |
+| KAPP Month End Reporting | 2023-08-10 |
+| Other Services Month End Reporting (Draft) | 2023-07-21 |
+
+**Query proof:**
+```sql
+-- Run on EW1R-REP-01 via xp_cmdshell + Python (query 12.4)
+-- Scans all Grafana dashboard JSON for references to REP_MONTHEND stored procedures
+SELECT title, updated FROM dashboard
+WHERE is_folder = 0 AND data LIKE '%REP_MONTHEND%'
+ORDER BY updated DESC;
+```
+
+**Action required:** Confirm who runs these reports at month end and whether June 2026 reporting was impacted. Escalate to management if confirmed.
+
+---
+
+### Finding 3 — DBA_VCC_COST is an active Grafana datasource and may be client-facing
+
+**What was found:**
+A Grafana dashboard JSON scan (query 12.3, run 2026-07-07) confirmed that 4 dashboards reference `DBA_VCC_COST` directly. This database is on FULL recovery model — the only database on this server deliberately set that way — meaning someone made a conscious decision that this data cannot be lost. The collection job is still running and was last successful on 29 June 2026. One of the confirmed dashboards is named `KAPP Client Utilisation and Growth Report` — a name that strongly suggests client-facing use.
+
+**Why this matters for decommission:**
+If any of these dashboards are used for client billing, SLA reporting, or client-facing presentations, decommissioning this server without a confirmed replacement would directly impact clients. This is the single highest-risk finding in this investigation.
+
+**Affected dashboards — confirmed by query 12.3:**
+
+| Dashboard | Last Updated | Risk |
+|---|---|---|
+| Database Engineering Costs | 2024-10-15 | Internal — DB engineering |
+| Database Engineering Sprint Reporting | 2024-03-08 | Internal — engineering management |
+| KAPP Client Utilisation and Growth Report | 2024-02-22 | **High — name suggests client-facing** |
+| AWS Cost Report Monthly | 2023-10-06 | Internal — note AWS data stale since Sept 2024 |
+
+**Query proof:**
+```sql
+-- Run on EW1R-REP-01 via xp_cmdshell + Python (query 12.3)
+-- Scans all Grafana dashboard JSON for references to DBA_VCC_COST
+SELECT title, updated FROM dashboard
+WHERE is_folder = 0 AND data LIKE '%DBA_VCC_COST%'
+ORDER BY updated DESC;
+```
+
+**Action required:** Confirm with tashvir.babulal and rayhaan.suleyman whether `KAPP Client Utilisation and Growth Report` is shared with clients. This must be answered before any decommission date is set.
+
+---
+
+### Finding 4 — Jobs failing silently against decommissioned servers since 25 June 2026
+
+**What was found:**
+All 4 WPv2 linked servers (`ew2p-wpv2`, `ew2r-wpv2`, `ue1p-wpv2`, `ue1r-wpv2`) point to RDS instances that no longer exist. DNS does not resolve for any of them. Two SQL Agent jobs — `DBA_VCC_MYSQL_DAILY_CHECKS` and `DBA_VCC_MYSQL_AUDIT_DXM_CLIENT_DETAILED` — have been failing every day since 25 June 2026. No alert was configured. No one was notified.
+
+**Why this matters for decommission:**
+This is an existing operational failure that is separate from the decommission work but must be resolved as part of it. The stale linked servers and their referencing jobs need to be cleaned up. Additionally, a full reachability audit across all 109 linked servers is needed — WPv2 is confirmed but further stale targets have also been identified beyond WPv2.
+
+**Evidence — confirmed by query 4.2 (job failure history):**
+```
+DBA_VCC_MYSQL_DAILY_CHECKS         SP_AUDIT_WPv2_CLIENTS_DETAILED
+  Error 7303 — Unknown MySQL server host 'ew2p-wpv2'
+  Error 7303 — Unknown MySQL server host 'ew2r-wpv2'
+  Failing daily since 25 June 2026
+
+DBA_VCC_MYSQL_AUDIT_DXM_CLIENT_DETAILED   SP_AUDIT_WPv2_CLIENTS_DETAILED
+  Same errors — same linked servers
+  Failing daily since 25 June 2026
+```
+
+**Additional stale targets confirmed beyond WPv2:**
+- `ew1d-aggr-05`, `ew1d-aggr-15` — Not Online
+- `ew1r-aggr-03.gen-rel` — ODBC misconfigured
+- `ew1r-aggr-05.gen-rel`, `ew2p-aggr-01.gen-prd`, `ew2p-aggr-02.gen-prd` — Can't connect
+- `EW2P-MARKETING-DB` — Not Online, owner unknown
+
+**Action required:** Assign an owner to clean up WPv2 linked servers and referencing job steps. Run a full reachability audit across all 109 linked servers before decommission.
+
+---
+
+### Finding 5 — AWS cost data has been silently wrong for 18 months
+
+**What was found:**
+The AWS cost ETL stored procedure `SP_AUDIT_COST_ETL_CLEANUP` has a data type conversion bug — it attempts `CONVERT(decimal(20,10), Cost)` but the `Cost` column is `nvarchar`. This causes the entire MERGE to roll back on every run. The CATCH block swallows the error so the job reports `Succeeded`. The staging table `MON_AWS_Entity_Cost` has 2.4 million rows that have never been processed. The target table `INFO_AWS_Entity_Cost` has been stale since **22 September 2024**. The `INFO_AWS_DE_Entity_Cost` table in `DBA_VCC_COST` has been stale since **5 December 2024**.
+
+**Why this matters for decommission:**
+The `AWS Cost Report Monthly` Grafana dashboard reads from `DBA_VCC_COST` which includes this stale AWS cost data. Anyone using that dashboard for cost reporting has been looking at figures that are 18 months out of date without knowing it. This needs to be disclosed before decommission planning proceeds.
+
+**Action required:** Raise as a separate incident ticket. Disclose to whoever uses the AWS Cost Report Monthly dashboard that the data has been stale since September 2024.
+
+---
+
 ## Links
 
 | Resource | Location |
