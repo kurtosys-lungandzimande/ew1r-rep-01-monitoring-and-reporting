@@ -159,38 +159,46 @@ ORDER BY updated DESC;
 
 ---
 
-### Finding 2 — 6 month-end reporting dashboards are calling stored procedures with no fresh data
+### Finding 2 — 6 month-end reporting dashboards have no dedicated jobs and depend entirely on the broken MEMSQL feed
 
 **What was found:**
-A Grafana dashboard JSON scan (query 12.4, run 2026-07-07) confirmed that 6 dashboards call `REP_MONTHEND_*` stored procedures directly. These procedures read from `DBA_VCC_MEMSQL` tables which have had no new data since May 2026. Anyone who ran June 2026 month-end reporting from these dashboards received incomplete or empty results.
+A Grafana dashboard JSON scan (query 12.4, run 2026-07-07) confirmed that 6 dashboards call `REP_MONTHEND_*` stored procedures directly. A SQL Agent job history query (run 2026-07-07) returned only one month-end job: `DBA_VCC_JIRA_MONTHEND_CHECKS`, which ran successfully on 2026-07-01. No dedicated jobs exist for WPv2, Encore, DXM, InvestorPress, or KAPP month-end dashboards.
+
+This means those 5 dashboards have no independent data pipeline. They call stored procedures that read directly from `DBA_VCC_MEMSQL` tables — the same tables that have had no new data since May 2026 (Finding 1). There is no separate job to fix or re-enable. The month-end dashboards are broken as a direct consequence of the MEMSQL feed being disabled.
 
 **Why this matters for decommission:**
-Month-end reporting dashboards are typically used by management or finance to review performance and costs at the end of each month. If these reports were run for June 2026 and returned no data, that is a business impact that needs to be acknowledged and escalated — not quietly noted in a discovery ticket.
+Anyone who opened these dashboards for June 2026 month-end reporting received stale or incomplete data with no warning. There is no alert, no error message in Grafana, and no failed job to indicate something is wrong — the dashboards simply show old data silently. This needs to be disclosed to whoever uses these reports.
 
 **Affected dashboards — confirmed by query 12.4:**
 
-| Dashboard | Last Updated |
-|---|---|
-| WPv2 Month End Reporting | 2024-06-20 |
-| Encore Month End Reporting | 2023-08-10 |
-| DXM Month End Reporting | 2023-08-10 |
-| InvestorPress Month End Reporting | 2023-08-10 |
-| KAPP Month End Reporting | 2023-08-10 |
-| Other Services Month End Reporting (Draft) | 2023-07-21 |
+| Dashboard | Last Updated | Dedicated job? |
+|---|---|---|
+| WPv2 Month End Reporting | 2024-06-20 | None — reads DBA_VCC_MEMSQL directly |
+| Encore Month End Reporting | 2023-08-10 | None — reads DBA_VCC_MEMSQL directly |
+| DXM Month End Reporting | 2023-08-10 | None — reads DBA_VCC_MEMSQL directly |
+| InvestorPress Month End Reporting | 2023-08-10 | None — reads DBA_VCC_MEMSQL directly |
+| KAPP Month End Reporting | 2023-08-10 | None — reads DBA_VCC_MEMSQL directly |
+| Other Services Month End Reporting (Draft) | 2023-07-21 | None — reads DBA_VCC_MEMSQL directly |
 
 **Query proof:**
 ```sql
--- Run on EW1R-REP-01 via xp_cmdshell + Python (query 12.4)
--- Scans all Grafana dashboard JSON for references to REP_MONTHEND stored procedures
+-- Grafana dashboard JSON scan (query 12.4) — run 2026-07-07
 SELECT title, updated FROM dashboard
 WHERE is_folder = 0 AND data LIKE '%REP_MONTHEND%'
 ORDER BY updated DESC;
+
+-- SQL Agent job history — run 2026-07-07
+SELECT j.name, j.enabled,
+    msdb.dbo.agent_datetime(h.run_date, h.run_time) AS last_run,
+    h.run_status, h.message
+FROM msdb.dbo.sysjobs j
+LEFT JOIN msdb.dbo.sysjobhistory h ON j.job_id = h.job_id AND h.step_id = 0
+WHERE j.name LIKE '%MONTHEND%' OR j.name LIKE '%month_end%'
+ORDER BY h.run_date DESC;
+-- Result: only DBA_VCC_JIRA_MONTHEND_CHECKS returned — no jobs for WPv2/Encore/DXM/InvestorPress/KAPP
 ```
 
-**Additional context from job history (run 2026-07-07):**
-The Grafana dashboard dates (2023/2024) reflect when the dashboards were last *edited*, not when the underlying jobs last ran. `DBA_VCC_JIRA_MONTHEND_CHECKS` ran successfully on 2026-07-01 at 08:00 — confirming the Jira month-end job completed for June 2026 close. However, dashboards referencing `DBA_VCC_MEMSQL` (Finding 1) would still have shown stale data regardless, as the MEMSQL feed jobs were disabled in May 2026.
-
-**Action required:** Confirm who runs these reports at month end and whether June 2026 reporting was impacted for the MEMSQL-dependent dashboards. Escalate to management if confirmed.
+**Action required:** Confirm who uses these dashboards for month-end reporting and disclose that data has been stale since May 2026. Resolving this requires re-enabling the MEMSQL feed jobs (Finding 1) — there is no separate fix for the month-end dashboards alone.
 
 ---
 
@@ -244,6 +252,7 @@ Failing step: SP_AUDIT_WPv2_CLIENTS_DETAILED
 First confirmed failure in history: 2026-06-12
 Last confirmed failure: 2026-07-07
 Total confirmed consecutive daily failures: 26 days
+SP last modified: 2022-11-01 (confirmed via query 13.6 — never updated after WPv2 decommission)
 ```
 
 For contrast, `DBA - AUDIT - KAPP_Schema_details_Capture` is running and succeeding every day at 11:00 — confirming the SQL Agent service is healthy and the WPv2 failure is isolated to the dead linked servers, not a broader infrastructure issue.

@@ -247,3 +247,28 @@ Core monitoring framework — tracks all monitored SQL Server instances.
 - [ ] Confirm if EW1P-OCT RDS backup job is still needed
 - [ ] Identify owner of DBA_VCC_COST data — who consumes cost reports?
 - [ ] Confirm if MemSQL linked servers are still reachable or all stale
+
+---
+
+## Stored Procedure Inventory (query 13.6 — confirmed 2026-07-07)
+
+Total across all user databases: ~600+ procedures. Counts per database:
+
+| Database | SP Count | Notes |
+|---|---|---|
+| DBA_VCC | ~160 | Core monitoring/reporting SPs. Prefixes: APP_, DBA_, MAINT_, REP_, SP_AUDIT_, SP_MON_, SP_REP_, SP_VDBA_, SP_VCC_. Most created 2017-11-30 (bulk deploy). Notable recent: `SP_AUDIT_ENCORE_DOCUMENT_PRODUCTION_DETAILED` (2023-08), `SP_AUDIT_INDEX_FRAG_DETAILED` (2023-06), `SP_AUDIT_IIS_ETL_CLEANUP` (2023-07). |
+| DBA_VCC_MEMSQL | ~200 | Largest SP set. Mirrors DBA_VCC base set plus FinancialPortal (FP_), InvestorPress (IP_), KAPP-specific SPs. Notable: `SP_AUDIT_FP_Client_DETAILED` (modified 2024-09), `SP_AUDIT_KAPP_WorkFlow_Run_History` (2024-03), `REP_CLIENT_APP_AUTH_CONFIG_CHANGES_REPORT` (2024-10), `USP_GLOBAL_STATUS_INSERT` (modified 2024-08), `DBA_KAPP_DELETE_CREATOR` (modified 2024-11). |
+| DBA_VCC_MYSQL | ~200 | Mirrors MEMSQL base set plus DXM/WPv2-specific SPs. Notable: `SP_AUDIT_WPv2_CLIENTS_DETAILED` (the failing job's target — last modified 2022-11-01), `SP_AUDIT_DXM_CLIENT_SIZES_DETAILED` (2023-05), `SP_AUDIT_DATABASE_TABLE_SIZES_DETAILED` (2023-05), TAC monitoring SPs (`SP_MON_TAC_*`). |
+| DBA_VCC_AWS | 15 | ETL cleanup SPs only. All `SP_AUDIT_*_ETL_CLEANUP`. Most recent: `SP_AUDIT_AWS_PY_CALL_DETAILED` (modified 2024-11), `SP_AUDIT_KAPP_QUERY_DATASETS_ETL_CLEANUP` (modified 2024-10). |
+| DBA_VCC_COST | 28 | Two groups: `REP_MONTHEND_*` reporting SPs and `SP_INFO_KAPP_CLIENT_*_COUNTS` collection SPs. All created 2022–2023, last modified 2023. |
+| DBA_VCC_ATLASSIAN | 0 | No stored procedures. Confirmed — reference data store only. |
+| KURTOSYS_BASELINE | 8 | Baseline collection SPs: MSSQL, MemSQL, MySQL connections and table sizes. Plus `sp_WhoIsActive` (2024-02). |
+| Utilities | ~60 | DBA utility scripts. Ola Hallengren maintenance SPs (`DatabaseBackup`, `IndexOptimize`, etc.), Zabbix integration (`USP_ZAB_*`), MemSQL history collection (`USP_MemSQL_*`), KAPP schema comparison (`USP_KAPP_Schema_details_Capture` modified 2024-08, `USP_ZAB_KAPP_schema_compare` modified 2024-05). |
+
+### Key observations
+
+- `SP_AUDIT_WPv2_CLIENTS_DETAILED` in DBA_VCC_MYSQL — last modified **2022-11-01**. This is the SP called by the failing job `DBA_VCC_MYSQL_AUDIT_DXM_CLIENT_DETAILED`. The SP has not been touched since WPv2 was decommissioned. Likely broken due to missing source tables.
+- DBA_VCC and DBA_VCC_MEMSQL/MYSQL share a large common base of SPs (APP_, SP_MON_, SP_REP_, SP_VDBA_, SP_VCC_) — these were bulk-deployed in 2017 and are largely unchanged. Not all are actively called.
+- DBA_VCC_MEMSQL has the most actively maintained SPs — FP, IP, KAPP-specific procedures modified as recently as 2024-11.
+- Utilities database holds the KAPP schema comparison logic (`USP_KAPP_Schema_details_Capture`, `USP_ZAB_KAPP_schema_compare`) — relevant to TECH-3481.
+- DBA_VCC_AWS SPs are exclusively ETL cleanup routines — no reporting SPs.
