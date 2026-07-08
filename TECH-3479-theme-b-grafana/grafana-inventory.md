@@ -34,6 +34,7 @@
 | sunil.odedra | Sunil Odedra | sunil.odedra@kurtosys.com | No | 2023-07-12 — likely inactive |
 
 > 3 admins actively using Grafana as of June 2026: tashvir.babulal, yogeshwar.phull, rayhaan.suleyman.
+> 2 admins inactive: donovan.vangraan (last seen Nov 2024 — credentials still in 4 Zabbix datasources, needs rotation) and default admin account (last seen Nov 2024 — should be disabled).
 > These are the key contacts before any decommission or migration decision.
 
 ---
@@ -247,5 +248,5 @@
 - [x] ~~Who has admin access to Grafana?~~ — tashvir.babulal, yogeshwar.phull, rayhaan.suleyman, donovan.vangraan
 - [x] ~~Is Grafana version current or end-of-life?~~ — v9.5.2, LTS, not latest but supported
 - [ ] Are any dashboards client-facing or SLA-related? — Month End Reporting and KAPP Client reports are candidates — confirm with tashvir/rayhaan
-- [ ] What contact points are configured for Grafana alert rules? — Check via Grafana UI or grafana.ini
+- [x] ~~What contact points are configured for Grafana alert rules?~~ — 3 contact points confirmed: alerts-data-operations (Slack, active), alert-app-allow2fa-disabled (Slack, active), email (placeholder — not configured, will not deliver)
 - [ ] Is InfluxDB datasource still active — URL not stored in db, needs confirmation

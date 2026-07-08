@@ -1,7 +1,7 @@
 # External Targets — EW1R-REP-01
 
 ## Overview
-EW1R-REP-01 connects to 97 external systems via linked servers. These are the systems this server monitors, queries, or integrates with.
+EW1R-REP-01 connects to 109 external systems via linked servers. These are the systems this server monitors, queries, or integrates with.
 
 ---
 
