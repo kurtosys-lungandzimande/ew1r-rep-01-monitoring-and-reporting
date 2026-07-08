@@ -1,6 +1,6 @@
 # Consumers and Dependencies — EW1R-REP-01
 
-> Status: Consumers partially identified from query evidence. Stakeholder confirmation still needed for billing and client-facing use.
+> Status: DBA_VCC_COST confirmed client-facing — LU_KAPP_ClientList contains 200+ real institutional clients. Stakeholder disclosure required for billing impact.
 
 ---
 
@@ -11,7 +11,7 @@
 | Grafana dashboards (74 total) | tashvir.babulal, yogeshwar.phull, rayhaan.suleyman | Confirmed | 3 active admins as of June 2026 |
 | DBA_VCC_COST — Database Engineering Costs | DB engineering team | Confirmed | Dashboard JSON confirmed — last updated Oct 2024 |
 | DBA_VCC_COST — Database Engineering Sprint Reporting | Engineering management | Confirmed | Dashboard JSON confirmed — last updated Mar 2024 |
-| DBA_VCC_COST — KAPP Client Utilisation and Growth Report | Unknown — likely client-facing | ⚠️ High risk | Dashboard JSON confirmed — name suggests client use, needs confirmation |
+| DBA_VCC_COST — KAPP Client Utilisation and Growth Report | Client-facing — confirmed | ⚠️ Critical | LU_KAPP_ClientList contains 200+ real institutional clients across EW2, UE1, EC1 — BlackRock, BNY Mellon, Aberdeen, Wellington, T. Rowe Price, Nordea, Jupiter, M&G, AXA IM, BMO, HSBC and others. This is billing data. |
 | DBA_VCC_COST — AWS Cost Report Monthly | Unknown | Medium | Dashboard JSON confirmed — AWS data stale since Nov 2024 |
 | DBA_VCC_COST — INFO_KAPP_Client_* tables | Unknown | ⚠️ High risk | All 9 collection tables stale since 4 May 2026 — job reports Succeeded but no data written, silent failure |
 | DBA_VCC_MEMSQL — 14 dashboards | Unknown | Confirmed broken | All stale since May 2026 — jobs disabled |
@@ -99,6 +99,43 @@ This is not a CATCH block swallowing an error — there is no error to catch. Th
 All 9 SP_INFO procedures follow the same pattern. Every one of them depends on DBA_VCC_MEMSQL ping stats being fresh. When the MEMSQL jobs were disabled, the entire DBA_VCC_COST collection pipeline silently stopped with it.
 
 This means the DBA_VCC_COST data that the KAPP Client Utilisation and Growth Report dashboard is reading is also stale since 4 May 2026 — not just the MEMSQL dashboards. Both databases stopped collecting on the same day for the same root cause.
+
+Client list confirmed by query 5.2 (run 2026-07-09) — `SELECT * FROM DBA_VCC_COST.dbo.LU_KAPP_ClientList ORDER BY ClientName`:
+
+```
+200+ clients across EW2 (eu-west-2), UE1 (us-east-1), EC1 (eu-central-1)
+
+Major institutional clients confirmed:
+Aberdeen / abrdn          EW2       Aberdeen
+AXA IM                    EC1       AXA IM
+BlackRock                 UE1       BlackRock
+BlueBay                   EW2       Blue Bay
+BMO / BMO GAM / BMO NL    EW2/UE1/EC1  BMO
+BNY Mellon / BNY Dreyfus  EW2/UE1   BNY
+Boston Partners           UE1       Boston Partners
+CTI / Threadneedle        EW2       Threadneedle
+FedHermes                 EW2       Hermes
+ICMARC                    UE1       ICMARC
+Jupiter / OMGI / Merian   EW2       Jupiter
+M&G Investments           EW2       M&G Investments
+Nordea Asset Management   EW2/EC1   Nordea
+OP Cooperative            EW2/EC1   OP Cooperative
+Osmosis                   EW2       Osmosis
+PRIMECAP                  UE1       Primecap
+RWC Partners              EW2       RWC
+SALI                      EW2/UE1   Sali
+Sands Capital             UE1       Sands Capital
+Security Benefit          UE1       Security Benefit
+T. Rowe Price             EW2       T. Rowe Price
+TDAM                      UE1       TDAM
+Wellington                EW2       Wellington
+Ziegler                   EW2/UE1   Ziegler
+-- plus staging, dev, demo, and POC entries for each
+-- C&D Investments marked Terminated — still in the list
+-- Several entries marked Potential Client — not yet live
+```
+
+⚠️ This confirms DBA_VCC_COST is tracking entity counts for real production clients across three regions. This is billing data. Decommissioning this server without a confirmed replacement directly impacts client invoicing.
 
 Environments collected from:
 
@@ -303,9 +340,9 @@ All 20 of these dashboards are showing stale data. Do not re-enable jobs without
 
 | # | Item | Who to Ask |
 |---|---|---|
-| 1 | Is KAPP Client Utilisation and Growth Report client-facing? | tashvir.babulal / rayhaan.suleyman |
-| 2 | Who calls REP_MONTHEND_* procedures each month end? | tashvir.babulal / rayhaan.suleyman |
-| 3 | Is DBA_VCC_COST used for client billing? | tashvir.babulal / rayhaan.suleyman |
+| 1 | ~~Is KAPP Client Utilisation and Growth Report client-facing?~~ | **Closed** — confirmed client-facing. LU_KAPP_ClientList contains 200+ real institutional clients (BlackRock, BNY Mellon, Aberdeen, Wellington, T. Rowe Price, Nordea and others). This is billing data. |
+| 2 | ~~Is DBA_VCC_COST used for client billing?~~ | **Closed** — confirmed. See above. |
+| 3 | Who calls REP_MONTHEND_* procedures each month end? | tashvir.babulal / rayhaan.suleyman |
 | 4 | Who receives the Slack alerts from SSISStatusCheck? | DBA team / ops team |
 | 5 | What IAM role/key does the Python AWS API caller use? | DevOps / cloud team |
 | 6 | What S3 bucket do backups go to — bucket name/ARN? | DevOps / cloud team |

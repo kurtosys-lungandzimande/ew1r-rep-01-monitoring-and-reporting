@@ -10,7 +10,7 @@
 | # | Question | Priority | Assigned To | Status |
 |---|---|---|---|---|
 | 1 | What SSIS packages are being checked by `DBA - SSISStatusCheck`? Where do they run? | High | Unknown | Open |
-| 2 | Who consumes the data in `DBA_VCC_COST` — is it used for client billing or internal reporting? | High | Unknown | Open |
+| 2 | Who consumes the data in `DBA_VCC_COST` — is it used for client billing or internal reporting? | High | Unknown | **Closed** — confirmed client billing. LU_KAPP_ClientList contains 200+ real institutional clients across EW2, UE1, EC1. Entity counts tracked per client per month. This is billing data. |
 | 3 | Is the `DBA - Maintenance - SQL Backup EW1P-OCT` job still needed? Who owns that RDS instance? | High | Unknown | Open |
 | 4 | Are all 109 SingleStore linked servers still reachable or are most stale? | Medium | Unknown | Open |
 | 5 | What credentials are used for linked server connections — where are they stored in vault? | High | Unknown | Open |
@@ -25,7 +25,7 @@
 | 7 | What is the Grafana URL/DNS for this server? | High | Unknown | **Closed** — https://ew1r-rep-01 (port 443, HTTPS) |
 | 8 | Who has access to Grafana on this server? | High | Unknown | **Closed** — tashvir.babulal, yogeshwar.phull, rayhaan.suleyman (active admins), donovan.vangraan (inactive builder) |
 | 9 | Which teams use the Grafana dashboards — engineering, ops, client-facing? | High | Unknown | **Partial** — DB engineering confirmed. Client-facing TBC — ask tashvir.babulal / rayhaan.suleyman |
-| 10 | Are any dashboards client-facing or SLA-related? | Critical | tashvir.babulal / rayhaan.suleyman | Open — Month End Reporting and KAPP Client reports are strong candidates |
+| 10 | Are any dashboards client-facing or SLA-related? | Critical | tashvir.babulal / rayhaan.suleyman | **Closed** — confirmed. KAPP Client Utilisation and Growth Report reads from DBA_VCC_COST which tracks entity counts for 200+ real institutional clients (BlackRock, BNY Mellon, Aberdeen, Wellington, T. Rowe Price, Nordea and others). Data stale since 4 May 2026 — billing figures for May and June 2026 are wrong. |
 | 11 | What datasources does Grafana use — does it read from DBA_VCC_* databases directly? | High | Unknown | **Closed** — 21 datasources confirmed: DBA_VCC (localhost MSSQL), KAPP MySQL (Dev/Rel/UK/EU/US Prod), SingleStore (Dev/Rel/UK/EU/US Prod), Zabbix MySQL (x4), NiFi JSON API, CloudWatch, InfluxDB |
 | 12 | Are there alert notification channels configured in Grafana? Who receives them? | High | Unknown | **Closed** — 2 Slack channels: `alerts-data-operations` (default) and `alert-app-allow2fa-disabled` (Client Auth alerts). Email contact point is a placeholder — not configured. |
 
@@ -110,7 +110,7 @@
 
 | # | Question | Answer | Evidence |
 |---|---|---|---|
-| Q-A | Which dashboards read from DBA_VCC_COST? | 4 confirmed: Database Engineering Costs (2024-10-15), Database Engineering Sprint Reporting (2024-03-08), KAPP Client Utilisation and Growth Report (2024-02-22), AWS Cost Report Monthly (2023-10-06) | query 12.3 — full scan of all dashboard JSON in grafana.db |
+| Q-A | Which dashboards read from DBA_VCC_COST? | 4 confirmed: Database Engineering Costs (2024-10-15), Database Engineering Sprint Reporting (2024-03-08), KAPP Client Utilisation and Growth Report (2024-02-22), AWS Cost Report Monthly (2023-10-06). KAPP Client Utilisation confirmed client-facing — LU_KAPP_ClientList has 200+ real institutional clients. | query 12.3 — full scan of all dashboard JSON in grafana.db + query 5.2 — LU_KAPP_ClientList |
 | Q-B | Which dashboards call REP_MONTHEND stored procedures? | 6 confirmed: WPv2 Month End Reporting (2024-06-20), Encore Month End Reporting (2023-08-10), DXM Month End Reporting (2023-08-10), InvestorPress Month End Reporting (2023-08-10), KAPP Month End Reporting (2023-08-10), Other Services Month End Reporting Draft (2023-07-21) | query 12.4 — full scan of all dashboard JSON in grafana.db |
 | Q-C | Which dashboards read from DBA_VCC_MEMSQL? | 14 confirmed — all currently showing stale data since May 2026 when collection jobs were disabled. Key dashboards: KAPP Dataset Query and Source Execution (2024-11-20), KAPP Client Application Auth Config (2024-10-29), KAPP Client Config (2024-09-02), KAPP Client Growth (2024-02-28), plus 10 others | query 12.5 — full scan of all dashboard JSON in grafana.db |
 | Q-D | Are there duplicate datasource entries? | Yes — DBA_VCC has two entries with different UIDs (a082f27e and e8597015) both pointing to localhost DBA_VCC. Dashboards may be split across both UIDs — must be resolved before any migration | query 12.6 — data_source table from grafana.db |
@@ -143,8 +143,8 @@
 
 | # | Question | Who to Ask | Why It Blocks Decommission |
 |---|---|---|---|
-| Q2 | Who consumes DBA_VCC_COST — billing or internal reporting? | tashvir.babulal / rayhaan.suleyman | If billing — cannot decommission without a confirmed replacement |
-| Q10 | Is KAPP Client Utilisation and Growth Report client-facing? | tashvir.babulal / rayhaan.suleyman | If client-facing — decommission directly impacts clients |
+| Q2 | ~~Who consumes DBA_VCC_COST — billing or internal reporting?~~ | **Closed** — confirmed billing. LU_KAPP_ClientList has 200+ real institutional clients. |
+| Q10 | ~~Is KAPP Client Utilisation and Growth Report client-facing?~~ | **Closed** — confirmed. Data stale since 4 May 2026 — must disclose to stakeholders immediately. |
 | Q13 | Who owns the KAPP monitoring data in DBA_VCC_AWS? Is it used for SLA reporting? | KAPP engineering / platform team | If SLA — cannot decommission without a confirmed replacement |
 | Q21 | If this server went offline today, what would break immediately? | yogeshwar.phull / tashvir.babulal | Required for decommission risk assessment |
 | Q22 | Is any alerting dependent solely on this server? | yogeshwar.phull / tashvir.babulal | Required for decommission risk assessment |
