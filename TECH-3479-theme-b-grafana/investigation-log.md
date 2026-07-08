@@ -77,9 +77,9 @@ EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python
 | jason.wolmarans | Jason Wolmarans | jason.wolmarans@kurtosys.com | Viewer | 2025-02-12 | Active |
 | sunil.odedra | Sunil Odedra | sunil.odedra@kurtosys.com | Viewer | 2023-07-12 | ⚠️ Inactive since Jul 2023 |
 
-**Total: 8 users (4 admins, 3 viewers, 1 NULL row ignored)**
+**Total: 8 users (5 admins, 3 viewers, 1 NULL row ignored)**
 
-> Note: User list re-run on 2026-07-07. donovan.vangraan is Admin (not Editor as previously noted) — confirmed via is_admin column.
+> Note: User list re-run on 2026-07-07. Role determined by is_admin column (1 = Admin, 0 = Viewer).
 
 ---
 
@@ -92,11 +92,85 @@ EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python
 ```
 
 **Evidence:**
-```
-Dashboards: 74 total across 16 folders (confirmed query 13.7 — 2026-07-07)
-  KAPP and SingleStore dashboards last updated Oct/Nov 2025 — actively used
-  Month End Reporting dashboards exist but data stale since May 2026
-```
+
+| Title | Last Updated | Notes |
+|---|---|---|
+| Prod US Document Generation Run Metrics | 2025-10-29 | Active |
+| Prod UK Document Generation Run Metrics | 2025-10-29 | Active |
+| Prod EU Document Generation Run Metrics | 2025-10-29 | Active |
+| Release Document Generation Run Metrics | 2025-10-29 | Active |
+| Development Document Generation Run Metrics | 2025-10-29 | Active |
+| NTAM Workflow by workflowRunId | 2025-09-07 | Active |
+| Detailed KAPP Workflow Document Generation Stats | 2025-08-18 | Active |
+| Query History | 2025-08-07 | Active |
+| Historical Workload Monitoring | 2025-08-07 | Active |
+| Cluster View | 2025-06-23 | Active |
+| KAPP Dataset Query and Source Execution | 2024-11-20 | ⚠️ Stale — DBA_VCC_MEMSQL feed disabled May 2026 |
+| KAPP Dataset Query Execution | 2024-11-07 | ⚠️ Stale — DBA_VCC_MEMSQL feed disabled May 2026 |
+| Grafana Dashboard Exporter/Importer | 2024-10-29 | Utility dashboard |
+| KAPP Client Application Auth Config | 2024-10-29 | ⚠️ Stale — DBA_VCC_MEMSQL feed disabled May 2026 |
+| KAPP Dataset Lambdas Time Outs | 2024-10-23 | ⚠️ Stale — DBA_VCC_MEMSQL feed disabled May 2026 |
+| Database Engineering Costs | 2024-10-15 | Internal |
+| KAPP Client Config | 2024-09-02 | ⚠️ Stale — DBA_VCC_MEMSQL feed disabled May 2026 |
+| Resource Pool Monitoring | 2024-07-12 | SingleStore monitoring |
+| Pipeline Summary | 2024-07-12 | SingleStore monitoring |
+| Pipeline Performance | 2024-07-12 | SingleStore monitoring |
+| Memory Usage | 2024-07-12 | SingleStore monitoring |
+| Historical Workload Monitoring | 2024-07-12 | ⚠️ Duplicate title — older copy |
+| Disk Usage | 2024-07-12 | SingleStore monitoring |
+| Detailed Cluster View By Node | 2024-07-12 | SingleStore monitoring |
+| Cluster View | 2024-07-12 | ⚠️ Duplicate title — older copy |
+| WPv2 Month End Reporting | 2024-06-20 | ⚠️ Stale — WPv2 decommissioned |
+| KAPP Workflow Times History | 2024-06-12 | ⚠️ Stale — DBA_VCC_MEMSQL feed disabled May 2026 |
+| KAPP Orphaned and Duplicated Records Report | 2024-03-26 | ⚠️ Stale — DBA_VCC_MEMSQL feed disabled May 2026 |
+| KAPP API Error Reporting | 2024-03-11 | ⚠️ Stale — DBA_VCC_MEMSQL feed disabled May 2026 |
+| Database Engineering Sprint Reporting | 2024-03-08 | Internal |
+| Query Performance Dashboard | 2024-03-07 | ⚠️ Stale — DBA_VCC_MEMSQL feed disabled May 2026 |
+| KAPP Workflow History | 2024-03-07 | ⚠️ Stale — DBA_VCC_MEMSQL feed disabled May 2026 |
+| KAPP Client Growth | 2024-02-28 | ⚠️ Duplicate title — older copy |
+| KAPP API Query Reporting | 2024-02-23 | ⚠️ Stale |
+| KAPP Client Utilisation and Growth Report | 2024-02-22 | ⚠️ High risk — name suggests client-facing |
+| AWS DataTransfer AZ Bytes Report | 2024-02-20 | AWS reporting |
+| Nifi API Reporting | 2024-02-15 | NiFi monitoring |
+| Jira Projects Info | 2023-12-08 | Jira reporting |
+| KAPP Client Growth | 2023-11-16 | ⚠️ Duplicate title |
+| Zabbix Monitoring | 2023-10-27 | Zabbix |
+| Database Engineering Costs | 2023-10-12 | ⚠️ Duplicate title — older copy |
+| AWS Cost Report Monthly | 2023-10-06 | ⚠️ Stale — AWS cost data stale since Sept 2024 |
+| Nifi API Reporting Copy | 2023-09-21 | ⚠️ Stale copy |
+| Database Engineering Sprint Reporting | 2023-09-15 | ⚠️ Duplicate title — older copy |
+| Memory Usage | 2023-09-07 | ⚠️ Duplicate title — older copy |
+| Detailed Cluster View By Node | 2023-09-07 | ⚠️ Duplicate title — older copy |
+| Dashboard Servers Windows | 2023-09-05 | Zabbix/Windows monitoring |
+| SQL SERVER | 2023-09-05 | SQL Server monitoring |
+| Microsoft SQL Server | 2023-09-05 | SQL Server monitoring |
+| Zabbix Server Dashboard | 2023-09-05 | Zabbix |
+| AWS RDS Report | 2023-08-21 | AWS reporting |
+| Encore Document Production Runtimes | 2023-08-16 | Encore monitoring |
+| Encore Month End Reporting | 2023-08-10 | ⚠️ Stale — month-end, no dedicated job |
+| DXM Month End Reporting | 2023-08-10 | ⚠️ Stale — month-end, no dedicated job |
+| InvestorPress Month End Reporting | 2023-08-10 | ⚠️ Stale — month-end, no dedicated job |
+| KAPP Month End Reporting | 2023-08-10 | ⚠️ Stale — month-end, no dedicated job |
+| AWS Security Report | 2023-08-10 | AWS reporting |
+| KAPP Orphaned and Duplicated Records Report | 2023-08-10 | ⚠️ Duplicate title — older copy |
+| AWS S3 Report | 2023-08-09 | AWS reporting |
+| AWS EC2 Report | 2023-08-09 | ⚠️ Duplicate title |
+| AWS EC2 Report | 2023-08-09 | ⚠️ Duplicate title — older copy |
+| AWS RDS Report | 2023-08-09 | ⚠️ Duplicate title — older copy |
+| Home | 2023-08-09 | Home dashboard |
+| AWS Cost Report | 2023-08-09 | ⚠️ Stale — AWS cost data stale since Sept 2024 |
+| Other Services Month End Reporting -- Draft | 2023-07-21 | ⚠️ Draft — month-end, no dedicated job |
+| AWS S3 Report | 2023-07-13 | ⚠️ Duplicate title — older copy |
+| BNY IIS Log Streams | 2023-07-11 | ⚠️ BNY — external client? Needs confirmation before decommission |
+| Encore Document Production Runtimes | 2023-07-09 | ⚠️ Duplicate title — older copy |
+| DXM Month End Reporting | 2023-07-07 | ⚠️ Duplicate title — older copy |
+| WPv2 Month End Reporting | 2023-07-07 | ⚠️ Duplicate title — older copy |
+| Encore Month End Reporting | 2023-07-07 | ⚠️ Duplicate title — older copy |
+| KAPP Month End Reporting | 2023-07-05 | ⚠️ Duplicate title — older copy |
+| InvestorPress Month End Reporting | 2023-07-05 | ⚠️ Duplicate title — older copy |
+| Server States | 2023-05-29 | Server monitoring |
+
+**Total: 74 dashboards. 10 actively updated (2025+). ~20 stale/broken. Multiple duplicate titles.**
 
 > Note: Initial count from query 9.5 showed 90. Recount via query 13.7 on 2026-07-07 confirmed 74. Difference due to deleted/archived dashboards between runs.
 
