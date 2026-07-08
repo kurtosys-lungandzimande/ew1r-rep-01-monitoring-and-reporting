@@ -137,6 +137,63 @@ Ziegler                   EW2/UE1   Ziegler
 
 ⚠️ This confirms DBA_VCC_COST is tracking entity counts for real production clients across three regions. This is billing data. Decommissioning this server without a confirmed replacement directly impacts client invoicing.
 
+Entity registry confirmed by query (run 2026-07-09) — `SELECT * FROM DBA_VCC_COST.dbo.LU_EntityList ORDER BY Application, Enviroment, EntityName`:
+
+```
+Applications and environments tracked:
+
+KAPP (KurtosysApp_Prod / KurtosysApp_Non-Prod)
+  Production:   EC1P, EW2P, UE1P — aggregators, leaves, admin, mops, EFS, backups
+  Release:      EW1R — aggregators, leaves, admin, mops, EFS, backups
+  Development:  EW1D — aggregators, leaves, admin, mops, EFS
+
+DXM (KurtosysApp_Prod / KurtosysApp_Non-Prod)
+  Production:   EC1P, EW2P, UE1P — DXM nodes, logging, replication, jump, backups
+  Release:      EW1R — DXM nodes, logging, jump
+  Development:  EW1D — DXM nodes, logging, jump
+
+InvestorPress (InvestorPress_Encore_Prod / Non-Prod)
+  Production:   EW2P — aggregators, leaves, admin, mops, EFS, IP RDS
+  Release:      EW1R — aggregators, leaves, admin, mops, EFS, IP RDS
+  Development:  EW1D — aggregators, IP RDS
+
+Encore (InvestorPress_Encore_Prod / Non-Prod)
+  Production:   EW2P-MSSQL-01/02, backups, license exemption node
+  Release:      EW1R-MSSQL-01/02/03, backups
+  Development:  EW1D-MSSQL-01, backups
+
+WPv2 (Wordpress_V2_Prod / Non-Prod)
+  Production:   EW2P-WPV2, UE1P-WPV2 (+ temp node EW2P-WPV2-TEMP-ABDUL)
+  Release:      EW2R-WPV2, UE1R-WPV2, backups
+  -- WPv2 platform decommissioned — these entries are stale
+
+Marketing
+  Production:   EW2P-MARKETING-DB, EW2P-JUMP-01, backup
+  -- EW2P-MARKETING-DB confirmed Not Online in BASELINE_CONNECTIONS
+  -- Owner confirmed: Marketing account (AccountId 232173278818)
+
+Shared Services
+  NiFi:         EW1P-NIFIREG-01, backup
+  TeamCity:     EW1P-GIT-01/02, EW1P-JUMP-01, EW1R-TC, EW1R-JUMP-01/02
+  Octa:         EW1P-OCT, backups
+  Reporting:    EW1R-REP-01 — this server tracks its own AWS costs
+  Zabbix:       EW1R-ZABBIX-02
+
+Monitoring_Alerting
+  REP:          EW1P-MON-01
+
+Special entries:
+  EntityName=DELETE  — InvestorPress_Encore_Non-Prod, flagged for removal, never cleaned up
+  UE1-WPV2           — Wordpress_V2_Prod, NULL application/environment, stale WPv2 entry
+```
+
+Key findings from LU_EntityList:
+- EW1R-TC confirmed as TeamCity — closes open item 8
+- EW2P-MARKETING-DB owner confirmed as Marketing account (AccountId 232173278818)
+- EW1R-REP-01 (this server) is in its own entity list — it tracks its own AWS costs
+- WPv2 entries still present despite platform being decommissioned
+- Data quality issues: Region column has leading space on some EW1R Release rows, Enviroment column has mixed case (RELEASE vs Release vs Development vs Production)
+
 Environments collected from:
 
 | Code | Region | Environment |
@@ -347,4 +404,4 @@ All 20 of these dashboards are showing stale data. Do not re-enable jobs without
 | 5 | What IAM role/key does the Python AWS API caller use? | DevOps / cloud team |
 | 6 | What S3 bucket do backups go to — bucket name/ARN? | DevOps / cloud team |
 | 7 | Is ZabbixProdOld still active or can it be removed? | Infrastructure team |
-| 8 | What does EW1R-TC resolve to — is it TeamCity? | Infrastructure team |
+| 8 | ~~What does EW1R-TC resolve to — is it TeamCity?~~ | **Closed** — confirmed TeamCity. EW1R-TC appears in LU_EntityList under Shared_Services_Non-Prod, Application=TeamCity, Release environment, EW1 region. |
