@@ -26,15 +26,33 @@ EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python
 ```
 
 **Evidence:**
-```
-Datasources: 21 total
-  DBA_VCC (localhost MSSQL — Windows auth)
-  KAPP MySQL: Dev, Rel, UK Prod, EU Prod, US Prod
-  SingleStore: Dev, Rel, UK Prod, EU Prod, US Prod
-  Zabbix MySQL: NonProd, Prod Old, Prod New, Prod 4  ← all use donovan.vangraan credentials
-  NiFi JSON API, CloudWatch (IAM role), InfluxDB
-  [3 additional]
-```
+
+| Name | Type | URL | User | Notes |
+|---|---|---|---|---|
+| DBA_VCC | mssql | localhost | grafana | Core SQL Server datasource — reads from DBA_VCC on localhost |
+| DBA_VCC | mssql | localhost | grafana | ⚠️ Duplicate entry — same datasource registered twice |
+| KAPP Dev | mysql | 10.61.11.70:3306 | root | KAPP Dev environment |
+| KAPP Rel | mysql | 10.77.3.236 | root | KAPP Release environment |
+| KAPP UK Prod | mysql | 10.121.29.82 | root | KAPP UK Production |
+| KAPP EU Prod | mysql | 10.125.6.134 | root | KAPP EU Production |
+| KAPP US Prod | mysql | 10.128.30.6 | root | KAPP US Production |
+| KAPP Monitoring | mysql | 10.120.8.208 | root | KAPP monitoring database |
+| MySQL | mysql | 10.77.3.236:3306 | root | ⚠️ Likely duplicate of KAPP Rel — same IP |
+| monitoring | mysql | 10.120.8.208 | root | ⚠️ Likely duplicate of KAPP Monitoring — same IP |
+| SingleStore-Dev | mysql | 10.61.0.95 | FundPressDataReader | SingleStore Dev environment |
+| SingleStore-Release | mysql | 10.77.6.161 | FundPressDataReader | SingleStore Release environment |
+| SingleStore-Production-UK | mysql | 10.121.22.219 | FundPressDataReader | SingleStore UK Production |
+| SingleStore-Production-EU | mysql | 10.125.12.126 | FundPressDataReader | SingleStore EU Production |
+| SingleStore-Production-US | mysql | 10.128.24.122 | FundPressDataReader | SingleStore US Production |
+| Zabbix Prod Old | mysql | 10.120.8.120 | donovan.vangraan | ⚠️ Stale credentials — donovan.vangraan inactive since Nov 2024 |
+| zabbix-server-data.shprd.kurtosys-internal | mysql | 10.120.8.51 | donovan.vangraan | ⚠️ Stale credentials — donovan.vangraan inactive since Nov 2024 |
+| Zabbix Nonprod old | mysql | 10.72.8.191 | donovan.vangraan | ⚠️ Stale credentials — donovan.vangraan inactive since Nov 2024 |
+| zabbix-server-data.shnonprd.kurtosys-internal | mysql | 10.72.8.186 | donovan.vangraan | ⚠️ Stale credentials — donovan.vangraan inactive since Nov 2024 |
+| JSON API | marcusolsson-json-datasource | https://10.125.9.192:8443/nifi-api/flow/process-groups/root/ | — | NiFi Registry API |
+| CloudWatch | cloudwatch | — | — | AWS CloudWatch — uses IAM role |
+| InfluxDB | influxdb | — | — | InfluxDB — connection details not exposed |
+
+**Total: 22 rows returned (1 duplicate DBA_VCC entry, 1 NULL row). Distinct datasources: 21.**
 
 ---
 
