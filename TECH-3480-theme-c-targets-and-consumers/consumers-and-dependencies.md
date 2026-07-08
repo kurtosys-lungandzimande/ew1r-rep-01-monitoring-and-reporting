@@ -67,7 +67,38 @@ Data freshness confirmed by query 5.1 (run 2026-07-09):
 | INFO_KAPP_Client_Users_Counts | 2026-05-04 08:00 | 14,811,776 |
 | INFO_AWS_DE_Entity_Cost | 2024-11-01 | 4,382 | ⚠️ Stale — 20 months out of date |
 
-⚠️ All 9 collection tables last updated 4 May 2026 — not 29 June 2026 as previously noted from job history. The job is reporting Succeeded but data has not moved in 2 months. This matches the same silent failure pattern seen in the AWS cost ETL — job runs, CATCH block swallows the error, nothing gets written. Needs investigation before any decommission decision.
+⚠️ All 9 collection tables last updated 4 May 2026 — not 29 June 2026 as previously noted from job history. The job reports Succeeded but no data has been written in 2 months.
+
+Root cause confirmed by SP_INFO_KAPP_CLIENT_ALLOCATIONS_COUNTS definition (run 2026-07-09):
+
+```sql
+-- The procedure only collects from nodes that appear in DBA_VCC_MEMSQL ping stats
+-- within the last 40 minutes AND have SQL status = 1 within the last 40 minutes
+INSERT INTO @SERVERNAMES
+SELECT InstanceName
+FROM DBA_VCC_MEMSQL..LU_Serverlist
+WHERE Role = 'Master Aggregator'
+  AND SERVERNAME IN (
+      SELECT SERVERNAME FROM DBA_VCC_MEMSQL.dbo.BAS_Ping_Stat
+      WHERE DATEDIFF(MINUTE, DATECHECKED, GETDATE()) < 40
+      AND [Status] = 1)
+  AND INSTANCENAME IN (
+      SELECT SERVERNAME FROM DBA_VCC_MEMSQL.dbo.BAS_SQL_Status
+      WHERE DATEDIFF(MINUTE, DATECHECKED, GETDATE()) < 40
+      AND [Status] = 1)
+  AND SERVERNAME IN (
+      SELECT EntityName COLLATE Latin1_General_CI_AS
+      FROM [DBA_VCC_COST].[dbo].[LU_EntityList]
+      WHERE Application = 'KAPP')
+```
+
+The procedure checks `DBA_VCC_MEMSQL.dbo.BAS_Ping_Stat` and `DBA_VCC_MEMSQL.dbo.BAS_SQL_Status` for nodes that were active within the last 40 minutes. The MEMSQL jobs that write to those tables were disabled on 4 May 2026. From that point on, no node ever passes the 40-minute freshness check — `@SERVERNAMES` is always empty, the WHILE loop never executes, nothing is inserted, and the procedure exits cleanly with no error.
+
+This is not a CATCH block swallowing an error — there is no error to catch. The procedure runs successfully and writes zero rows. The job reports Succeeded because it did succeed — it just had nothing to do.
+
+All 9 SP_INFO procedures follow the same pattern. Every one of them depends on DBA_VCC_MEMSQL ping stats being fresh. When the MEMSQL jobs were disabled, the entire DBA_VCC_COST collection pipeline silently stopped with it.
+
+This means the DBA_VCC_COST data that the KAPP Client Utilisation and Growth Report dashboard is reading is also stale since 4 May 2026 — not just the MEMSQL dashboards. Both databases stopped collecting on the same day for the same root cause.
 
 Environments collected from:
 
