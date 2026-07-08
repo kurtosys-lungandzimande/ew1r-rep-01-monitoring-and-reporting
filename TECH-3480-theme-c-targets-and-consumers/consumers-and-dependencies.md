@@ -75,6 +75,51 @@ Environments collected from:
 
 19 stored procedures named `REP_MONTHEND_*` sit on top of the collection tables. These are called every month end to generate client reports — both summary (all clients) and per-client versions. Who calls them and whether they are client-facing is still open.
 
+Confirmed by query 5.3 (run 2026-07-07) — all objects in DBA_VCC_COST:
+```sql
+SELECT name, type_desc, create_date, modify_date
+FROM DBA_VCC_COST.sys.objects
+WHERE type IN ('P', 'V', 'U')
+ORDER BY type, name;
+```
+
+Evidence — REP_MONTHEND procedures returned:
+```
+REP_MONTHEND_CLIENT_ALLOCATIONS_CLIENT_REPORT
+REP_MONTHEND_CLIENT_ALLOCATIONS_REPORT
+REP_MONTHEND_CLIENT_DISCLAIMERS_COMMENTARIES_REPORT
+REP_MONTHEND_CLIENT_DOCUMENTS_REPORT
+REP_MONTHEND_CLIENT_ENTITY_REPORT
+REP_MONTHEND_CLIENT_HISTORICALDATASETS_REPORT
+REP_MONTHEND_CLIENT_SNAPSHOTS_REPORT
+REP_MONTHEND_CLIENT_STATSTICS_REPORT
+REP_MONTHEND_CLIENT_TIMESERIES_REPORT
+REP_MONTHEND_CLIENT_TOP5_ALLOCATIONS_REPORT
+REP_MONTHEND_CLIENT_USER_COUNTS_REPORT
+REP_MONTHEND_CLIENT_USER_REPORT
+REP_MONTHEND_TOP5_CLIENTS_DATA_FOOTPRINT_REPORT
+-- plus 6 additional collection and ETL procedures
+-- Total: 19 procedures in DBA_VCC_COST
+```
+
+6 Grafana dashboards confirmed calling these procedures — confirmed by query 12.4 (run 2026-07-07), full dashboard JSON scan:
+```sql
+-- run via xp_cmdshell + Python against grafana.db
+SELECT title, updated FROM dashboard
+WHERE is_folder=0 AND data LIKE '%REP_MONTHEND%'
+ORDER BY updated DESC;
+```
+
+Evidence — dashboards returned:
+```
+WPv2 Month End Reporting                    2024-06-20
+Encore Month End Reporting                  2023-08-10
+DXM Month End Reporting                     2023-08-10
+InvestorPress Month End Reporting           2023-08-10
+KAPP Month End Reporting                    2023-08-10
+Other Services Month End Reporting (Draft)  2023-07-21
+```
+
 ---
 
 ## DBA_VCC_MEMSQL — Data Freshness
@@ -100,7 +145,17 @@ Table freshness:
 | ARC_INFO_ClientSizes_Sizes_IP (IP archive) | Feb 2026 | 690,058 |
 | INFO_AWS_DE_Entity_Cost (AWS costs) | Nov 2024 | 4,382 |
 
-14 dashboards referencing DBA_VCC_MEMSQL and 6 dashboards calling REP_MONTHEND procedures are all showing stale data. Do not re-enable jobs without understanding why DAILY_CHECKS failed on 8 May 2026.
+14 dashboards referencing DBA_VCC_MEMSQL confirmed by query 12.5 (run 2026-07-07):
+```sql
+-- run via xp_cmdshell + Python against grafana.db
+SELECT title, updated FROM dashboard
+WHERE is_folder=0 AND data LIKE '%DBA_VCC_MEMSQL%'
+ORDER BY updated DESC;
+```
+
+6 dashboards calling REP_MONTHEND confirmed by query 12.4 — see DBA_VCC_COST section above.
+
+All 20 of these dashboards are showing stale data. Do not re-enable jobs without understanding why DAILY_CHECKS failed on 8 May 2026.
 
 ---
 
