@@ -240,6 +240,8 @@ EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python
 
 **Total: 3 contact points (2 active Slack, 1 broken email)**
 
+> Note: query 9.8 returns 3 rows from `alert_configuration` — Grafana stores multiple config versions in this table (factory default, old draft, current active). The contact points above are extracted from the current active config (row 2 of 3). Row 1 is an old draft with no sub-routes where all alerts defaulted to the broken email. Row 3 is the factory default Grafana ships with — never customised. The Slack webhook tokens in row 2 are encrypted — a Grafana admin login is required to view or rotate them.
+
 **Finding:** Grafana reads directly from DBA_VCC on localhost. 4 Zabbix datasources use donovan.vangraan credentials — he is an Admin account that has not logged in since November 2024. His credentials need to be rotated and his account should be reviewed before decommission. The default `admin` account is also still active and should be disabled. Email contact point is a placeholder and will never deliver alerts. Month-end dashboards are showing stale data since May 2026 due to MemSQL jobs being disabled — nobody has flagged this.
 
 **Open questions for TECH-3479:**
