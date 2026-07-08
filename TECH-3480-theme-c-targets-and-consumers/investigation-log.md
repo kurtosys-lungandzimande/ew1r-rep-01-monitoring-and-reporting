@@ -3,8 +3,7 @@
 Scope: External targets, consumers, service accounts, firewall rules, dependencies.
 Each entry has the question, the query, the evidence, and the finding.
 
-> Status: Targets partially identified from job history and linked server list.
-> Consumer confirmation still needed — who reads DBA_VCC_COST, who depends on Grafana dashboards.
+> Status: External targets mapped — 109 linked servers inventoried, 11 confirmed stale. Consumers identified from query evidence — stakeholder confirmation still needed for billing/client-facing use. Full detail in consumers-and-dependencies.md and external-targets.md.
 
 ---
 

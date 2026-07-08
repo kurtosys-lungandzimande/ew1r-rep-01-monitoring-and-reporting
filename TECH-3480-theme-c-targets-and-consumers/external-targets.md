@@ -78,8 +78,8 @@ EW1R-REP-01 connects to 109 external systems via linked servers. These are the s
 | EW1P-NIFIREG-01 | Apache NiFi Registry | NiFi pipeline registry | Unknown |
 | EW1R-TC | Unknown | Likely TeamCity CI/CD | Unknown |
 | ew1d-admin-01/02 | Admin servers | Dev admin | Unknown |
-| ew2p-wpv2 / ew2r-wpv2 | Web Platform v2 | EW2 web platform nodes | Unknown |
-| ue1p-wpv2 / ue1r-wpv2 | Web Platform v2 | UE1 web platform nodes | Unknown |
+| ew2p-wpv2 / ew2r-wpv2 | Web Platform v2 | EW2 web platform nodes | ⚠️ Decommissioned — DNS gone, jobs failing daily |
+| ue1p-wpv2 / ue1r-wpv2 | Web Platform v2 | UE1 web platform nodes | ⚠️ Decommissioned — DNS gone, jobs failing daily |
 | ew1r-leaf-01.gen-prd | SingleStore | Generic prod leaf | Unknown |
 
 ---
@@ -87,6 +87,6 @@ EW1R-REP-01 connects to 109 external systems via linked servers. These are the s
 ## Open Questions
 - [ ] Are all SingleStore linked servers still reachable? Run connectivity test
 - [ ] What does EW1R-TC resolve to — is it TeamCity?
-- [ ] Are wpv2 nodes web servers or database nodes?
+- [x] ~~Are wpv2 nodes web servers or database nodes?~~ — MySQL database nodes, WPv2 platform confirmed decommissioned
 - [ ] Is ZabbixProdOld still active or can it be removed?
 - [ ] What credentials are used for each linked server — check vault

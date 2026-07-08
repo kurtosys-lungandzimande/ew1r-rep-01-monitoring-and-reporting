@@ -271,7 +271,7 @@ The daily checks job failed on its last run before being disabled — that failu
 ### Firewall Rules
 | Direction | Source | Destination | Port | Purpose |
 |---|---|---|---|---|
-| Outbound | EW1R-REP-01 | SingleStore nodes (97) | Unknown | ODBC connections to MemSQL clusters |
+| Outbound | EW1R-REP-01 | SingleStore nodes (109) | Unknown | ODBC connections to MemSQL clusters |
 | Outbound | EW1R-REP-01 | MySQL/DXM/WPv2 nodes | 3306 | MySQL monitoring |
 | Outbound | EW1R-REP-01 | EW2P-MSSQL-01/02 | 1433 | SQL Server monitoring |
 | Outbound | EW1R-REP-01 | AWS APIs | 443 | Python API calls for AWS data collection |
