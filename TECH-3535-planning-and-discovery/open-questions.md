@@ -135,6 +135,7 @@
 | F3 | DBA_VCC_COST confirmed active Grafana datasource — KAPP Client Utilisation and Growth Report is highest risk, name suggests client-facing use, consumer not yet confirmed | query 12.3 (dashboard JSON scan) |
 | F4 | All 4 WPv2 linked servers dead — DNS does not resolve. DBA_VCC_MYSQL_DAILY_CHECKS and DBA_VCC_MYSQL_AUDIT_DXM_CLIENT_DETAILED failing silently every day since 25 June 2026 | query 4.2 (job failure history — Error 7303 on ew2p-wpv2 and ew2r-wpv2) |
 | F5 | AWS cost ETL silently broken since September 2024 — SP_AUDIT_COST_ETL_CLEANUP CATCH block swallows nvarchar-to-decimal conversion error, job reports Succeeded, 2.4M rows stuck in staging, INFO_AWS_Entity_Cost stale 22 months | query 5.4 (data freshness) + stored procedure definition review |
+| F6 | DBA_VCC_COST collection also stopped 4 May 2026 — all 9 SP_INFO_KAPP_CLIENT_* procedures check DBA_VCC_MEMSQL.BAS_Ping_Stat and BAS_SQL_Status for nodes active within the last 40 minutes before collecting. When MEMSQL jobs were disabled, ping stats stopped updating, every SP_INFO finds zero live nodes, writes zero rows, and exits cleanly. Job reports Succeeded. All 9 INFO_KAPP_Client_* tables confirmed stale since 4 May 2026 — same day MEMSQL jobs were disabled. KAPP Client Utilisation and Growth Report dashboard is therefore also showing 2-month-old data. | query 5.1 (data freshness) + SP_INFO_KAPP_CLIENT_ALLOCATIONS_COUNTS definition review |
 
 ---
 
@@ -149,3 +150,4 @@
 | Q22 | Is any alerting dependent solely on this server? | yogeshwar.phull / tashvir.babulal | Required for decommission risk assessment |
 | Q23 | Is the VCC framework replicated anywhere else? | DBA team | If not replicated — this is a single point of failure |
 | Q35 | Who disabled the DBA_VCC_MEMSQL jobs in May 2026 and why? Was the daily checks failure on 8 May 2026 ever investigated? | yogeshwar.phull / tashvir.babulal | Jobs must not be re-enabled without understanding the root cause — re-enabling a broken job could cause data corruption or cascading failures |
+| Q36 | Has anyone noticed that DBA_VCC_COST client entity counts have been stale since 4 May 2026? The KAPP Client Utilisation and Growth Report dashboard is showing 2-month-old data. Whoever uses that report for billing or client reporting has been working with stale figures since May with no warning. | tashvir.babulal / rayhaan.suleyman | Must be disclosed before decommission — if this data feeds billing, June figures are wrong |
