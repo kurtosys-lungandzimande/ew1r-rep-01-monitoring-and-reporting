@@ -28,7 +28,7 @@ EW1R-REP-01 is a non-production Windows host running SQL Server 2019 and Grafana
 |---|---|---|
 | All discovery queries executed and outputs captured | ✅ Done | 13 sections of discovery queries run — captured in discovery-queries.sql |
 | SQL Server inventory complete (jobs, databases, linked servers) | ✅ Done | Jobs, databases, 109 linked servers inventoried — TECH-3478 owns the detail |
-| Grafana inventory complete (datasources, dashboards, users, alerts) | ✅ Done | 21 datasources, dashboards, 3 active users, 2 alert channels captured — TECH-3479 owns the detail |
+| Grafana inventory complete (datasources, dashboards, users, alerts) | ✅ Done | 21 datasources, 74 dashboards, 8 users (5 admins, 3 viewers), 3 alert rules, 3 contact points captured — TECH-3479 owns the detail |
 | External targets and consumers mapped | 🔄 In Progress | Data sources identified — consumer confirmation still open, TECH-3480 owns this |
 | Open questions documented and blockers escalated | ✅ Done | 34 open questions logged in open-questions.md — critical blockers flagged |
 | Topology and classification published to Confluence | ⏳ Blocked | Blocked on TECH-3478, TECH-3479, TECH-3480 completing — TECH-3481 owns this |
@@ -59,8 +59,11 @@ Initial discovery queries executed across 13 sections covering server basics, da
 
 - Grafana 9.5.2 on port 443 (HTTPS)
 - 21 datasources: SQL Server (localhost), KAPP MySQL, SingleStore, Zabbix MySQL, NiFi, CloudWatch, InfluxDB
-- 3 active admin users, 1 inactive builder (no longer active)
-- 2 Slack alert channels configured — email contact point is a placeholder, not configured
+- 8 users: 5 admins (tashvir.babulal, yogeshwar.phull, rayhaan.suleyman active; donovan.vangraan and default admin inactive since Nov 2024)
+- 3 viewers: ram.jeyaraman, jason.wolmarans (active), sunil.odedra (inactive since Jul 2023)
+- 4 Zabbix datasources still using donovan.vangraan credentials — needs rotation
+- Default admin account (admin@localhost) still active — should be disabled
+- 3 alert rules, 2 active Slack contact points — email contact point is a placeholder, not configured
 - Some dashboards are candidates for client-facing or SLA use — not yet confirmed
 
 → Full detail in TECH-3479
