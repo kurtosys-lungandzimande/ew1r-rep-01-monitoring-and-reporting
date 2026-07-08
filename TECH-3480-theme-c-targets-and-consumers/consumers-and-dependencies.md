@@ -102,97 +102,57 @@ This means the DBA_VCC_COST data that the KAPP Client Utilisation and Growth Rep
 
 Client list confirmed by query 5.2 (run 2026-07-09) — `SELECT * FROM DBA_VCC_COST.dbo.LU_KAPP_ClientList ORDER BY ClientName`:
 
-```
-200+ clients across EW2 (eu-west-2), UE1 (us-east-1), EC1 (eu-central-1)
-
-Major institutional clients confirmed:
-Aberdeen / abrdn          EW2       Aberdeen
-AXA IM                    EC1       AXA IM
-BlackRock                 UE1       BlackRock
-BlueBay                   EW2       Blue Bay
-BMO / BMO GAM / BMO NL    EW2/UE1/EC1  BMO
-BNY Mellon / BNY Dreyfus  EW2/UE1   BNY
-Boston Partners           UE1       Boston Partners
-CTI / Threadneedle        EW2       Threadneedle
-FedHermes                 EW2       Hermes
-ICMARC                    UE1       ICMARC
-Jupiter / OMGI / Merian   EW2       Jupiter
-M&G Investments           EW2       M&G Investments
-Nordea Asset Management   EW2/EC1   Nordea
-OP Cooperative            EW2/EC1   OP Cooperative
-Osmosis                   EW2       Osmosis
-PRIMECAP                  UE1       Primecap
-RWC Partners              EW2       RWC
-SALI                      EW2/UE1   Sali
-Sands Capital             UE1       Sands Capital
-Security Benefit          UE1       Security Benefit
-T. Rowe Price             EW2       T. Rowe Price
-TDAM                      UE1       TDAM
-Wellington                EW2       Wellington
-Ziegler                   EW2/UE1   Ziegler
--- plus staging, dev, demo, and POC entries for each
--- C&D Investments marked Terminated — still in the list
--- Several entries marked Potential Client — not yet live
-```
+| Client | Region | Account Group | Notes |
+|---|---|---|---|
+| Aberdeen / abrdn | EW2 | Aberdeen | Multiple prod/staging/dev entries |
+| AXA IM | EC1 | AXA IM | Dev/staging/prod |
+| BlackRock | UE1 | BlackRock | Prod/staging/dev/index services |
+| BlueBay | EW2 | Blue Bay | Prod/staging/FundTools staging |
+| BMO / BMO GAM / BMO NL | EW2/UE1/EC1 | BMO | Multiple regions and entities |
+| BNY Mellon / BNY Dreyfus | EW2/UE1 | BNY | Multiple prod/staging/dev entries |
+| Boston Partners | UE1 | Boston Partners | Prod/staging/dev |
+| CTI / Threadneedle | EW2 | Threadneedle | Prod/staging/MIGR/AOV entries |
+| FedHermes | EW2 | Hermes | Factsheets and web prod/staging |
+| HSBC Asset Management | EW2 | Potential Client | Not yet live |
+| ICMARC | UE1 | ICMARC | Prod/staging/dev/release |
+| Jupiter / OMGI / Merian | EW2 | Jupiter | Multiple prod/staging entries |
+| M&G Investments | EW2 | M&G Investments | Prod/staging/dev/European tools |
+| Nordea Asset Management | EW2/EC1 | Nordea | Multiple regions |
+| OP Cooperative | EW2/EC1 | OP Cooperative | Prod/staging/DXM |
+| Osmosis | EW2 | Osmosis | Prod/staging/dev/P2 |
+| PRIMECAP | UE1 | Primecap | Prod/staging/testing |
+| RWC Partners | EW2 | RWC | Prod/staging/dev |
+| SALI | EW2/UE1 | Sali | Prod/staging/dev/portal entries |
+| Sands Capital | UE1 | Sands Capital | Prod/staging |
+| Security Benefit | UE1 | Security Benefit | Prod/staging/dev |
+| T. Rowe Price | EW2 | T. Rowe Price | Prod/staging/data API |
+| TDAM | UE1 | TDAM | Prod/staging/dev |
+| Wellington | EW2 | Wellington | Prod/staging/dev/WMF global FS |
+| Ziegler | EW2/UE1 | Ziegler | Prod/staging/dev |
+| C&D Investments | EW2 | C&D (Terminated) | ⚠️ Marked Terminated — still in list |
+| AXAIM, Brown Advisory, CCLA, HSBC, Brunel | EW2 | Potential Client | ⚠️ Not yet live — POC/demo entries |
+| Kurtosys internal | EW2/UE1/EC1 | Kurtosys | Internal demo, sales, support, monitoring entries |
 
 ⚠️ This confirms DBA_VCC_COST is tracking entity counts for real production clients across three regions. This is billing data. Decommissioning this server without a confirmed replacement directly impacts client invoicing.
 
 Entity registry confirmed by query (run 2026-07-09) — `SELECT * FROM DBA_VCC_COST.dbo.LU_EntityList ORDER BY Application, Enviroment, EntityName`:
 
-```
-Applications and environments tracked:
+| Application | Account | Environments | Nodes | Notes |
+|---|---|---|---|---|
+| KAPP | KurtosysApp_Prod / Non-Prod | Production (EC1P, EW2P, UE1P), Release (EW1R), Dev (EW1D) | Aggregators, leaves, admin, mops, EFS, backups | Core KAPP platform |
+| DXM | KurtosysApp_Prod / Non-Prod | Production (EC1P, EW2P, UE1P), Release (EW1R), Dev (EW1D) | DXM nodes, logging, replication, jump, backups | Document generation |
+| InvestorPress | InvestorPress_Encore_Prod / Non-Prod | Production (EW2P), Release (EW1R), Dev (EW1D) | Aggregators, leaves, admin, mops, EFS, IP RDS | |
+| Encore | InvestorPress_Encore_Prod / Non-Prod | Production (EW2P), Release (EW1R), Dev (EW1D) | MSSQL-01/02/03, backups, license exemption node | |
+| WPv2 | Wordpress_V2_Prod / Non-Prod | Production (EW2P, UE1P), Release (EW2R, UE1R) | WPV2 nodes, backups | ⚠️ Decommissioned — entries stale |
+| Marketing | Marketing (232173278818) | Production (EW2P) | EW2P-MARKETING-DB, EW2P-JUMP-01, backup | ⚠️ EW2P-MARKETING-DB Not Online |
+| NiFi | Shared_Services_Prod | Production (EW1P) | EW1P-NIFIREG-01, backup | |
+| TeamCity | Shared_Services_Prod / Non-Prod | Production (EW1P), Release (EW1R) | EW1P-GIT-01/02, EW1P-JUMP-01, EW1R-TC, EW1R-JUMP-01/02 | EW1R-TC confirmed TeamCity |
+| Octa | Shared_Services_Non-Prod | Production (EW1P) | EW1P-OCT, backups | |
+| Reporting | Shared_Services_Non-Prod | Release (EW1R) | EW1R-REP-01 | This server tracks its own costs |
+| Zabbix | Shared_Services_Non-Prod | Release (EW1R) | EW1R-ZABBIX-02 | |
+| REP | Monitoring_Alerting | Production (EW1P) | EW1P-MON-01 | |
 
-KAPP (KurtosysApp_Prod / KurtosysApp_Non-Prod)
-  Production:   EC1P, EW2P, UE1P — aggregators, leaves, admin, mops, EFS, backups
-  Release:      EW1R — aggregators, leaves, admin, mops, EFS, backups
-  Development:  EW1D — aggregators, leaves, admin, mops, EFS
-
-DXM (KurtosysApp_Prod / KurtosysApp_Non-Prod)
-  Production:   EC1P, EW2P, UE1P — DXM nodes, logging, replication, jump, backups
-  Release:      EW1R — DXM nodes, logging, jump
-  Development:  EW1D — DXM nodes, logging, jump
-
-InvestorPress (InvestorPress_Encore_Prod / Non-Prod)
-  Production:   EW2P — aggregators, leaves, admin, mops, EFS, IP RDS
-  Release:      EW1R — aggregators, leaves, admin, mops, EFS, IP RDS
-  Development:  EW1D — aggregators, IP RDS
-
-Encore (InvestorPress_Encore_Prod / Non-Prod)
-  Production:   EW2P-MSSQL-01/02, backups, license exemption node
-  Release:      EW1R-MSSQL-01/02/03, backups
-  Development:  EW1D-MSSQL-01, backups
-
-WPv2 (Wordpress_V2_Prod / Non-Prod)
-  Production:   EW2P-WPV2, UE1P-WPV2 (+ temp node EW2P-WPV2-TEMP-ABDUL)
-  Release:      EW2R-WPV2, UE1R-WPV2, backups
-  -- WPv2 platform decommissioned — these entries are stale
-
-Marketing
-  Production:   EW2P-MARKETING-DB, EW2P-JUMP-01, backup
-  -- EW2P-MARKETING-DB confirmed Not Online in BASELINE_CONNECTIONS
-  -- Owner confirmed: Marketing account (AccountId 232173278818)
-
-Shared Services
-  NiFi:         EW1P-NIFIREG-01, backup
-  TeamCity:     EW1P-GIT-01/02, EW1P-JUMP-01, EW1R-TC, EW1R-JUMP-01/02
-  Octa:         EW1P-OCT, backups
-  Reporting:    EW1R-REP-01 — this server tracks its own AWS costs
-  Zabbix:       EW1R-ZABBIX-02
-
-Monitoring_Alerting
-  REP:          EW1P-MON-01
-
-Special entries:
-  EntityName=DELETE  — InvestorPress_Encore_Non-Prod, flagged for removal, never cleaned up
-  UE1-WPV2           — Wordpress_V2_Prod, NULL application/environment, stale WPv2 entry
-```
-
-Key findings from LU_EntityList:
-- EW1R-TC confirmed as TeamCity — closes open item 8
-- EW2P-MARKETING-DB owner confirmed as Marketing account (AccountId 232173278818)
-- EW1R-REP-01 (this server) is in its own entity list — it tracks its own AWS costs
-- WPv2 entries still present despite platform being decommissioned
-- Data quality issues: Region column has leading space on some EW1R Release rows, Enviroment column has mixed case (RELEASE vs Release vs Development vs Production)
+⚠️ Data quality issues in LU_EntityList: `Enviroment` column name is a typo, mixed case values (RELEASE vs Release), Region column has leading spaces on some EW1R rows. Never corrected since 2022.
 
 Environments collected from:
 
@@ -215,39 +175,37 @@ ORDER BY type, name;
 ```
 
 Evidence — full output (run 2026-07-09):
-```
--- REP_MONTHEND reporting procedures (19 total)
-REP_MONTHEND_CLIENT_ALLOCATIONS_CLIENT_REPORT          created 2023-01-06  modified 2023-01-06
-REP_MONTHEND_CLIENT_ALLOCATIONS_REPORT                 created 2022-09-28  modified 2023-01-06
-REP_MONTHEND_CLIENT_DISCLAIMERS_COMMENTARIES_CLIENT_REPORT  created 2023-01-06  modified 2023-01-06
-REP_MONTHEND_CLIENT_DISCLAIMERS_COMMENTARIES_REPORT    created 2022-09-28  modified 2022-11-23
-REP_MONTHEND_CLIENT_DOCUMENTS_CLIENT_REPORT            created 2023-01-06  modified 2023-01-06
-REP_MONTHEND_CLIENT_DOCUMENTS_REPORT                   created 2022-09-28  modified 2022-11-23
-REP_MONTHEND_CLIENT_ENTITY_REPORT                      created 2022-09-28  modified 2022-11-23
-REP_MONTHEND_CLIENT_HISTORICALDATASETS_CLIENT_REPORT   created 2023-01-06  modified 2023-01-06
-REP_MONTHEND_CLIENT_HISTORICALDATASETS_REPORT          created 2022-09-28  modified 2022-11-23
-REP_MONTHEND_CLIENT_SNAPSHOTS_CLIENT_REPORT            created 2023-01-06  modified 2023-01-06
-REP_MONTHEND_CLIENT_SNAPSHOTS_REPORT                   created 2022-09-29  modified 2022-11-23
-REP_MONTHEND_CLIENT_STATSTICS_CLIENT_REPORT            created 2023-01-06  modified 2023-01-06
-REP_MONTHEND_CLIENT_STATSTICS_REPORT                   created 2022-09-29  modified 2022-11-23
-REP_MONTHEND_CLIENT_TIMESERIES_CLIENT_REPORT           created 2023-01-06  modified 2023-01-06
-REP_MONTHEND_CLIENT_TIMESERIES_REPORT                  created 2022-09-29  modified 2022-11-23
-REP_MONTHEND_CLIENT_TOP5_ALLOCATIONS_REPORT            created 2023-01-06  modified 2023-01-06
-REP_MONTHEND_CLIENT_USER_COUNTS_REPORT                 created 2022-10-12  modified 2022-10-12
-REP_MONTHEND_CLIENT_USER_REPORT                        created 2022-09-29  modified 2022-11-23
-REP_MONTHEND_TOP5_CLIENTS_DATA_FOOTPRINT_REPORT        created 2023-01-06  modified 2023-01-06
 
--- SP_INFO collection procedures (9 total — these feed the INFO_KAPP_Client_* tables)
-SP_INFO_KAPP_CLIENT_ALLOCATIONS_COUNTS                 created 2022-09-27
-SP_INFO_KAPP_CLIENT_DISCLAIMERS_COMMENTARIES_COUNTS    created 2022-09-27
-SP_INFO_KAPP_CLIENT_DOCUMENT_COUNTS                    created 2022-09-27
-SP_INFO_KAPP_CLIENT_ENTITIES_COUNTS                    created 2022-09-27
-SP_INFO_KAPP_CLIENT_HISTORICALDATASETS_COUNTS          created 2022-09-27
-SP_INFO_KAPP_CLIENT_SNAPSHOTS_COUNTS                   created 2022-09-27
-SP_INFO_KAPP_CLIENT_STATISTICS_COUNTS                  created 2022-09-27
-SP_INFO_KAPP_CLIENT_TIMESERIES_COUNTS                  created 2022-09-27
-SP_INFO_KAPP_CLIENT_USERS_COUNTS                       created 2022-09-27
-```
+| Procedure | Type | Created | Last Modified |
+|---|---|---|---|
+| REP_MONTHEND_CLIENT_ALLOCATIONS_CLIENT_REPORT | Reporting | 2023-01-06 | 2023-01-06 |
+| REP_MONTHEND_CLIENT_ALLOCATIONS_REPORT | Reporting | 2022-09-28 | 2023-01-06 |
+| REP_MONTHEND_CLIENT_DISCLAIMERS_COMMENTARIES_CLIENT_REPORT | Reporting | 2023-01-06 | 2023-01-06 |
+| REP_MONTHEND_CLIENT_DISCLAIMERS_COMMENTARIES_REPORT | Reporting | 2022-09-28 | 2022-11-23 |
+| REP_MONTHEND_CLIENT_DOCUMENTS_CLIENT_REPORT | Reporting | 2023-01-06 | 2023-01-06 |
+| REP_MONTHEND_CLIENT_DOCUMENTS_REPORT | Reporting | 2022-09-28 | 2022-11-23 |
+| REP_MONTHEND_CLIENT_ENTITY_REPORT | Reporting | 2022-09-28 | 2022-11-23 |
+| REP_MONTHEND_CLIENT_HISTORICALDATASETS_CLIENT_REPORT | Reporting | 2023-01-06 | 2023-01-06 |
+| REP_MONTHEND_CLIENT_HISTORICALDATASETS_REPORT | Reporting | 2022-09-28 | 2022-11-23 |
+| REP_MONTHEND_CLIENT_SNAPSHOTS_CLIENT_REPORT | Reporting | 2023-01-06 | 2023-01-06 |
+| REP_MONTHEND_CLIENT_SNAPSHOTS_REPORT | Reporting | 2022-09-29 | 2022-11-23 |
+| REP_MONTHEND_CLIENT_STATSTICS_CLIENT_REPORT | Reporting | 2023-01-06 | 2023-01-06 |
+| REP_MONTHEND_CLIENT_STATSTICS_REPORT | Reporting | 2022-09-29 | 2022-11-23 |
+| REP_MONTHEND_CLIENT_TIMESERIES_CLIENT_REPORT | Reporting | 2023-01-06 | 2023-01-06 |
+| REP_MONTHEND_CLIENT_TIMESERIES_REPORT | Reporting | 2022-09-29 | 2022-11-23 |
+| REP_MONTHEND_CLIENT_TOP5_ALLOCATIONS_REPORT | Reporting | 2023-01-06 | 2023-01-06 |
+| REP_MONTHEND_CLIENT_USER_COUNTS_REPORT | Reporting | 2022-10-12 | 2022-10-12 |
+| REP_MONTHEND_CLIENT_USER_REPORT | Reporting | 2022-09-29 | 2022-11-23 |
+| REP_MONTHEND_TOP5_CLIENTS_DATA_FOOTPRINT_REPORT | Reporting | 2023-01-06 | 2023-01-06 |
+| SP_INFO_KAPP_CLIENT_ALLOCATIONS_COUNTS | Collection | 2022-09-27 | 2022-09-27 |
+| SP_INFO_KAPP_CLIENT_DISCLAIMERS_COMMENTARIES_COUNTS | Collection | 2022-09-27 | 2022-09-27 |
+| SP_INFO_KAPP_CLIENT_DOCUMENT_COUNTS | Collection | 2022-09-27 | 2022-09-27 |
+| SP_INFO_KAPP_CLIENT_ENTITIES_COUNTS | Collection | 2022-09-27 | 2022-09-27 |
+| SP_INFO_KAPP_CLIENT_HISTORICALDATASETS_COUNTS | Collection | 2022-09-27 | 2022-09-27 |
+| SP_INFO_KAPP_CLIENT_SNAPSHOTS_COUNTS | Collection | 2022-09-27 | 2022-09-27 |
+| SP_INFO_KAPP_CLIENT_STATISTICS_COUNTS | Collection | 2022-09-27 | 2022-09-27 |
+| SP_INFO_KAPP_CLIENT_TIMESERIES_COUNTS | Collection | 2022-09-27 | 2022-09-27 |
+| SP_INFO_KAPP_CLIENT_USERS_COUNTS | Collection | 2022-09-27 | 2022-09-27 |
 
 Note: each REP_MONTHEND procedure has two versions — a summary report (all clients) and a per-client report (e.g. `REP_MONTHEND_CLIENT_ALLOCATIONS_REPORT` vs `REP_MONTHEND_CLIENT_ALLOCATIONS_CLIENT_REPORT`). All were last modified between Sep 2022 and Jan 2023 — built by donovan.vangraan, never touched since.
 
@@ -281,23 +239,24 @@ WHERE type = 'P' AND name LIKE '%MONTHEND%'
 ORDER BY name;
 ```
 
-Evidence — full output:
-```
-REP_MONTHEND_CLIENT_NUMBER_REPORT              created 2023-07-04  modified 2024-01-22
-REP_MONTHEND_CLIENTGROWTH_COST_ENV_FOOTPRINT_REPORT  created 2023-07-04  modified 2023-10-13
-REP_MONTHEND_CLIENTGROWTH_COST_REPORT          created 2023-07-05  modified 2023-07-05
-REP_MONTHEND_CLIENTGROWTH_COST_TOP5_REPORT     created 2023-07-05  modified 2024-01-22
-REP_MONTHEND_CLINTGROWTH_COST_ENV_FOOTPRINT_REPORT  created 2022-07-05  modified 2023-08-10
-REP_MONTHEND_CLINTGROWTH_COST_REPORT           created 2022-06-21  modified 2022-06-21
-REP_MONTHEND_CLINTGROWTH_COST_TOP5_REPORT      created 2022-07-05  modified 2023-08-10
-REP_MONTHEND_IP_BACKUP_REPORT                  created 2022-07-06  modified 2023-08-10
-REP_MONTHEND_IP_CLINTGROWTH_COST_REPORT        created 2022-06-21  modified 2023-01-05
-REP_MONTHEND_KAPP_BACKUP_REPORT                created 2022-07-06  modified 2023-08-10
-REP_MONTHEND_KAPP_CLINTGROWTH_COST_REPORT      created 2022-06-21  modified 2022-06-21
-REP_MONTHEND_KAPP_LOADER_REPORT                created 2022-07-05  modified 2023-08-10
-REP_MONTHEND_KAPP_SNAPSHOTS_TOP5_REPORT        created 2022-07-05  modified 2023-08-10
-REP_MONTHEND_MAXDB_SERVER_STATUS_REPORT        created 2017-12-13  modified 2017-12-13
-```
+Evidence — full output (run 2026-07-09):
+
+| Procedure | Created | Last Modified | Notes |
+|---|---|---|---|
+| REP_MONTHEND_CLIENT_NUMBER_REPORT | 2023-07-04 | 2024-01-22 | Most recently modified |
+| REP_MONTHEND_CLIENTGROWTH_COST_ENV_FOOTPRINT_REPORT | 2023-07-04 | 2023-10-13 | |
+| REP_MONTHEND_CLIENTGROWTH_COST_REPORT | 2023-07-05 | 2023-07-05 | |
+| REP_MONTHEND_CLIENTGROWTH_COST_TOP5_REPORT | 2023-07-05 | 2024-01-22 | Most recently modified |
+| REP_MONTHEND_CLINTGROWTH_COST_ENV_FOOTPRINT_REPORT | 2022-07-05 | 2023-08-10 | ⚠️ CLINT typo — old version |
+| REP_MONTHEND_CLINTGROWTH_COST_REPORT | 2022-06-21 | 2022-06-21 | ⚠️ CLINT typo — old version |
+| REP_MONTHEND_CLINTGROWTH_COST_TOP5_REPORT | 2022-07-05 | 2023-08-10 | ⚠️ CLINT typo — old version |
+| REP_MONTHEND_IP_BACKUP_REPORT | 2022-07-06 | 2023-08-10 | InvestorPress backups |
+| REP_MONTHEND_IP_CLINTGROWTH_COST_REPORT | 2022-06-21 | 2023-01-05 | ⚠️ CLINT typo — old version |
+| REP_MONTHEND_KAPP_BACKUP_REPORT | 2022-07-06 | 2023-08-10 | KAPP backups |
+| REP_MONTHEND_KAPP_CLINTGROWTH_COST_REPORT | 2022-06-21 | 2022-06-21 | ⚠️ CLINT typo — old version |
+| REP_MONTHEND_KAPP_LOADER_REPORT | 2022-07-05 | 2023-08-10 | |
+| REP_MONTHEND_KAPP_SNAPSHOTS_TOP5_REPORT | 2022-07-05 | 2023-08-10 | |
+| REP_MONTHEND_MAXDB_SERVER_STATUS_REPORT | 2017-12-13 | 2017-12-13 | ⚠️ Predates VCC framework — leftover |
 
 Note: `REP_MONTHEND_MAXDB_SERVER_STATUS_REPORT` was created in 2017 and never modified — predates the VCC framework, likely a leftover from a previous monitoring system. `REP_MONTHEND_CLIENT_NUMBER_REPORT` and `REP_MONTHEND_CLIENTGROWTH_COST_TOP5_REPORT` were last modified January 2024 — the most recently touched procedures in this database, suggesting someone was still actively working on these reports 6 months before donovan.vangraan went inactive.
 
