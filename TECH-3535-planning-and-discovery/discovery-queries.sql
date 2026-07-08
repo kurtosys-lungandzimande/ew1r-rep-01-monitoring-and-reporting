@@ -649,9 +649,16 @@ EXEC xp_cmdshell 'echo import sqlite3 > C:\temp\gf.py && echo conn = sqlite3.con
 EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python.exe C:\temp\gf.py';
 
 -- 9.8 List Grafana alert contact points
--- Expected: 2 Slack channels and 1 email placeholder (not configured).
--- The email contact point has no address set — it will not deliver alerts.
--- Slack webhooks are encrypted in grafana.db — a Grafana admin must rotate them.
+-- NOTE: This query returns 3 rows from alert_configuration.
+-- Grafana stores multiple config versions in this table:
+--   Row 1 — old draft config: default route pointed to broken email, no sub-routes
+--   Row 2 — CURRENT ACTIVE config: default route → alerts-data-operations (Slack),
+--            sub-route for Client Auth = Yes → alert-app-allow2fa-disabled (Slack)
+--   Row 3 — factory default Grafana ships with, never customised
+-- Only Row 2 is the active routing config. The Slack webhook tokens
+-- are encrypted — a Grafana admin login is required to view or rotate them.
+-- Expected contact points from Row 2: alerts-data-operations (Slack, active),
+-- alert-app-allow2fa-disabled (Slack, active), email (placeholder, will not deliver).
 EXEC xp_cmdshell 'echo import sqlite3 > C:\temp\gf.py && echo conn = sqlite3.connect(r"C:\Program Files\GrafanaLabs\grafana\data\grafana.db") >> C:\temp\gf.py && echo rows = conn.execute("SELECT alertmanager_configuration FROM alert_configuration").fetchall() >> C:\temp\gf.py && echo [print(r) for r in rows] >> C:\temp\gf.py';
 EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python.exe C:\temp\gf.py';
 
@@ -1058,4 +1065,30 @@ ORDER BY database_name, name;
 -- will determine which are active and which can be cleaned up.
 -- ============================================================
 EXEC xp_cmdshell 'echo import sqlite3 > C:\temp\gf.py && echo conn = sqlite3.connect(r"C:\Program Files\GrafanaLabs\grafana\data\grafana.db") >> C:\temp\gf.py && echo rows = conn.execute("SELECT title, updated FROM dashboard WHERE is_folder=0 ORDER BY updated DESC").fetchall() >> C:\temp\gf.py && echo print(len(rows), "dashboards total") >> C:\temp\gf.py && echo [print(r) for r in rows] >> C:\temp\gf.py';
+EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python.exe C:\temp\gf.py';
+
+
+-- ============================================================
+-- 13.8 — Dashboard to datasource UID mapping
+-- Purpose: Extract the datasource UID from every dashboard's
+-- panel JSON and cross-reference against the datasource table
+-- from query 12.6 to resolve UIDs to human-readable names.
+-- This is how the Datasource column in the dashboard evidence
+-- table was built. UIDs are what Grafana stores internally —
+-- without this query you cannot tell which physical database
+-- each dashboard reads from.
+-- Run confirmed 2026-07-07. Output cross-referenced against
+-- query 12.6 to produce the final dashboard table.
+-- ============================================================
+EXEC xp_cmdshell 'del C:\temp\gf.py';
+EXEC xp_cmdshell 'echo import sqlite3, json > C:\temp\gf.py';
+EXEC xp_cmdshell 'echo conn = sqlite3.connect(r"C:\Program Files\GrafanaLabs\grafana\data\grafana.db") >> C:\temp\gf.py';
+EXEC xp_cmdshell 'echo rows = conn.execute("SELECT title, data FROM dashboard WHERE is_folder=0 ORDER BY updated DESC").fetchall() >> C:\temp\gf.py';
+EXEC xp_cmdshell 'echo for r in rows: >> C:\temp\gf.py';
+EXEC xp_cmdshell 'echo     panels = json.loads(r[1]).get("panels", []) >> C:\temp\gf.py';
+EXEC xp_cmdshell 'echo     ds = set() >> C:\temp\gf.py';
+EXEC xp_cmdshell 'echo     for p in panels: >> C:\temp\gf.py';
+EXEC xp_cmdshell 'echo         d = p.get("datasource", "") >> C:\temp\gf.py';
+EXEC xp_cmdshell 'echo         ds.add(d.get("uid", "") if isinstance(d, dict) else str(d)) >> C:\temp\gf.py';
+EXEC xp_cmdshell 'echo     print(r[0], "|", ds) >> C:\temp\gf.py';
 EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python.exe C:\temp\gf.py';
