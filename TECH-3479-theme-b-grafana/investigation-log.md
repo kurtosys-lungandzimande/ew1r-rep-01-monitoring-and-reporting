@@ -65,16 +65,21 @@ EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python
 ```
 
 **Evidence:**
-```
-Users: 8 total
-  tashvir.babulal    admin   last_seen 2026-06-28   active
-  yogeshwar.phull    admin   last_seen 2026-06-15   active
-  rayhaan.suleyman   admin   last_seen 2026-06-30   active
-  donovan.vangraan   editor  last_seen 2024-11-12   INACTIVE — credentials still in 4 datasources
-  [4 additional viewer accounts]
-```
 
-> Note: User list was captured on 2026-07-01. Re-run query 9.4 to confirm current state before TECH-3479 deep work begins — user accounts may have changed.
+| Login | Name | Email | Role | Last Seen | Notes |
+|---|---|---|---|---|---|
+| admin | — | admin@localhost | Admin | 2024-11-29 | ⚠️ Default admin account — no real name, should be disabled |
+| donovan.vangraan | Donovan van Graan | donovan.vangraan@kurtosys.com | Admin | 2024-11-13 | ⚠️ Inactive since Nov 2024 — credentials still in 4 Zabbix datasources |
+| tashvir.babulal | Tashvir Babulal | tashvir.babulal@kurtosys.com | Admin | 2026-06-09 | Active |
+| yogeshwar.phull | Yogeshwar Phull | yogeshwar.phull@kurtosys.com | Admin | 2026-06-22 | Active |
+| rayhaan.suleyman | Rayhaan Suleyman | rayhaan.suleyman@kurtosys.com | Admin | 2026-07-07 | Active |
+| ram.jeyaraman | Ram Jeyaraman | ram@kurtosys.com | Viewer | 2025-09-11 | Active |
+| jason.wolmarans | Jason Wolmarans | jason.wolmarans@kurtosys.com | Viewer | 2025-02-12 | Active |
+| sunil.odedra | Sunil Odedra | sunil.odedra@kurtosys.com | Viewer | 2023-07-12 | ⚠️ Inactive since Jul 2023 |
+
+**Total: 8 users (4 admins, 3 viewers, 1 NULL row ignored)**
+
+> Note: User list re-run on 2026-07-07. donovan.vangraan is Admin (not Editor as previously noted) — confirmed via is_admin column.
 
 ---
 
