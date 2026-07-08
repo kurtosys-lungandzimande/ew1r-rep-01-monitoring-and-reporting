@@ -17,13 +17,21 @@ Full queries in TECH-3535-planning-and-discovery/discovery-queries.sql — Secti
 
 ---
 
-### Datasources (query 9.3)
+### Datasources (queries 9.3 and 12.6)
 
-**Query:**
+**Query 9.3** — initial datasource list (name, type, url, user):
 ```sql
 EXEC xp_cmdshell 'echo import sqlite3 > C:\temp\gf.py && echo conn = sqlite3.connect(r"C:\Program Files\GrafanaLabs\grafana\data\grafana.db") >> C:\temp\gf.py && echo rows = conn.execute("SELECT name, type, url, user FROM data_source").fetchall() >> C:\temp\gf.py && echo [print(r) for r in rows] >> C:\temp\gf.py';
 EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python.exe C:\temp\gf.py';
 ```
+
+**Query 12.6** — full datasource list with UIDs (run 2026-07-07 to resolve dashboard datasource references):
+```sql
+EXEC xp_cmdshell 'echo import sqlite3 > C:\temp\gf_ds_uid.py && echo conn = sqlite3.connect(r"C:\Program Files\GrafanaLabs\grafana\data\grafana.db") >> C:\temp\gf_ds_uid.py && echo rows = conn.execute("SELECT uid, name, type, url, json_data FROM data_source ORDER BY name").fetchall() >> C:\temp\gf_ds_uid.py && echo [print(r) for r in rows] >> C:\temp\gf_ds_uid.py';
+EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python.exe C:\temp\gf_ds_uid.py';
+```
+
+> Note: UID column in the evidence table below comes from query 12.6. UIDs are what Grafana stores inside dashboard JSON to reference datasources — without them you cannot map a dashboard to its datasource. Query 9.3 confirmed names/types/URLs. Query 12.6 added UIDs and confirmed the full picture.
 
 **Evidence:**
 
@@ -83,13 +91,31 @@ EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python
 
 ---
 
-### Dashboards (queries 9.5 and 13.7)
+### Dashboards (queries 9.5, 13.7, and 12.6)
 
-**Query:**
+**Query 9.5 / 13.7** — dashboard titles and last updated dates:
 ```sql
 EXEC xp_cmdshell 'echo import sqlite3 > C:\temp\gf.py && echo conn = sqlite3.connect(r"C:\Program Files\GrafanaLabs\grafana\data\grafana.db") >> C:\temp\gf.py && echo rows = conn.execute("SELECT title, created, updated FROM dashboard WHERE is_folder=0 ORDER BY updated DESC").fetchall() >> C:\temp\gf.py && echo print(len(rows), "dashboards total") >> C:\temp\gf.py && echo [print(r) for r in rows] >> C:\temp\gf.py';
 EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python.exe C:\temp\gf.py';
 ```
+
+**UID-to-datasource resolution** — run after 13.7 to map dashboard datasource UIDs to names (query 13.7 variant):
+```sql
+EXEC xp_cmdshell 'del C:\temp\gf.py';
+EXEC xp_cmdshell 'echo import sqlite3, json > C:\temp\gf.py';
+EXEC xp_cmdshell 'echo conn = sqlite3.connect(r"C:\Program Files\GrafanaLabs\grafana\data\grafana.db") >> C:\temp\gf.py';
+EXEC xp_cmdshell 'echo rows = conn.execute("SELECT title, data FROM dashboard WHERE is_folder=0 ORDER BY updated DESC").fetchall() >> C:\temp\gf.py';
+EXEC xp_cmdshell 'echo for r in rows: >> C:\temp\gf.py';
+EXEC xp_cmdshell 'echo     panels = json.loads(r[1]).get("panels", []) >> C:\temp\gf.py';
+EXEC xp_cmdshell 'echo     ds = set() >> C:\temp\gf.py';
+EXEC xp_cmdshell 'echo     for p in panels: >> C:\temp\gf.py';
+EXEC xp_cmdshell 'echo         d = p.get("datasource", "") >> C:\temp\gf.py';
+EXEC xp_cmdshell 'echo         ds.add(d.get("uid", "") if isinstance(d, dict) else str(d)) >> C:\temp\gf.py';
+EXEC xp_cmdshell 'echo     print(r[0], "|", ds) >> C:\temp\gf.py';
+EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python.exe C:\temp\gf.py';
+```
+
+> Note: The Datasource column in the evidence table below was resolved by cross-referencing the UIDs extracted from dashboard JSON against the datasource UID table from query 12.6. Raw UIDs from the dashboard scan were replaced with human-readable datasource names for clarity.
 
 **Evidence:**
 
