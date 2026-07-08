@@ -1096,3 +1096,223 @@ EXEC xp_cmdshell 'echo         d = p.get("datasource", "") >> C:\temp\gf.py';
 EXEC xp_cmdshell 'echo         ds.add(d.get("uid", "") if isinstance(d, dict) else str(d)) >> C:\temp\gf.py';
 EXEC xp_cmdshell 'echo     print(r[0], "|", ds) >> C:\temp\gf.py';
 EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python.exe C:\temp\gf.py';
+
+
+-- ============================================================
+-- SECTION 14 — DBA_VCC_COST DEEP DIVE
+-- Purpose: Confirm what DBA_VCC_COST tracks, who it tracks it
+-- for, and whether the data is current.
+-- Run date: 2026-07-09
+-- Key findings:
+--   - Database confirmed client-facing billing data
+--   - LU_KAPP_ClientList has 200+ real institutional clients
+--   - All 9 collection tables stale since 4 May 2026
+--   - Root cause: SP_INFO procedures depend on DBA_VCC_MEMSQL
+--     ping stats — when MEMSQL jobs disabled, cost collection
+--     silently stopped on the same day
+--   - LU_EntityList confirms EW1R-TC = TeamCity,
+--     EW2P-MARKETING-DB owner = Marketing account
+-- ============================================================
+
+
+-- ============================================================
+-- 14.1 — DBA_VCC_COST objects — all stored procedures, views,
+--        and tables
+--
+-- WHY THIS QUERY EXISTS:
+-- Confirms exactly what exists in DBA_VCC_COST — the full list
+-- of stored procedures, tables, and views. This is the evidence
+-- that 19 REP_MONTHEND reporting procedures and 9 SP_INFO
+-- collection procedures exist in this database.
+--
+-- ACTUAL OUTPUT CONFIRMED (run 2026-07-09):
+--   REP_MONTHEND_CLIENT_ALLOCATIONS_CLIENT_REPORT   SP  created 2023-01-06  modified 2023-01-06
+--   REP_MONTHEND_CLIENT_ALLOCATIONS_REPORT          SP  created 2022-09-28  modified 2023-01-06
+--   REP_MONTHEND_CLIENT_DISCLAIMERS_COMMENTARIES_CLIENT_REPORT  SP  2023-01-06
+--   REP_MONTHEND_CLIENT_DISCLAIMERS_COMMENTARIES_REPORT         SP  2022-09-28
+--   REP_MONTHEND_CLIENT_DOCUMENTS_CLIENT_REPORT     SP  created 2023-01-06
+--   REP_MONTHEND_CLIENT_DOCUMENTS_REPORT            SP  created 2022-09-28
+--   REP_MONTHEND_CLIENT_ENTITY_REPORT               SP  created 2022-09-28
+--   REP_MONTHEND_CLIENT_HISTORICALDATASETS_CLIENT_REPORT  SP  2023-01-06
+--   REP_MONTHEND_CLIENT_HISTORICALDATASETS_REPORT   SP  created 2022-09-28
+--   REP_MONTHEND_CLIENT_SNAPSHOTS_CLIENT_REPORT     SP  created 2023-01-06
+--   REP_MONTHEND_CLIENT_SNAPSHOTS_REPORT            SP  created 2022-09-29
+--   REP_MONTHEND_CLIENT_STATSTICS_CLIENT_REPORT     SP  created 2023-01-06
+--   REP_MONTHEND_CLIENT_STATSTICS_REPORT            SP  created 2022-09-29
+--   REP_MONTHEND_CLIENT_TIMESERIES_CLIENT_REPORT    SP  created 2023-01-06
+--   REP_MONTHEND_CLIENT_TIMESERIES_REPORT           SP  created 2022-09-29
+--   REP_MONTHEND_CLIENT_TOP5_ALLOCATIONS_REPORT     SP  created 2023-01-06
+--   REP_MONTHEND_CLIENT_USER_COUNTS_REPORT          SP  created 2022-10-12
+--   REP_MONTHEND_CLIENT_USER_REPORT                 SP  created 2022-09-29
+--   REP_MONTHEND_TOP5_CLIENTS_DATA_FOOTPRINT_REPORT SP  created 2023-01-06
+--   SP_INFO_KAPP_CLIENT_ALLOCATIONS_COUNTS          SP  created 2022-09-27
+--   SP_INFO_KAPP_CLIENT_DISCLAIMERS_COMMENTARIES_COUNTS  SP  2022-09-27
+--   SP_INFO_KAPP_CLIENT_DOCUMENT_COUNTS             SP  created 2022-09-27
+--   SP_INFO_KAPP_CLIENT_ENTITIES_COUNTS             SP  created 2022-09-27
+--   SP_INFO_KAPP_CLIENT_HISTORICALDATASETS_COUNTS   SP  created 2022-09-27
+--   SP_INFO_KAPP_CLIENT_SNAPSHOTS_COUNTS            SP  created 2022-09-27
+--   SP_INFO_KAPP_CLIENT_STATISTICS_COUNTS           SP  created 2022-09-27
+--   SP_INFO_KAPP_CLIENT_TIMESERIES_COUNTS           SP  created 2022-09-27
+--   SP_INFO_KAPP_CLIENT_USERS_COUNTS                SP  created 2022-09-27
+--   + tables: INFO_KAPP_Client_*, LU_KAPP_ClientList, LU_EntityList,
+--             INFO_AWS_*, MON_AWS_*, LU_*_ClientList
+-- ============================================================
+SELECT
+    name,
+    type_desc,
+    create_date,
+    modify_date
+FROM DBA_VCC_COST.sys.objects
+WHERE type IN ('P', 'V', 'U')
+ORDER BY type, name;
+
+
+-- ============================================================
+-- 14.2 — DBA_VCC_COST data freshness — all 9 collection tables
+--
+-- WHY THIS QUERY EXISTS:
+-- Confirms when data was last written to each INFO_KAPP_Client_*
+-- table. If the collection job is healthy, MAX(DateChecked)
+-- should be within the last 7 days (job runs weekly on Sunday).
+-- If stale, the REP_MONTHEND reports are producing wrong figures.
+--
+-- ACTUAL OUTPUT CONFIRMED (run 2026-07-09):
+--   INFO_KAPP_Client_Allocations_Counts              2026-05-04 08:00   123,374 rows
+--   INFO_KAPP_Client_Disclaimers_Commentaries_Counts 2026-05-04 08:00   578,926 rows
+--   INFO_KAPP_Client_Document_Counts                 2026-05-04 08:00   471,593 rows
+--   INFO_KAPP_Client_Entities_Counts                 2026-05-04 08:00   145,047 rows
+--   INFO_KAPP_Client_HistoricalDatasets_Counts       2026-05-04 08:00    33,483 rows
+--   INFO_KAPP_Client_Snapshots_Counts                2026-05-04 08:00   286,584 rows
+--   INFO_KAPP_Client_Statstics_Counts                2026-05-04 08:00   134,707 rows
+--   INFO_KAPP_Client_TimeSeries_Counts               2026-05-04 08:00   120,269 rows
+--   INFO_KAPP_Client_Users_Counts                    2026-05-04 08:00 14,811,776 rows
+--   INFO_AWS_DE_Entity_Cost (STALE)                  2024-11-01           4,382 rows
+--
+-- ALL 9 tables stale since 4 May 2026 — same day MEMSQL jobs
+-- were disabled. Root cause: SP_INFO procedures check
+-- DBA_VCC_MEMSQL.BAS_Ping_Stat for nodes active within 40 min.
+-- With MEMSQL jobs disabled, no node passes the check,
+-- @SERVERNAMES is empty, WHILE loop never runs, zero rows written.
+-- Job reports Succeeded — no error raised.
+-- ============================================================
+SELECT 'INFO_KAPP_Client_Allocations_Counts'              AS table_name, MAX(DateChecked) AS last_collected, COUNT(*) AS rows FROM DBA_VCC_COST.dbo.INFO_KAPP_Client_Allocations_Counts
+UNION ALL
+SELECT 'INFO_KAPP_Client_Disclaimers_Commentaries_Counts', MAX(DateChecked), COUNT(*) FROM DBA_VCC_COST.dbo.INFO_KAPP_Client_Disclaimers_Commentaries_Counts
+UNION ALL
+SELECT 'INFO_KAPP_Client_Document_Counts',                 MAX(DateChecked), COUNT(*) FROM DBA_VCC_COST.dbo.INFO_KAPP_Client_Document_Counts
+UNION ALL
+SELECT 'INFO_KAPP_Client_Entities_Counts',                 MAX(DateChecked), COUNT(*) FROM DBA_VCC_COST.dbo.INFO_KAPP_Client_Entities_Counts
+UNION ALL
+SELECT 'INFO_KAPP_Client_HistoricalDatasets_Counts',       MAX(DateChecked), COUNT(*) FROM DBA_VCC_COST.dbo.INFO_KAPP_Client_HistoricalDatasets_Counts
+UNION ALL
+SELECT 'INFO_KAPP_Client_Snapshots_Counts',                MAX(DateChecked), COUNT(*) FROM DBA_VCC_COST.dbo.INFO_KAPP_Client_Snapshots_Counts
+UNION ALL
+SELECT 'INFO_KAPP_Client_Statstics_Counts',                MAX(DateChecked), COUNT(*) FROM DBA_VCC_COST.dbo.INFO_KAPP_Client_Statstics_Counts
+UNION ALL
+SELECT 'INFO_KAPP_Client_TimeSeries_Counts',               MAX(DateChecked), COUNT(*) FROM DBA_VCC_COST.dbo.INFO_KAPP_Client_TimeSeries_Counts
+UNION ALL
+SELECT 'INFO_KAPP_Client_Users_Counts',                    MAX(DateChecked), COUNT(*) FROM DBA_VCC_COST.dbo.INFO_KAPP_Client_Users_Counts
+UNION ALL
+SELECT 'INFO_AWS_DE_Entity_Cost (STALE)',                   MAX(Period),      COUNT(*) FROM DBA_VCC_COST.dbo.INFO_AWS_DE_Entity_Cost;
+
+
+-- ============================================================
+-- 14.3 — KAPP client list — who is being tracked
+--
+-- WHY THIS QUERY EXISTS:
+-- Confirms which clients are registered in DBA_VCC_COST.
+-- This is the definitive answer to whether this database is
+-- internal reporting or client-facing billing data.
+--
+-- ACTUAL OUTPUT CONFIRMED (run 2026-07-09):
+--   200+ clients across EW2, UE1, EC1 including:
+--   Aberdeen/abrdn, AXA IM, BlackRock, BlueBay, BMO, BNY Mellon,
+--   Boston Partners, CTI/Threadneedle, FedHermes, ICMARC, Jupiter,
+--   M&G Investments, Nordea, OP Cooperative, Osmosis, PRIMECAP,
+--   RWC Partners, SALI, Sands Capital, Security Benefit,
+--   T. Rowe Price, TDAM, Wellington, Ziegler and others.
+--   C&D Investments marked Terminated — still in list.
+--   Several entries marked Potential Client — not yet live.
+--
+-- CONCLUSION: This is client billing data. Decommissioning
+-- without a confirmed replacement directly impacts invoicing.
+-- ============================================================
+SELECT * FROM DBA_VCC_COST.dbo.LU_KAPP_ClientList ORDER BY ClientName;
+
+
+-- ============================================================
+-- 14.4 — Entity list — infrastructure nodes tracked per product
+--
+-- WHY THIS QUERY EXISTS:
+-- LU_EntityList is the registry of every infrastructure node
+-- tracked for AWS cost billing across all products. The SP_INFO
+-- procedures use this table to filter which SingleStore nodes
+-- to collect from (WHERE Application = 'KAPP').
+-- Also answers two open questions from the investigation:
+--   - EW1R-TC confirmed as TeamCity (Shared_Services_Non-Prod)
+--   - EW2P-MARKETING-DB owner confirmed as Marketing account
+--     (AccountId 232173278818)
+--
+-- NOTE: Column is named 'Enviroment' (typo) not 'Environment'.
+-- Data quality issues: Region has leading space on some rows,
+-- Enviroment has mixed case (RELEASE vs Release vs Development).
+--
+-- ACTUAL OUTPUT CONFIRMED (run 2026-07-09):
+--   Applications tracked: KAPP, DXM, InvestorPress, Encore,
+--   WPv2, Marketing, NiFi, TeamCity, Octa, Reporting, Zabbix
+--   EW1R-REP-01 appears as Application=Reporting — this server
+--   tracks its own AWS costs.
+--   WPv2 entries still present despite platform decommissioned.
+--   One row has EntityName=DELETE — flagged for removal, never
+--   cleaned up.
+-- ============================================================
+SELECT
+    COLUMN_NAME
+FROM DBA_VCC_COST.INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_NAME = 'LU_EntityList'
+ORDER BY ORDINAL_POSITION;
+-- Returns: AccountName, AccountId, EntityName, Application,
+--          Enviroment (typo), Region, DateAdded
+
+SELECT * FROM DBA_VCC_COST.dbo.LU_EntityList ORDER BY Application, Enviroment, EntityName;
+
+
+-- ============================================================
+-- 14.5 — DBA_VCC_MEMSQL REP_MONTHEND procedures
+--
+-- WHY THIS QUERY EXISTS:
+-- Confirms a second set of REP_MONTHEND procedures exists in
+-- DBA_VCC_MEMSQL — separate from the 19 in DBA_VCC_COST.
+-- These focus on client growth, cost footprint, backups, and
+-- loader stats rather than entity counts.
+--
+-- ACTUAL OUTPUT CONFIRMED (run 2026-07-09):
+--   REP_MONTHEND_CLIENT_NUMBER_REPORT              modified 2024-01-22
+--   REP_MONTHEND_CLIENTGROWTH_COST_ENV_FOOTPRINT_REPORT  modified 2023-10-13
+--   REP_MONTHEND_CLIENTGROWTH_COST_REPORT          modified 2023-07-05
+--   REP_MONTHEND_CLIENTGROWTH_COST_TOP5_REPORT     modified 2024-01-22
+--   REP_MONTHEND_CLINTGROWTH_COST_ENV_FOOTPRINT_REPORT  modified 2023-08-10
+--   REP_MONTHEND_CLINTGROWTH_COST_REPORT           modified 2022-06-21
+--   REP_MONTHEND_CLINTGROWTH_COST_TOP5_REPORT      modified 2023-08-10
+--   REP_MONTHEND_IP_BACKUP_REPORT                  modified 2023-08-10
+--   REP_MONTHEND_IP_CLINTGROWTH_COST_REPORT        modified 2023-01-05
+--   REP_MONTHEND_KAPP_BACKUP_REPORT                modified 2023-08-10
+--   REP_MONTHEND_KAPP_CLINTGROWTH_COST_REPORT      modified 2022-06-21
+--   REP_MONTHEND_KAPP_LOADER_REPORT                modified 2023-08-10
+--   REP_MONTHEND_KAPP_SNAPSHOTS_TOP5_REPORT        modified 2023-08-10
+--   REP_MONTHEND_MAXDB_SERVER_STATUS_REPORT        created 2017-12-13 — predates VCC framework
+--
+-- Note: CLINTGROWTH typo in older (2022) procedures — corrected
+-- to CLIENTGROWTH in newer (2023) versions. Both sets present.
+-- Most recently modified: CLIENT_NUMBER_REPORT and
+-- CLIENTGROWTH_COST_TOP5_REPORT — January 2024.
+-- ============================================================
+SELECT
+    name,
+    type_desc,
+    create_date,
+    modify_date
+FROM DBA_VCC_MEMSQL.sys.objects
+WHERE type = 'P'
+AND name LIKE '%MONTHEND%'
+ORDER BY name;
