@@ -44,11 +44,31 @@ EW2P-MARKETING-DB     Unknown      Not online — owner unknown
 
 ---
 
-## Consumers — not yet confirmed
+## 2026-07-07 — Consumers: what query evidence confirmed vs what still needs stakeholder input
 
-**What still needs to be answered for TECH-3480:**
-- Who reads DBA_VCC_COST — Finance, billing, or internal only?
-- Who calls the 19 REP_MONTHEND_* stored procedures in DBA_VCC_COST?
-- Are any Grafana dashboards used by clients or for SLA reporting?
-- What firewall rules allow inbound connections to port 1433 and 443?
-- Who depends on the Grafana alerts (Slack channels)?
+**Question:** Who consumes the data and dashboards on this server?
+
+**Method:** Grafana dashboard JSON scanned via xp_cmdshell + Python (queries 12.3, 12.4, 12.5). Full queries in TECH-3535-planning-and-discovery/discovery-queries.sql.
+
+**Evidence — confirmed from query results:**
+```
+DBA_VCC_COST — 4 Grafana dashboards confirmed reading from it (query 12.3)
+  Database Engineering Costs                  2024-10-15  internal
+  Database Engineering Sprint Reporting       2024-03-08  internal
+  KAPP Client Utilisation and Growth Report   2024-02-22  ⚠️ name suggests client-facing
+  AWS Cost Report Monthly                     2023-10-06  internal — AWS data stale since Sept 2024
+
+DBA_VCC_MEMSQL — 14 dashboards confirmed reading from it (query 12.5) — all stale since May 2026
+REP_MONTHEND procedures — 6 dashboards confirmed calling them (query 12.4) — no dedicated jobs, all stale
+```
+
+**Evidence — still open, needs stakeholder input:**
+```
+Who reads DBA_VCC_COST — billing, client-facing, or internal only?
+Who calls the 19 REP_MONTHEND_* stored procedures each month end?
+Is KAPP Client Utilisation and Growth Report shared with clients?
+What firewall rules allow inbound connections to port 1433 and 443?
+Who depends on the Grafana Slack alerts?
+```
+
+**Finding:** Consumer picture is partially confirmed from query evidence. The critical unknown is whether DBA_VCC_COST data or any Grafana dashboard is client-facing. Escalated to tashvir.babulal and rayhaan.suleyman. Full consumer detail in consumers-and-dependencies.md.
