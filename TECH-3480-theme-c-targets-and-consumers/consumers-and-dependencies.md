@@ -140,6 +140,40 @@ Other Services Month End Reporting (Draft)  2023-07-21
 
 ---
 
+### DBA_VCC_MEMSQL — REP_MONTHEND procedures
+
+A second set of REP_MONTHEND procedures exists in DBA_VCC_MEMSQL — confirmed by query 6.2 (run 2026-07-09):
+```sql
+SELECT name, type_desc, create_date, modify_date
+FROM DBA_VCC_MEMSQL.sys.objects
+WHERE type = 'P' AND name LIKE '%MONTHEND%'
+ORDER BY name;
+```
+
+Evidence — full output:
+```
+REP_MONTHEND_CLIENT_NUMBER_REPORT              created 2023-07-04  modified 2024-01-22
+REP_MONTHEND_CLIENTGROWTH_COST_ENV_FOOTPRINT_REPORT  created 2023-07-04  modified 2023-10-13
+REP_MONTHEND_CLIENTGROWTH_COST_REPORT          created 2023-07-05  modified 2023-07-05
+REP_MONTHEND_CLIENTGROWTH_COST_TOP5_REPORT     created 2023-07-05  modified 2024-01-22
+REP_MONTHEND_CLINTGROWTH_COST_ENV_FOOTPRINT_REPORT  created 2022-07-05  modified 2023-08-10
+REP_MONTHEND_CLINTGROWTH_COST_REPORT           created 2022-06-21  modified 2022-06-21
+REP_MONTHEND_CLINTGROWTH_COST_TOP5_REPORT      created 2022-07-05  modified 2023-08-10
+REP_MONTHEND_IP_BACKUP_REPORT                  created 2022-07-06  modified 2023-08-10
+REP_MONTHEND_IP_CLINTGROWTH_COST_REPORT        created 2022-06-21  modified 2023-01-05
+REP_MONTHEND_KAPP_BACKUP_REPORT                created 2022-07-06  modified 2023-08-10
+REP_MONTHEND_KAPP_CLINTGROWTH_COST_REPORT      created 2022-06-21  modified 2022-06-21
+REP_MONTHEND_KAPP_LOADER_REPORT                created 2022-07-05  modified 2023-08-10
+REP_MONTHEND_KAPP_SNAPSHOTS_TOP5_REPORT        created 2022-07-05  modified 2023-08-10
+REP_MONTHEND_MAXDB_SERVER_STATUS_REPORT        created 2017-12-13  modified 2017-12-13
+```
+
+Note: `REP_MONTHEND_MAXDB_SERVER_STATUS_REPORT` was created in 2017 and never modified — predates the VCC framework, likely a leftover from a previous monitoring system. `REP_MONTHEND_CLIENT_NUMBER_REPORT` and `REP_MONTHEND_CLIENTGROWTH_COST_TOP5_REPORT` were last modified January 2024 — the most recently touched procedures in this database, suggesting someone was still actively working on these reports 6 months before donovan.vangraan went inactive.
+
+Note also the typo: `CLINTGROWTH` vs `CLIENTGROWTH` — both variants exist. The older procedures (2022) use `CLINT`, the newer ones (2023) corrected it to `CLIENT`. Both sets are still present — the old ones were never cleaned up.
+
+---
+
 ## DBA_VCC_MEMSQL — Data Freshness
 
 All 7 collection jobs disabled since May 2026. Last run history:
