@@ -7,7 +7,11 @@
 --           it monitors, who depends on it, and what breaks if
 --           it is decommissioned.
 -- Author  : DBA Discovery Pass — 2026
--- Status  : Investigation complete. Pending consumer confirmation.
+-- Status  : COMPLETE — all 13 sections executed and outputs captured.
+--           Findings documented across TECH-3478, TECH-3479, TECH-3480.
+--           Consumer confirmation for billing/client-facing use
+--           escalated to stakeholders — tracked in open-questions.md.
+--           TECH-3535 closed. TECH-3481 in progress.
 -- ============================================================
 
 

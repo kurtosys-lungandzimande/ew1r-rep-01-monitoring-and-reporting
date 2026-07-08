@@ -16,9 +16,9 @@ EW1R-REP-01 is a non-production Windows host running SQL Server 2019 and Grafana
 |---|---|---|---|
 | 1 | Run SQL discovery queries and capture outputs | ✅ Done | TECH-3535 |
 | 2 | Inventory SQL Server and Grafana components | ✅ Done | TECH-3478 / TECH-3479 |
-| 3 | Map external targets and consumers | 🔄 In Progress | TECH-3480 |
+| 3 | Map external targets and consumers | ✅ Done | TECH-3480 |
 | 4 | Document open questions and blockers | ✅ Done | TECH-3535 |
-| 5 | Produce a topology and risk classification | ⏳ Blocked | TECH-3481 |
+| 5 | Produce a topology and risk classification | 🔄 In Progress | TECH-3481 |
 
 ---
 
@@ -29,9 +29,9 @@ EW1R-REP-01 is a non-production Windows host running SQL Server 2019 and Grafana
 | All discovery queries executed and outputs captured | ✅ Done | 13 sections of discovery queries run — captured in discovery-queries.sql |
 | SQL Server inventory complete (jobs, databases, linked servers) | ✅ Done | Jobs, databases, 109 linked servers inventoried — TECH-3478 owns the detail |
 | Grafana inventory complete (datasources, dashboards, users, alerts) | ✅ Done | 21 datasources, 74 dashboards, 8 users (5 admins, 3 viewers), 3 alert rules, 3 contact points captured — TECH-3479 owns the detail |
-| External targets and consumers mapped | 🔄 In Progress | Data sources identified — consumer confirmation still open, TECH-3480 owns this |
+| External targets and consumers mapped | ✅ Done | 109 linked servers mapped, 11 stale confirmed, consumers identified — consumer confirmation for billing/client-facing use escalated to stakeholders, TECH-3480 owns the detail |
 | Open questions documented and blockers escalated | ✅ Done | 34 open questions logged in open-questions.md — critical blockers flagged |
-| Topology and classification published to Confluence | ⏳ Blocked | Blocked on TECH-3478, TECH-3479, TECH-3480 completing — TECH-3481 owns this |
+| Topology and classification published to Confluence | 🔄 In Progress | TECH-3481 in progress — blocked on stakeholder answers to consumer questions |
 
 ---
 
