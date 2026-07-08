@@ -27,30 +27,30 @@ EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python
 
 **Evidence:**
 
-| Name | Type | URL | User | Notes |
-|---|---|---|---|---|
-| DBA_VCC | mssql | localhost | grafana | Core SQL Server datasource — reads from DBA_VCC on localhost |
-| DBA_VCC | mssql | localhost | grafana | ⚠️ Duplicate entry — same datasource registered twice |
-| KAPP Dev | mysql | 10.61.11.70:3306 | root | KAPP Dev environment |
-| KAPP Rel | mysql | 10.77.3.236 | root | KAPP Release environment |
-| KAPP UK Prod | mysql | 10.121.29.82 | root | KAPP UK Production |
-| KAPP EU Prod | mysql | 10.125.6.134 | root | KAPP EU Production |
-| KAPP US Prod | mysql | 10.128.30.6 | root | KAPP US Production |
-| KAPP Monitoring | mysql | 10.120.8.208 | root | KAPP monitoring database |
-| MySQL | mysql | 10.77.3.236:3306 | root | ⚠️ Likely duplicate of KAPP Rel — same IP |
-| monitoring | mysql | 10.120.8.208 | root | ⚠️ Likely duplicate of KAPP Monitoring — same IP |
-| SingleStore-Dev | mysql | 10.61.0.95 | FundPressDataReader | SingleStore Dev environment |
-| SingleStore-Release | mysql | 10.77.6.161 | FundPressDataReader | SingleStore Release environment |
-| SingleStore-Production-UK | mysql | 10.121.22.219 | FundPressDataReader | SingleStore UK Production |
-| SingleStore-Production-EU | mysql | 10.125.12.126 | FundPressDataReader | SingleStore EU Production |
-| SingleStore-Production-US | mysql | 10.128.24.122 | FundPressDataReader | SingleStore US Production |
-| Zabbix Prod Old | mysql | 10.120.8.120 | donovan.vangraan | ⚠️ Stale credentials — donovan.vangraan inactive since Nov 2024 |
-| zabbix-server-data.shprd.kurtosys-internal | mysql | 10.120.8.51 | donovan.vangraan | ⚠️ Stale credentials — donovan.vangraan inactive since Nov 2024 |
-| Zabbix Nonprod old | mysql | 10.72.8.191 | donovan.vangraan | ⚠️ Stale credentials — donovan.vangraan inactive since Nov 2024 |
-| zabbix-server-data.shnonprd.kurtosys-internal | mysql | 10.72.8.186 | donovan.vangraan | ⚠️ Stale credentials — donovan.vangraan inactive since Nov 2024 |
-| JSON API | marcusolsson-json-datasource | https://10.125.9.192:8443/nifi-api/flow/process-groups/root/ | — | NiFi Registry API |
-| CloudWatch | cloudwatch | — | — | AWS CloudWatch — uses IAM role |
-| InfluxDB | influxdb | — | — | InfluxDB — connection details not exposed |
+| UID | Name | Type | URL | User | Notes |
+|---|---|---|---|---|---|
+| a082f27e-c56e-4a68-8a35-2b761fe5a099 | DBA_VCC | mssql | localhost | grafana | Core SQL Server datasource — reads from DBA_VCC on localhost |
+| e8597015-eb43-4adc-8da4-090eed43ee62 | DBA_VCC | mssql | localhost | grafana | ⚠️ Duplicate entry — same datasource registered twice |
+| da173cae-70a4-42da-9340-e04e08b63046 | KAPP Dev | mysql | 10.61.11.70:3306 | root | KAPP Dev environment |
+| d1679f57-82d7-4450-b676-6f71f7099bf3 | KAPP Rel | mysql | 10.77.3.236 | root | KAPP Release environment |
+| cd097e22-006c-4640-8a80-f1615c5c8b45 | KAPP UK Prod | mysql | 10.121.29.82 | root | KAPP UK Production |
+| e792d174-d407-4690-8fe5-97d8460049fb | KAPP EU Prod | mysql | 10.125.6.134 | root | KAPP EU Production |
+| db3d6c01-d578-4052-a636-041a65f38578 | KAPP US Prod | mysql | 10.128.30.6 | root | KAPP US Production |
+| f4830a0f-711b-4a69-898d-5ce8e62e241b | KAPP Monitoring | mysql | 10.120.8.208 | root | KAPP monitoring database |
+| f2ca52be-523b-44bc-a70a-5ede955155eb | MySQL | mysql | 10.77.3.236:3306 | root | ⚠️ Likely duplicate of KAPP Rel — same IP |
+| dce83066-258a-41f8-b5f3-8c35bee807aa | monitoring | mysql | 10.120.8.208 | root | ⚠️ Likely duplicate of KAPP Monitoring — same IP |
+| d8b0939b-9523-4e83-ada8-32ba2dd3cdb6 | SingleStore-Dev | mysql | 10.61.0.95 | FundPressDataReader | SingleStore Dev environment |
+| f1d911af-52de-4255-8a11-94e39eedb62a | SingleStore-Release | mysql | 10.77.6.161 | FundPressDataReader | SingleStore Release environment |
+| a6046586-7d67-428e-93e1-6b274d686900 | SingleStore-Production-UK | mysql | 10.121.22.219 | FundPressDataReader | SingleStore UK Production |
+| df309b44-0d9b-4411-b7f8-7baed30382d0 | SingleStore-Production-EU | mysql | 10.125.12.126 | FundPressDataReader | SingleStore EU Production |
+| bfe8f780-7ecc-4306-9d2c-b691b6352cca | SingleStore-Production-US | mysql | 10.128.24.122 | FundPressDataReader | SingleStore US Production |
+| dbafc322-929d-4fa8-886f-abe9d96a41aa | Zabbix Prod Old | mysql | 10.120.8.120 | donovan.vangraan | ⚠️ Stale credentials — donovan.vangraan inactive since Nov 2024 |
+| d68a35f0-c99b-4ec0-87c7-f714555753de | zabbix-server-data.shprd.kurtosys-internal | mysql | 10.120.8.51 | donovan.vangraan | ⚠️ Stale credentials — donovan.vangraan inactive since Nov 2024 |
+| aafbf2f7-2e78-4fa4-988a-9358fed7bfb3 | Zabbix Nonprod old | mysql | 10.72.8.191 | donovan.vangraan | ⚠️ Stale credentials — donovan.vangraan inactive since Nov 2024 |
+| b10bf74c-1c94-4624-8315-8953c9b407fa | zabbix-server-data.shnonprd.kurtosys-internal | mysql | 10.72.8.186 | donovan.vangraan | ⚠️ Stale credentials — donovan.vangraan inactive since Nov 2024 |
+| b7838f71-ce6c-4646-9e4b-2dacf777cd53 | JSON API | marcusolsson-json-datasource | https://10.125.9.192:8443/nifi-api/flow/process-groups/root/ | — | NiFi Registry API |
+| bae6c95e-4e84-413f-9c4a-8fd719e7e7b6 | CloudWatch | cloudwatch | — | — | AWS CloudWatch — uses IAM role |
+| aa82f021-baae-4259-a9f6-571d3f5f7f2d | InfluxDB | influxdb | — | — | InfluxDB — connection details not exposed |
 
 **Total: 22 rows returned (1 duplicate DBA_VCC entry, 1 NULL row). Distinct datasources: 21.**
 
@@ -79,7 +79,7 @@ EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python
 
 **Total: 8 users (5 admins, 3 viewers, 1 NULL row ignored)**
 
-> Note: User list re-run on 2026-07-07. Role determined by is_admin column (1 = Admin, 0 = Viewer).
+> Note: User list re-run on 2026-07-07. Role determined by is_admin column (1 = Admin, 0 = Viewer). Captured on 2026-07-07.
 
 ---
 
@@ -185,12 +185,14 @@ EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python
 ```
 
 **Evidence:**
-```
-Alert rules: 3
-  Failed Read Queries per Second        → alerts-data-operations (Slack)
-  KAPP Client Config Alert              → alerts-data-operations (Slack)
-  KAPP Client Application Auth Config   → alert-app-allow2fa-disabled (Slack)
-```
+
+| Title | Contact Point | Channel | Notes |
+|---|---|---|---|
+| Failed Read Queries per Second | alerts-data-operations | Slack | Active |
+| KAPP Client Config Alert | alerts-data-operations | Slack | Active |
+| KAPP Client Application Auth Config | alert-app-allow2fa-disabled | Slack | Active |
+
+**Total: 3 alert rules**
 
 ---
 
@@ -203,14 +205,16 @@ EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python
 ```
 
 **Evidence:**
-```
-Contact points:
-  alerts-data-operations       Slack  active
-  alert-app-allow2fa-disabled  Slack  active
-  email                        Email  placeholder — no address set, will not deliver
-```
 
-**Finding:** Grafana reads directly from DBA_VCC on localhost. 4 Zabbix datasources use donovan.vangraan credentials — he has not logged in since November 2024 and is no longer active. His credentials need to be rotated before decommission. Email contact point is a placeholder and will never deliver alerts. Month-end dashboards are showing stale data since May 2026 due to MemSQL jobs being disabled — nobody has flagged this.
+| Name | Type | Notes |
+|---|---|---|
+| alerts-data-operations | Slack | Active |
+| alert-app-allow2fa-disabled | Slack | Active |
+| email | Email | ⚠️ Placeholder — no address set, will not deliver |
+
+**Total: 3 contact points (2 active Slack, 1 broken email)**
+
+**Finding:** Grafana reads directly from DBA_VCC on localhost. 4 Zabbix datasources use donovan.vangraan credentials — he is an Admin account that has not logged in since November 2024. His credentials need to be rotated and his account should be reviewed before decommission. The default `admin` account is also still active and should be disabled. Email contact point is a placeholder and will never deliver alerts. Month-end dashboards are showing stale data since May 2026 due to MemSQL jobs being disabled — nobody has flagged this.
 
 **Open questions for TECH-3479:**
 - Are any dashboards client-facing or SLA-related? (Month End Reporting and KAPP Client reports are candidates)
