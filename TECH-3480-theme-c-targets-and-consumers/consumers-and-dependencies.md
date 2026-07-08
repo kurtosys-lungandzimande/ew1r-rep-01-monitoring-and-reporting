@@ -12,7 +12,8 @@
 | DBA_VCC_COST — Database Engineering Costs | DB engineering team | Confirmed | Dashboard JSON confirmed — last updated Oct 2024 |
 | DBA_VCC_COST — Database Engineering Sprint Reporting | Engineering management | Confirmed | Dashboard JSON confirmed — last updated Mar 2024 |
 | DBA_VCC_COST — KAPP Client Utilisation and Growth Report | Unknown — likely client-facing | ⚠️ High risk | Dashboard JSON confirmed — name suggests client use, needs confirmation |
-| DBA_VCC_COST — AWS Cost Report Monthly | Unknown | Medium | Dashboard JSON confirmed — AWS data stale since Sept 2024 |
+| DBA_VCC_COST — AWS Cost Report Monthly | Unknown | Medium | Dashboard JSON confirmed — AWS data stale since Nov 2024 |
+| DBA_VCC_COST — INFO_KAPP_Client_* tables | Unknown | ⚠️ High risk | All 9 collection tables stale since 4 May 2026 — job reports Succeeded but no data written, silent failure |
 | DBA_VCC_MEMSQL — 14 dashboards | Unknown | Confirmed broken | All stale since May 2026 — jobs disabled |
 | DBA_VCC_AWS — KAPP API query logs | KAPP engineering / platform team | High | 563M rows, collected every 30 min |
 | Encore IIS logs / BNY IIS logs | Encore team / BNY integration team | Medium | Hourly collection — BNY named explicitly in job step |
@@ -49,19 +50,24 @@
 
 Collection job `DBA_VCC_COST_Entity_Count_Collection` runs on schedule SCHED1. Last confirmed successful run: 29 June 2026 at 08:00. Database is on FULL recovery — the only database on this server set that way.
 
-Collects 9 entity types per KAPP client across 5 environments:
+Collects 9 entity types per KAPP client across 5 environments.
 
-| Entity Type | Table |
-|---|---|
-| Allocations | INFO_KAPP_Client_Allocations_Counts |
-| Disclaimers & Commentaries | INFO_KAPP_Client_Disclaimers_Commentaries_Counts |
-| Documents | INFO_KAPP_Client_Document_Counts |
-| Entities | INFO_KAPP_Client_Entities_Counts |
-| Historical Datasets | INFO_KAPP_Client_HistoricalDatasets_Counts |
-| Snapshots | INFO_KAPP_Client_Snapshots_Counts |
-| Statistics | INFO_KAPP_Client_Statstics_Counts |
-| Time Series | INFO_KAPP_Client_TimeSeries_Counts |
-| Users | INFO_KAPP_Client_Users_Counts |
+Data freshness confirmed by query 5.1 (run 2026-07-09):
+
+| Table | Last Collected | Row Count |
+|---|---|---|
+| INFO_KAPP_Client_Allocations_Counts | 2026-05-04 08:00 | 123,374 |
+| INFO_KAPP_Client_Disclaimers_Commentaries_Counts | 2026-05-04 08:00 | 578,926 |
+| INFO_KAPP_Client_Document_Counts | 2026-05-04 08:00 | 471,593 |
+| INFO_KAPP_Client_Entities_Counts | 2026-05-04 08:00 | 145,047 |
+| INFO_KAPP_Client_HistoricalDatasets_Counts | 2026-05-04 08:00 | 33,483 |
+| INFO_KAPP_Client_Snapshots_Counts | 2026-05-04 08:00 | 286,584 |
+| INFO_KAPP_Client_Statstics_Counts | 2026-05-04 08:00 | 134,707 |
+| INFO_KAPP_Client_TimeSeries_Counts | 2026-05-04 08:00 | 120,269 |
+| INFO_KAPP_Client_Users_Counts | 2026-05-04 08:00 | 14,811,776 |
+| INFO_AWS_DE_Entity_Cost | 2024-11-01 | 4,382 | ⚠️ Stale — 20 months out of date |
+
+⚠️ All 9 collection tables last updated 4 May 2026 — not 29 June 2026 as previously noted from job history. The job is reporting Succeeded but data has not moved in 2 months. This matches the same silent failure pattern seen in the AWS cost ETL — job runs, CATCH block swallows the error, nothing gets written. Needs investigation before any decommission decision.
 
 Environments collected from:
 
