@@ -65,7 +65,7 @@ Data freshness confirmed by query 5.1 (run 2026-07-09):
 | INFO_KAPP_Client_Statstics_Counts | 2026-05-04 08:00 | 134,707 |
 | INFO_KAPP_Client_TimeSeries_Counts | 2026-05-04 08:00 | 120,269 |
 | INFO_KAPP_Client_Users_Counts | 2026-05-04 08:00 | 14,811,776 |
-| INFO_AWS_DE_Entity_Cost | 2024-11-01 | 4,382 | ⚠️ Stale — 20 months out of date |
+| INFO_AWS_DE_Entity_Cost | 2024-11-01 ⚠️ Stale — 20 months out of date | 4,382 |
 
 ⚠️ All 9 collection tables last updated 4 May 2026 — not 29 June 2026 as previously noted from job history. The job reports Succeeded but no data has been written in 2 months.
 
