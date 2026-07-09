@@ -76,8 +76,8 @@ EW1R-REP-01 connects to 109 external systems via linked servers.
 | EW1P-NIFIREG-01 | Apache NiFi | NiFi pipeline registry | Active — Grafana JSON API datasource confirmed |
 | pmmdev | Clickhouse (PMM) | Percona Monitoring dev | Unknown |
 | pmmprod | Clickhouse (PMM) | Percona Monitoring prod | Unknown |
-| EW1R-TC | Unknown | Likely TeamCity CI/CD | Unknown — needs confirmation |
+| EW1R-TC | TeamCity | TeamCity CI/CD Release environment | Confirmed — LU_EntityList Shared_Services_Non-Prod |
 | ew1d-admin-01/02 | Admin servers | Dev admin | Unknown |
-| EW2P-MARKETING-DB | Unknown | Unknown | ⚠️ Stale — Not online, owner unknown |
+| EW2P-MARKETING-DB | Unknown | Marketing database | ⚠️ Stale — Not online, owner confirmed as Marketing account (AccountId 232173278818) |
 | AWS CloudWatch | Python API | AWS monitoring | Active — 15-min job running |
 | AWS S3 | Python API | Backup storage | Active — daily job running |
