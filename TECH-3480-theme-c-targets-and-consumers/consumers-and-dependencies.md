@@ -218,14 +218,15 @@ ORDER BY updated DESC;
 ```
 
 Evidence — dashboards returned:
-```
-WPv2 Month End Reporting                    2024-06-20
-Encore Month End Reporting                  2023-08-10
-DXM Month End Reporting                     2023-08-10
-InvestorPress Month End Reporting           2023-08-10
-KAPP Month End Reporting                    2023-08-10
-Other Services Month End Reporting (Draft)  2023-07-21
-```
+
+| Dashboard | Last Updated |
+|---|---|
+| WPv2 Month End Reporting | 2024-06-20 |
+| Encore Month End Reporting | 2023-08-10 |
+| DXM Month End Reporting | 2023-08-10 |
+| InvestorPress Month End Reporting | 2023-08-10 |
+| KAPP Month End Reporting | 2023-08-10 |
+| Other Services Month End Reporting (Draft) | 2023-07-21 |
 
 ---
 
