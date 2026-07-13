@@ -65,7 +65,7 @@ Full classification table in topology-and-classification.md. Summary:
 
 | Decision | Components |
 |---|---|
-| Retire | DBA_VCC_MEMSQL, all 97 SingleStore linked servers, all 7 VCC MemSQL jobs |
+| Retire | DBA_VCC_MEMSQL, all 90 SingleStore linked servers, all 7 VCC MemSQL jobs |
 | Replace | DBA_VCC_AWS, DBA_VCC_MYSQL, DBA_VCC_COST, VCC AWS jobs, VCC MySQL jobs, Grafana (74 dashboards, 3 active admins) |
 | Move | Active SQL Server linked servers (EW2P-MSSQL-01/02, EW1P-OCT), DBA maintenance jobs |
 | Investigate | DBA_VCC_ATLASSIAN, KURTOSYS_BASELINE, Jira month-end job, EW1P-OCT backup job |
