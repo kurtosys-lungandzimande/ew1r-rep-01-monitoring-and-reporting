@@ -1,6 +1,6 @@
 # Topology & Classification — EW1R-REP-01
 
-> Status: IN PROGRESS — Grafana fully documented. Consumer team identification pending Monday.
+> Status: IN PROGRESS — Themes A, B, C complete. All confirmed findings incorporated. Remaining blockers are stakeholder input (Q13, Q21, Q22, Q23, Q35, Q36) — documented in open-questions.md.
 
 ---
 
@@ -125,19 +125,19 @@ EW1R-REP-01 (Custom VCC Monitoring Hub)
 | DBA team (SSMS) | SQL Server inbound | 1433 | Server management | Yes |
 | Zabbix server | TCP inbound | 10050 | Infrastructure monitoring of this server | Yes — zabbix_agentd.exe running |
 
-### What Credentials It Uses (Locations TBC Monday)
+### What Credentials It Uses
 | Purpose | Account | Location | Confirmed |
 |---|---|---|---|
 | SQL Server Engine | SHNONPRD\sqlsrv | AD — SHNONPRD domain | Yes |
 | SQL Server Agent | SHNONPRD\sqlagent | AD — SHNONPRD domain | Yes |
-| AWS API calls | IAM role or access key | C:\DBA_Staging\AWS\ or env variable | TBC Monday |
+| AWS API calls | IAM role or access key | C:\DBA_Staging\AWS\ or env variable | ⚠️ Still unknown — needs DevOps/cloud team |
 | Grafana → SQL Server | grafana (SQL login) | SQL Server login on localhost | Yes — confirmed in grafana.db |
 | Grafana → KAPP MySQL | root | MySQL on each KAPP environment | Yes — confirmed in grafana.db |
 | Grafana → SingleStore | FundPressDataReader | MySQL on each SingleStore cluster | Yes — confirmed in grafana.db |
-| Grafana → Zabbix MySQL | donovan.vangraan | MySQL on Zabbix servers | Yes — needs rotation (ex-employee) |
-| Linked server → SQL Server targets | Unknown | Vault — TBC Monday | TBC |
-| Linked server → MySQL/SingleStore | Unknown | Vault — TBC Monday | TBC |
-| Slack webhooks | Encrypted tokens | grafana.db alert_configuration | Yes — encrypted, need Grafana admin to rotate |
+| Grafana → Zabbix MySQL | donovan.vangraan | MySQL on Zabbix servers | ⚠️ Needs rotation — ex-employee, inactive since Nov 2024 |
+| Linked server → SQL Server targets | Unknown | Vault | ⚠️ Still unknown — needs vault check |
+| Linked server → MySQL/SingleStore | Unknown | Vault | ⚠️ Still unknown — needs vault check |
+| Slack webhooks | Encrypted tokens | grafana.db alert_configuration | Yes — encrypted, Grafana admin required to rotate |
 
 > **Security flag:** Grafana Zabbix datasources use donovan.vangraan's personal credentials. This person is no longer active (last seen Nov 2024). These credentials need to be rotated immediately regardless of decommission decision.
 
@@ -151,7 +151,7 @@ EW1R-REP-01 (Custom VCC Monitoring Hub)
 |---|---|---|---|
 | DBA_VCC_AWS (KAPP monitoring) | Replace | Core KAPP observability — cannot retire | TECH-3428 unified monitoring |
 | DBA_VCC_MYSQL (MySQL monitoring) | Replace | Active MySQL/RDS monitoring | TECH-3428 or CloudWatch |
-| DBA_VCC_COST (Cost tracking) | Replace | FULL recovery model — someone needs this | TBC — identify consumer first |
+| DBA_VCC_COST (Cost tracking) | Replace | ⚠️ Confirmed client billing data — 200+ institutional clients tracked across EW2, UE1, EC1. Collection stale since 4 May 2026. Cannot retire without confirmed replacement and stakeholder sign-off. | TECH-3428 or dedicated billing host |
 | DBA_VCC_MEMSQL (MemSQL monitoring) | Retire | All jobs disabled, likely superseded | N/A |
 | DBA_VCC_ATLASSIAN (Jira integration) | Investigate | Unknown consumer — needs confirmation | TBC |
 | KURTOSYS_BASELINE | Investigate | Large (51GB) — unknown active consumer | TBC |
@@ -174,7 +174,7 @@ EW1R-REP-01 (Custom VCC Monitoring Hub)
 | KAPP API monitoring loss | Critical | 563M rows actively collected — Grafana KAPP dashboards updated Oct 2025, actively used |
 | Grafana dashboard loss | Critical | 3 active admins as of June 2026 — 74 dashboards confirmed including production KAPP metrics |
 | SingleStore monitoring loss | Critical | Grafana reads directly from SingleStore UK/EU/US Prod — dashboards updated Aug 2025 |
-| Cost tracking loss | High | DBA_VCC_COST on FULL recovery — consumer TBC Monday |
+| Cost tracking loss | Critical | DBA_VCC_COST confirmed client billing data — 200+ real institutional clients (BlackRock, BNY Mellon, Aberdeen, Wellington, T. Rowe Price, Nordea and others). Collection already stale since 4 May 2026. Decommissioning without a confirmed replacement directly impacts client invoicing. |
 | MySQL/RDS monitoring loss | High | Active jobs monitoring production RDS + Grafana reads KAPP MySQL directly |
 | Zabbix datasource loss | High | Grafana reads 4 Zabbix MySQL databases directly — Zabbix monitoring dashboards active |
 | NiFi API reporting loss | Medium | Grafana JSON datasource reads NiFi API — NiFi API Reporting dashboard active |
@@ -186,12 +186,15 @@ EW1R-REP-01 (Custom VCC Monitoring Hub)
 ## Recommendation (Preliminary)
 
 > **Do not decommission until:**
-> 1. tashvir.babulal / rayhaan.suleyman confirm which Grafana dashboards are client-facing or SLA-related
-> 2. KAPP monitoring data ownership is confirmed — who depends on it?
-> 3. DBA_VCC_COST consumer is identified
-> 4. Replacement monitoring is confirmed in place (TECH-3428)
-> 5. All 3 active Grafana admins are notified and have migrated to a replacement
-> 6. Slack alert channels (alerts-data-operations, alert-app-allow2fa-disabled) are re-routed
+> 1. ~~DBA_VCC_COST consumer is identified~~ — **Closed** — confirmed client billing data, 200+ institutional clients
+> 2. KAPP monitoring data ownership confirmed — who depends on DBA_VCC_AWS for SLA reporting? (Q13)
+> 3. tashvir.babulal / rayhaan.suleyman confirm which Grafana dashboards are client-facing or SLA-related (Q21, Q22)
+> 4. Who disabled DBA_VCC_MEMSQL jobs in May 2026 and why — must be understood before any re-enable (Q35)
+> 5. Stakeholders notified that DBA_VCC_COST billing data has been stale since 4 May 2026 (Q36)
+> 6. donovan.vangraan Zabbix credentials rotated — 4 Grafana datasources still using his account
+> 7. Replacement monitoring confirmed in place (TECH-3428)
+> 8. All 3 active Grafana admins notified and migrated to replacement
+> 9. Slack alert channels (alerts-data-operations, alert-app-allow2fa-disabled) re-routed
 
 This server is **not safe to decommission** based on current evidence. It is:
 - Actively collecting production KAPP, MySQL, and AWS data every 15 minutes
