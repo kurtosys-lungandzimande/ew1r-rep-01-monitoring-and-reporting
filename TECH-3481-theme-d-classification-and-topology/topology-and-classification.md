@@ -28,7 +28,7 @@ EW1R-REP-01 (Custom VCC Monitoring Hub)
 │   │   ├── pmmdev / pmmprod (Clickhouse/PMM)
 │   │   ├── ZabbixNonProd / ZabbixProdOld / ZabbixProdNew
 │   │   ├── EW1P-NIFIREG-01 (NiFi Registry)
-│   │   └── wpv2 nodes (Web Platform v2 — EW2, UE1)
+│   │   └── wpv2 nodes (Web Platform v2 — EW2, UE1) ← DECOMMISSIONED — DNS gone, jobs failing
 │   │
 │   ├── STORES IN (Local databases)
 │   │   ├── DBA_VCC_AWS (180 GB) — AWS + KAPP API monitoring
@@ -159,7 +159,7 @@ EW1R-REP-01 (Custom VCC Monitoring Hub)
 | SQL Server linked servers (active) | Move | Still needed for monitoring EW2P servers | New monitoring host |
 | Grafana dashboards | Replace/Move | 74 dashboards confirmed, 3 active admins, actively used Oct 2025 — cannot retire | Grafana Cloud or new host |
 | DBA Maintenance jobs | Move | Standard maintenance — needed on any host | New SQL Server host |
-| VCC AWS jobs (15min/daily/weekly) | Replace | AWS monitoring — move to CloudWatch/native | TECH-3428 |
+| VCC AWS jobs (30min/daily/weekly) | Replace | AWS monitoring — move to CloudWatch/native | TECH-3428 |
 | VCC MySQL jobs | Replace | MySQL monitoring | TECH-3428 or CloudWatch |
 | VCC MemSQL jobs | Retire | All disabled | N/A |
 | Jira month-end job | Investigate | Unknown consumer | TBC |
