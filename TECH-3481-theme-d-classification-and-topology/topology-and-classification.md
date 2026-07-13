@@ -80,7 +80,7 @@ EW1R-REP-01 (Custom VCC Monitoring Hub)
 ### What It Collects
 | Data Source | Method | Frequency | Stored In | Value |
 |---|---|---|---|---|
-| KAPP API query logs | Python API calls via SQL Agent | Every 15 min | DBA_VCC_AWS | Core KAPP observability — 563M rows |
+| KAPP API query logs | Python API calls via SQL Agent | Every 30 min | DBA_VCC_AWS | Core KAPP observability — 563M rows |
 | AWS costs per entity | Python API calls | Daily | DBA_VCC_AWS | Cost tracking per client/entity |
 | AWS infrastructure (EC2, RDS, S3) | Python API calls | Weekly | DBA_VCC_AWS | AWS inventory and security posture |
 | Encore IIS logs | CloudWatch log stream | Hourly | DBA_VCC | Encore document production tracking |
@@ -155,7 +155,7 @@ EW1R-REP-01 (Custom VCC Monitoring Hub)
 | DBA_VCC_MEMSQL (MemSQL monitoring) | Retire | All jobs disabled, likely superseded | N/A |
 | DBA_VCC_ATLASSIAN (Jira integration) | Investigate | Unknown consumer — needs confirmation | TBC |
 | KURTOSYS_BASELINE | Investigate | Large (51GB) — unknown active consumer | TBC |
-| SingleStore linked servers (97) | Retire | All MemSQL jobs disabled | N/A |
+| SingleStore linked servers (90) | Retire | All MemSQL jobs disabled | N/A |
 | SQL Server linked servers (active) | Move | Still needed for monitoring EW2P servers | New monitoring host |
 | Grafana dashboards | Replace/Move | 74 dashboards confirmed, 3 active admins, actively used Oct 2025 — cannot retire | Grafana Cloud or new host |
 | DBA Maintenance jobs | Move | Standard maintenance — needed on any host | New SQL Server host |
@@ -197,7 +197,7 @@ EW1R-REP-01 (Custom VCC Monitoring Hub)
 > 9. Slack alert channels (alerts-data-operations, alert-app-allow2fa-disabled) re-routed
 
 This server is **not safe to decommission** based on current evidence. It is:
-- Actively collecting production KAPP, MySQL, and AWS data every 15 minutes
+- Actively collecting production KAPP, MySQL, and AWS data every 30 minutes
 - Serving 74 Grafana dashboards to at least 3 active users as of June 2026
 - The sole source of SingleStore and Zabbix monitoring dashboards
 - Running production Slack alerts for KAPP client config and read query failures
