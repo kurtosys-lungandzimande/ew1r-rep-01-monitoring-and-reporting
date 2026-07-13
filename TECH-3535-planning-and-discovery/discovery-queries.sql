@@ -89,7 +89,7 @@ SELECT
 --   Total across all user databases: ~363 GB.
 --   DBA_VCC_AWS is the largest at 189 GB and is actively growing —
 --   it increased ~8 GB since the initial investigation, confirming
---   data collection is still running every 15 minutes.
+--   data collection is still running every 30 minutes.
 --   DBA_VCC_MEMSQL is 77 GB and has NOT grown — confirming all
 --   its collection jobs are disabled and no new data is coming in.
 --
@@ -115,7 +115,7 @@ SELECT
 -- IF OUTPUT DIFFERS WHEN YOU RE-RUN:
 --   DBA_VCC_COST not on FULL = someone changed it, investigate why.
 --   DBA_VCC_AWS still growing = collection pipeline is healthy.
---   DBA_VCC_AWS stopped growing = 15-min collection job has failed silently.
+--   DBA_VCC_AWS stopped growing = 30-min collection job has failed silently.
 --   DBA_VCC_MEMSQL growing again = someone re-enabled the MemSQL jobs.
 --   A database missing = it was dropped, confirm with DBA team.
 --   A new database present = undocumented workload, investigate
@@ -551,11 +551,11 @@ ORDER BY name;
 -- ============================================================
 -- SECTION 7 — DBA_VCC_AWS DATA FRESHNESS
 -- Core KAPP observability database. 180 GB.
--- KAPP API data is collected every 15 minutes via Python jobs.
+-- KAPP API data is collected every 30 minutes via Python jobs.
 -- This is actively growing and Grafana KAPP dashboards read from it.
 -- ============================================================
 
--- 7.1 Confirm KAPP API data is still being collected every 15 minutes
+-- 7.1 Confirm KAPP API data is still being collected every 30 minutes
 -- Expected: MAX(DateChecked) should be within the last 15-30 minutes
 -- if the collection job is healthy. 563M rows as of discovery.
 -- If this is stale, the KAPP observability pipeline has broken silently.
