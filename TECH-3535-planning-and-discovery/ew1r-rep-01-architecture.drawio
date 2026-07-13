@@ -154,7 +154,7 @@
           <mxGeometry x="585" y="785" width="170" height="90" as="geometry" />
         </mxCell>
 
-        <mxCell id="con5" value="Finance / Acct Mgmt?&#xa;DBA_VCC_COST reports&#xa;19 REP_MONTHEND procs&#xa;Billing data?&#xa;UNCONFIRMED" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+        <mxCell id="con5" value="Finance / Acct Mgmt&#xa;DBA_VCC_COST reports&#xa;19 REP_MONTHEND procs&#xa;200+ institutional clients&#xa;CONFIRMED BILLING DATA" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
           <mxGeometry x="770" y="785" width="170" height="90" as="geometry" />
         </mxCell>
 
@@ -162,7 +162,7 @@
           <mxGeometry x="955" y="785" width="170" height="90" as="geometry" />
         </mxCell>
 
-        <mxCell id="con7" value="Month-End Dashboards&#xa;KAPP/Encore/DXM/WPv2&#xa;Read from DBA_VCC_MEMSQL&#xa;NO DATA since May 2026&#xa;BROKEN — RAISE MONDAY" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+        <mxCell id="con7" value="Month-End Dashboards&#xa;KAPP/Encore/DXM/WPv2&#xa;Read from DBA_VCC_MEMSQL&#xa;NO DATA since May 2026&#xa;BROKEN — ESCALATED" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
           <mxGeometry x="1140" y="785" width="170" height="90" as="geometry" />
         </mxCell>
 
@@ -183,7 +183,7 @@
           <mxGeometry x="30" y="980" width="190" height="75" as="geometry" />
         </mxCell>
 
-        <mxCell id="rrm2" value="REPLACE → TECH-3428&#xa;DBA_VCC_AWS (180GB)&#xa;DBA_VCC_MYSQL (26GB)&#xa;VCC AWS + MySQL jobs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+        <mxCell id="rrm2" value="REPLACE → TECH-3428&#xa;DBA_VCC_AWS (180GB)&#xa;DBA_VCC_MYSQL (26GB)&#xa;DBA_VCC_COST (billing)&#xa;VCC AWS + MySQL jobs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=1;" vertex="1" parent="1">
           <mxGeometry x="240" y="980" width="190" height="75" as="geometry" />
         </mxCell>
 
@@ -195,7 +195,7 @@
           <mxGeometry x="660" y="980" width="190" height="75" as="geometry" />
         </mxCell>
 
-        <mxCell id="rrm5" value="INVESTIGATE FIRST&#xa;DBA_VCC_COST — billing?&#xa;DBA_VCC_ATLASSIAN&#xa;KURTOSYS_BASELINE" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+        <mxCell id="rrm5" value="INVESTIGATE FIRST&#xa;DBA_VCC_ATLASSIAN&#xa;KURTOSYS_BASELINE&#xa;EW1P-OCT backup job" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" vertex="1" parent="1">
           <mxGeometry x="870" y="980" width="190" height="75" as="geometry" />
         </mxCell>
 
