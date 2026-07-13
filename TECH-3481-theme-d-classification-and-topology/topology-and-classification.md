@@ -201,3 +201,19 @@ This server is **not safe to decommission** based on current evidence. It is:
 - Serving 74 Grafana dashboards to at least 3 active users as of June 2026
 - The sole source of SingleStore and Zabbix monitoring dashboards
 - Running production Slack alerts for KAPP client config and read query failures
+
+---
+
+## Open Questions — Decommission Blockers
+
+> These must be answered before any decommission or migration action is taken.
+> Full question log with all supporting context is in TECH-3535-planning-and-discovery/open-questions.md.
+
+| # | Question | Who to Ask | Status |
+|---|---|---|---|
+| Q13 | Who owns the KAPP monitoring data in DBA_VCC_AWS? Is it used for SLA reporting? If yes — cannot decommission without a confirmed replacement in place. | KAPP engineering / platform team | ⚠️ Open |
+| Q21 | If this server went offline today, what would break immediately? | yogeshwar.phull / tashvir.babulal | ⚠️ Open |
+| Q22 | Is any alerting dependent solely on this server — would anyone lose visibility? | yogeshwar.phull / tashvir.babulal | ⚠️ Open |
+| Q23 | Is the VCC framework replicated anywhere else or is this the only instance? | DBA team | ⚠️ Open |
+| Q35 | Who disabled the DBA_VCC_MEMSQL jobs in May 2026 and why? Was the DAILY_CHECKS failure on 8 May 2026 ever investigated? Jobs must not be re-enabled without understanding the root cause. | yogeshwar.phull / tashvir.babulal | ⚠️ Open |
+| Q36 | Has anyone noticed that DBA_VCC_COST client entity counts have been stale since 4 May 2026? The KAPP Client Utilisation and Growth Report dashboard is showing 2-month-old billing data. Whoever uses that report for invoicing has been working with wrong figures since May with no warning. Must be disclosed immediately. | tashvir.babulal / rayhaan.suleyman | ⚠️ Open — must disclose now |
