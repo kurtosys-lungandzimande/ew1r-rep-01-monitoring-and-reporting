@@ -47,7 +47,7 @@ EW1R-REP-01 (Custom VCC Monitoring Hub)
     ├── READS FROM (Datasources — 21 confirmed)
     │   ├── DBA_VCC on localhost (MSSQL)
     │   ├── KAPP MySQL — Dev, Release, UK/EU/US Prod
-    │   ├── SingleStore — Dev, Release, UK/EU/US Prod (FundPressDataReader)
+    │   ├── SingleStore — Dev, Release, UK/EU/US Prod
     │   ├── Zabbix MySQL — NonProd, Prod Old, Prod New (x4)
     │   ├── NiFi JSON API — https://10.125.9.192:8443
     │   ├── AWS CloudWatch
@@ -102,7 +102,7 @@ EW1R-REP-01 (Custom VCC Monitoring Hub)
 ### What It Needs To Function (Inbound Dependencies)
 | Dependency | Type | Port | Purpose | Confirmed |
 |---|---|---|---|---|
-| SHNONPRD domain controller | Active Directory | 389/636 | Service account auth | Yes |
+| Domain controller | Active Directory | 389/636 | Service account auth | Yes |
 | AWS APIs (CloudWatch, S3, EC2, RDS, IAM) | HTTPS outbound | 443 | Python API data collection | Yes — jobs running |
 | Jira API | HTTPS outbound | 443 | Monthly sprint data pull | Yes — job running |
 | KAPP MySQL — Dev (10.61.11.70) | MySQL outbound | 3306 | Grafana datasource | Yes — confirmed in grafana.db |
