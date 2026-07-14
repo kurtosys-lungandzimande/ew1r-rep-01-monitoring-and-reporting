@@ -95,7 +95,7 @@ Core monitoring framework — tracks all monitored SQL Server instances.
 
 | Job Name | Enabled | Last Run | Last Outcome | Schedule | Alert Target | Purpose |
 |---|---|---|---|---|---|---|
-| DBA_VCC_AWS_15MIN_CHECKS | Yes | 2026-07-06 | Succeeded | Every 15 min | None | 12-step job: pulls KAPP API query logs, NiFi loader API logs, KAPP dataset logs, Lambda timeout logs, and dataset metrics from CloudWatch log streams via Python (SP_AUDIT_AWS_PY_CALL_DETAILED). Core KAPP observability job. |
+| DBA_VCC_AWS_15MIN_CHECKS | Yes | 2026-07-06 | Succeeded | Every 30 min | None | 12-step job: pulls KAPP API query logs, NiFi loader API logs, KAPP dataset logs, Lambda timeout logs, and dataset metrics from CloudWatch log streams via Python (SP_AUDIT_AWS_PY_CALL_DETAILED). Core KAPP observability job. |
 | DBA_VCC_AWS_DAILY_CHECKS | Yes | 2026-07-06 | Succeeded | Daily | None | Collects S3 bucket sizes, AWS costs per entity, and regional data transfer bytes via Python API calls. |
 | DBA_VCC_AWS_WEEKLY_CHECKS | Yes | 2026-07-05 | Succeeded | Weekly | None | Collects RDS inventory, RDS maintenance windows, RDS security group rules, S3 lifecycle/encryption, EC2 inventory, IAM key details. Archives data older than 90 days. |
 
