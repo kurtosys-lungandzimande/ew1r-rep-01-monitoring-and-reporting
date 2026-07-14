@@ -11,11 +11,17 @@
 |---|---|
 | [Discovery Queries](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6841237572/06+-Discovery+Queries) | All 14 SQL query sections with outputs |
 | [SQL Server Inventory](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6847725586/SQL+Server+Inventory+EW1R-REP-01) | Databases, jobs, linked servers, stored procedures |
-| [SQL Server Investigation Log](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6848282648/SQL+Server+Investigation+Log) | Theme A findings with query evidence |
+| [SQL Server Investigation Log](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6848282648/SQL+Server+Investigation+Log) | TECH-3560 findings with query evidence |
 | [Grafana Inventory](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6850314252/Grafana+Inventory) | Datasources, dashboards, users, alert rules |
-| [Grafana Investigation Log](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6851067926/Grafana+-+Investigation+Log) | Theme B findings with query evidence |
+| [Grafana Investigation Log](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6851067926/Grafana+-+Investigation+Log) | TECH-3561 findings with query evidence |
+| [Consumers & Dependencies](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6853460033/Consumers+and+Dependencies) | Consumers, service accounts, firewall rules |
+| [External Targets](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6854344805/External+Targets+EW1R-REP-01) | External targets and connections |
+| [Targets & Consumers Investigation Log](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6853918807/Investigation+Log+for+External+Target+and+Consumers) | TECH-3562 findings with query evidence |
+| [Consumers & Dependencies](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6853460033/Consumers+and+Dependencies) | Consumers, service accounts, firewall rules |
+| [External Targets](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6854344805/External+Targets+EW1R-REP-01) | External targets and connections |
+| [Targets & Consumers Investigation Log](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6853918807/Investigation+Log+for+External+Target+and+Consumers) | TECH-3562 findings with query evidence |
 | [Topology & Classification](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6860963905/Topology+Classification+EW1R-REP-01) | Full topology map and component classification |
-| [Topology Investigation Log](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6860243025/Topology+-+Investigaton+Log) | Theme D findings with query evidence |
+| [Topology Investigation Log](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6860243025/Topology+-+Investigaton+Log) | TECH-3563 findings with query evidence |
 
 ---
 
