@@ -177,7 +177,7 @@ FROM sys.dm_exec_requests r WHERE r.session_id = 67;
 session_id=67  MERGE  running  percent_complete=0  cpu=531s  elapsed=534s  reads=3,461,771  writes=1
 ```
 
-**Finding:** Job is healthy and running every 30 minutes (schedule is :00 and :30, not every 15 min as originally noted). The MERGE into INFO_AWS_KAPP_Query_API_Detail (563M rows, no partitioning) is already taking 9+ minutes per run. No blocking. As the table grows this will eventually exceed 30 minutes and runs will overlap. Written by donovan.vangraan (Feb 2024) who is no longer active. This is a performance risk for RDS migration — needs redesign before moving.
+**Finding:** Job is healthy and running every 30 minutes (schedule is :00 and :30, not every 15 min as originally noted). The MERGE into INFO_AWS_KAPP_Query_API_Detail (563M rows, no partitioning) is already taking 9+ minutes per run. No blocking. As the table grows this will eventually exceed 30 minutes and runs will overlap. Written by a former team member (Feb 2024) who is no longer active. This is a performance risk for RDS migration — needs redesign before moving.
 
 ---
 
