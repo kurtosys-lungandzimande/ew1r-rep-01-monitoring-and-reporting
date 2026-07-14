@@ -10,34 +10,34 @@
 Each folder maps to a Jira ticket. All investigation and discovery work is scoped per ticket.
 
 ```
-TECH-3535-planning-and-discovery/
+TECH-3535-planning-and-discovery/                        ← Parent — Planning & Discovery
 │
-│   discovery-summary.md            ← Master consolidation doc (this file)
-│   discovery-queries.sql           ← All SQL queries used during investigation (14 sections)
-│   open-questions.md               ← All open questions, blockers, and active findings
-│   investigation-log.md            ← Critical findings with query evidence
-│   ew1r-rep-01-architecture.drawio ← Architecture diagram
+│   discovery-summary.md                                 ← Master consolidation doc (this file)
+│   discovery-queries.sql                                ← All SQL queries used during investigation (14 sections)
+│   open-questions.md                                    ← All open questions, blockers, and active findings
+│   investigation-log.md                                 ← Critical findings with query evidence
+│   ew1r-rep-01-architecture.drawio                      ← Architecture diagram
 │
-TECH-3560-sql-server/
+├── TECH-3560-sql-server/                                ← Child — SQL Server investigation
+│   │
+│   │   sql-server-inventory.md                          ← Databases, jobs, linked servers, service accounts, stored procs
+│   │   investigation-log.md                             ← TECH-3560 findings
 │
-│   sql-server-inventory.md         ← Databases, jobs, linked servers, service accounts, stored procs
-│   investigation-log.md            ← TECH-3560 findings
+├── TECH-3561-grafana/                                   ← Child — Grafana investigation
+│   │
+│   │   grafana-inventory.md                             ← Datasources, dashboards (74 confirmed), users, alert rules
+│   │   investigation-log.md                             ← TECH-3561 findings
 │
-TECH-3561-grafana/
+├── TECH-3562-targets-and-consumers/                     ← Child — Targets & Consumers investigation
+│   │
+│   │   external-targets.md                              ← External targets and connections
+│   │   consumers-and-dependencies.md                    ← Consumers, service accounts, firewall rules
+│   │   investigation-log.md                             ← TECH-3562 findings
 │
-│   grafana-inventory.md            ← Datasources, dashboards (74 confirmed), users, alert rules
-│   investigation-log.md            ← TECH-3561 findings
-│
-TECH-3562-targets-and-consumers/
-│
-│   external-targets.md             ← External targets and connections
-│   consumers-and-dependencies.md   ← Consumers, service accounts, firewall rules
-│   investigation-log.md            ← TECH-3562 findings
-│
-TECH-3563-topology-and-classification/
-│
-│   topology-and-classification.md  ← Topology map and classification outputs
-│   investigation-log.md            ← TECH-3563 findings
+└── TECH-3563-topology-and-classification/               ← Child — Topology & Classification investigation
+    │
+    │   topology-and-classification.md                   ← Topology map and classification outputs
+    │   investigation-log.md                             ← TECH-3563 findings
 ```
 
 ---
