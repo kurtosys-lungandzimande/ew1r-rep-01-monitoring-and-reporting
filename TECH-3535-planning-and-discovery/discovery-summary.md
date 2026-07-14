@@ -117,7 +117,7 @@ EW1R-REP-01 is a custom-built monitoring and reporting hub. It is not a standard
 
 ---
 
-## 6. Theme Summaries
+## 6. Summaries
 
 ### SQL Server — [TECH-3560](https://kurtosys-prod-eng.atlassian.net/jira/software/c/projects/TECH/boards/795?selectedIssue=TECH-3560)
 Full inventory complete. 8 databases, 378 GB, 63 jobs, 109 linked servers, ~600+ stored procedures documented. All critical failures identified and evidenced with query output.
@@ -292,11 +292,11 @@ It is:
 |---|---|---|
 | Discovery Queries | All 14 SQL query sections with outputs | [View](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6841237572/06+-Discovery+Queries) |
 | SQL Server Inventory | Databases, jobs, linked servers, stored procedures | [View](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6847725586/SQL+Server+Inventory+EW1R-REP-01) |
-| SQL Server Investigation Log | Theme A findings with query evidence | [View](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6848282648/SQL+Server+Investigation+Log) |
+| SQL Server Investigation Log | TECH-3560 findings with query evidence | [View](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6848282648/SQL+Server+Investigation+Log) |
 | Grafana Inventory | Datasources, dashboards, users, alert rules | [View](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6850314252/Grafana+Inventory) |
-| Grafana Investigation Log | Theme B findings with query evidence | [View](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6851067926/Grafana+-+Investigation+Log) |
+| Grafana Investigation Log | TECH-3561 findings with query evidence | [View](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6851067926/Grafana+-+Investigation+Log) |
 | Consumers & Dependencies | Consumers, service accounts, firewall rules | [View](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6853460033/Consumers+and+Dependencies) |
 | External Targets | External targets and connections | [View](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6854344805/External+Targets+EW1R-REP-01) |
 | Targets & Consumers Investigation Log | TECH-3562 findings with query evidence | [View](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6853918807/Investigation+Log+for+External+Target+and+Consumers) |
 | Topology & Classification | Full topology map and component classification | [View](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6860963905/Topology+Classification+EW1R-REP-01) |
-| Topology Investigation Log | Theme D findings with query evidence | [View](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6860243025/Topology+-+Investigaton+Log) |
+| Topology Investigation Log | TECH-3563 findings with query evidence | [View](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6860243025/Topology+-+Investigaton+Log) |
