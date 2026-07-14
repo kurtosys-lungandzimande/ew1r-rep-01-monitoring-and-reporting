@@ -8,7 +8,7 @@
 --           it is decommissioned.
 -- Author  : DBA Discovery Pass — 2026
 -- Status  : COMPLETE — all 13 sections executed and outputs captured.
---           Findings documented across TECH-3478, TECH-3479, TECH-3480.
+--           Findings documented across TECH-3560, TECH-3561, TECH-3562.
 --           Consumer confirmation for billing/client-facing use
 --           escalated to stakeholders — tracked in open-questions.md.
 --           TECH-3535 closed. TECH-3481 in progress.
@@ -1039,7 +1039,7 @@ ORDER BY size_mb DESC;
 -- Lists all stored procedures in every user database.
 -- This is a discovery-level inventory only — not diving into
 -- definitions. The goal is to know what exists in each database
--- so the deeper tickets (TECH-3478 onwards) have a starting point.
+-- so the deeper tickets (TECH-3560 onwards) have a starting point.
 -- ============================================================
 SELECT 'DBA_VCC'           AS database_name, name COLLATE DATABASE_DEFAULT AS name, create_date, modify_date FROM DBA_VCC.sys.objects           WHERE type = 'P' AND is_ms_shipped = 0
 UNION ALL
@@ -1065,7 +1065,7 @@ ORDER BY database_name, name;
 -- Run confirmed 2026-07-07: 74 dashboards total.
 -- Several dashboard names appear more than once — these are
 -- older versions sitting in different folders, not duplicates
--- of the same dashboard. The deeper Grafana ticket (TECH-3479)
+-- of the same dashboard. The deeper Grafana ticket (TECH-3561)
 -- will determine which are active and which can be cleaned up.
 -- ============================================================
 EXEC xp_cmdshell 'echo import sqlite3 > C:\temp\gf.py && echo conn = sqlite3.connect(r"C:\Program Files\GrafanaLabs\grafana\data\grafana.db") >> C:\temp\gf.py && echo rows = conn.execute("SELECT title, updated FROM dashboard WHERE is_folder=0 ORDER BY updated DESC").fetchall() >> C:\temp\gf.py && echo print(len(rows), "dashboards total") >> C:\temp\gf.py && echo [print(r) for r in rows] >> C:\temp\gf.py';

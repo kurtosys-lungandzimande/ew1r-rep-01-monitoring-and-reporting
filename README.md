@@ -36,17 +36,17 @@ TECH-3535-planning-and-discovery/
 │   investigation-log.md             ← Critical findings with query evidence (5 findings)
 │   ew1r-rep-01-architecture.drawio  ← Architecture diagram
 │
-TECH-3478-theme-a-sql-server/
+TECH-3560-theme-a-sql-server/
 │
 │   sql-server-inventory.md          ← Databases, jobs, linked servers, service accounts, stored procs
 │   investigation-log.md             ← Theme A findings
 │
-TECH-3479-theme-b-grafana/
+TECH-3561-theme-b-grafana/
 │
 │   grafana-inventory.md             ← Datasources, dashboards (74 confirmed), users, alert rules
 │   investigation-log.md             ← Theme B findings
 │
-TECH-3480-theme-c-targets-and-consumers/
+TECH-3562-theme-c-targets-and-consumers/
 │
 │   external-targets.md              ← External targets and connections
 │   consumers-and-dependencies.md    ← Consumers, service accounts, firewall rules

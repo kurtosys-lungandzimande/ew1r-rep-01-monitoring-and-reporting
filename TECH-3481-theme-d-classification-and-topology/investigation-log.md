@@ -11,11 +11,11 @@ Each entry has the question, the query, the evidence, and the finding.
 
 **Question:** Based on everything confirmed in Themes A, B, and C — what does this server do, what is the classification of each component, and is it safe to decommission?
 
-**Method:** No new queries run. All findings drawn from confirmed evidence in TECH-3478, TECH-3479, TECH-3480 investigation logs and open-questions.md. Full detail in topology-and-classification.md.
+**Method:** No new queries run. All findings drawn from confirmed evidence in TECH-3560, TECH-3561, TECH-3562 investigation logs and open-questions.md. Full detail in topology-and-classification.md.
 
 ---
 
-### What was confirmed from Theme A (TECH-3478)
+### What was confirmed from Theme A (TECH-3560)
 
 | Finding | Evidence |
 |---|---|
@@ -31,7 +31,7 @@ Each entry has the question, the query, the evidence, and the finding.
 
 ---
 
-### What was confirmed from Theme B (TECH-3479)
+### What was confirmed from Theme B (TECH-3561)
 
 | Finding | Evidence |
 |---|---|
@@ -46,7 +46,7 @@ Each entry has the question, the query, the evidence, and the finding.
 
 ---
 
-### What was confirmed from Theme C (TECH-3480)
+### What was confirmed from Theme C (TECH-3562)
 
 | Finding | Evidence |
 |---|---|

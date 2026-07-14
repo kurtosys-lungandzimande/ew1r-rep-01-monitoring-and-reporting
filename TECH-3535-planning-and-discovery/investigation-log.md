@@ -129,7 +129,7 @@ a082f27e  DBA_VCC   mssql  localhost  — core SQL Server datasource
 e8597015  DBA_VCC   mssql  localhost  — ⚠️ duplicate entry, same datasource registered twice
 ```
 
-**Finding:** DBA_VCC has two entries with different UIDs both pointing to localhost. Dashboards are split across both UIDs. Must be resolved before any migration — dashboards referencing the removed UID will break. Full datasource list in TECH-3479 investigation-log.md.
+**Finding:** DBA_VCC has two entries with different UIDs both pointing to localhost. Dashboards are split across both UIDs. Must be resolved before any migration — dashboards referencing the removed UID will break. Full datasource list in TECH-3561 investigation-log.md.
 
 ---
 
@@ -140,8 +140,8 @@ e8597015  DBA_VCC   mssql  localhost  — ⚠️ duplicate entry, same datasourc
 **Evidence:**
 ```
 1  Run SQL discovery queries and capture outputs       Done  — 13 sections, all outputs in discovery-queries.sql
-2  Inventory SQL Server and Grafana components         Done  — TECH-3478 (SQL Server), TECH-3479 (Grafana)
-3  Map external targets and consumers                  Done  — TECH-3480
+2  Inventory SQL Server and Grafana components         Done  — TECH-3560 (SQL Server), TECH-3561 (Grafana)
+3  Map external targets and consumers                  Done  — TECH-3562
 4  Document open questions and blockers                Done  — 34 questions in open-questions.md
 5  Produce topology and risk classification            In Progress  — TECH-3481, blocked on stakeholder answers
 ```
@@ -178,7 +178,7 @@ Developer Edition not licensed for production use                               
 | Discovery queries | TECH-3535-planning-and-discovery/discovery-queries.sql |
 | Open questions | TECH-3535-planning-and-discovery/open-questions.md |
 | Architecture diagram | TECH-3535-planning-and-discovery/ew1r-rep-01-architecture.drawio |
-| SQL Server detail | TECH-3478-theme-a-sql-server/investigation-log.md |
-| Grafana detail | TECH-3479-theme-b-grafana/investigation-log.md |
-| Targets & consumers detail | TECH-3480-theme-c-targets-and-consumers/investigation-log.md |
+| SQL Server detail | TECH-3560-theme-a-sql-server/investigation-log.md |
+| Grafana detail | TECH-3561-theme-b-grafana/investigation-log.md |
+| Targets & consumers detail | TECH-3562-theme-c-targets-and-consumers/investigation-log.md |
 | Topology & classification | TECH-3481-theme-d-classification-and-topology/investigation-log.md |
