@@ -1,10 +1,10 @@
-# TECH-3479 — Theme B: Grafana — Investigation Log
+# TECH-3561 — Theme B: Grafana — Investigation Log
 
 Scope: Grafana inventory — datasources, dashboards, users, alert rules, contact points.
 Each entry has the question, the query, the evidence, and the finding.
 
 > Status: Initial inventory complete. Not being investigated further in current sprint (TECH-3535).
-> Full Grafana investigation deferred to when TECH-3479 is picked up.
+> Full Grafana investigation deferred to when TECH-3561 is picked up.
 
 ---
 
@@ -244,7 +244,7 @@ EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python
 
 **Finding:** Grafana reads directly from DBA_VCC on localhost. 4 Zabbix datasources use donovan.vangraan credentials — he is an Admin account that has not logged in since November 2024. His credentials need to be rotated and his account should be reviewed before decommission. The default `admin` account is also still active and should be disabled. Email contact point is a placeholder and will never deliver alerts. Month-end dashboards are showing stale data since May 2026 due to MemSQL jobs being disabled — nobody has flagged this.
 
-**Open questions for TECH-3479:**
+**Open questions for TECH-3561:**
 - Are any dashboards client-facing or SLA-related? (Month End Reporting and KAPP Client reports are candidates)
 - Which teams use the dashboards — engineering only or wider?
 - Confirm with tashvir.babulal / rayhaan.suleyman before decommission decision

@@ -1,4 +1,4 @@
-# TECH-3478 — Theme A: SQL Server — Investigation Log
+# TECH-3560 — Theme A: SQL Server — Investigation Log
 
 Scope: SQL Server inventory — databases, jobs, linked servers, service accounts, data freshness.
 Each entry has the question, the query, the evidence, and the finding.

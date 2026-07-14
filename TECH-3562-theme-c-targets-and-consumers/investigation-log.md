@@ -1,4 +1,4 @@
-# TECH-3480 — Theme C: Targets & Consumers — Investigation Log
+# TECH-3562 — Theme C: Targets & Consumers — Investigation Log
 
 Scope: External targets, consumers, service accounts, firewall rules, dependencies.
 Each entry has the question, the query, the evidence, and the finding.
