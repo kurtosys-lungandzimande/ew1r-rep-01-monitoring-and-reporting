@@ -40,6 +40,8 @@ TECH-3535-planning-and-discovery/                        ← Parent — Planning
     │   investigation-log.md                             ← TECH-3563 findings
 ```
 
+**Confluence Documentation**
+
 | Document | Description |
 |---|---|
 | [Discovery Queries](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6841237572/06+-Discovery+Queries) | All 14 SQL query sections with outputs |
