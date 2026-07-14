@@ -5,6 +5,24 @@
 
 ---
 
+## Executive Summary
+
+EW1R-REP-01 is a custom-built monitoring and reporting hub running a bespoke VCC (Virtualised Collection & Consolidation) framework. It is the sole source of 74 Grafana dashboards, production Slack alerts, and billing data for 200+ institutional clients. Discovery is complete across all 4 investigation tracks (SQL Server, Grafana, Targets & Consumers, Topology & Classification).
+
+6 critical failures were identified during investigation — including silent ETL breakage since September 2024, all SingleStore collection jobs disabled since May 2026, and client billing data stale for 2 months with no alert fired. The server is not safe to decommission. 6 stakeholder questions (Q13, Q21, Q22, Q23, Q35, Q36) must be answered before any migration or decommission action can proceed.
+
+| Area | Status |
+|---|---|
+| SQL Server inventory | Complete |
+| Grafana inventory | Complete |
+| Targets & Consumers mapping | Complete |
+| Topology & Classification | Complete |
+| Active failures identified | 6 |
+| Decommission blockers | 6 open questions |
+| Safe to decommission | ❌ No |
+
+---
+
 ## Repository Structure
 
 Each folder maps to a Jira ticket. All investigation and discovery work is scoped per ticket.
