@@ -166,6 +166,12 @@ Full inventory complete. 21 datasources, 74 dashboards, 8 users (3 active admins
 ### Targets & Consumers — [TECH-3562](https://kurtosys-prod-eng.atlassian.net/jira/software/c/projects/TECH/boards/795?selectedIssue=TECH-3562)
 External targets and consumers mapped. DBA_VCC_COST confirmed client billing data. DBA_VCC_MEMSQL confirmed broken. Consumer confirmation still needed for month-end procedures.
 
+| Resource | Link |
+|---|---|
+| Consumers & Dependencies | [View in Confluence](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6853460033/Consumers+and+Dependencies) |
+| External Targets | [View in Confluence](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6854344805/External+Targets+EW1R-REP-01) |
+| Investigation Log | [View in Confluence](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6853918807/Investigation+Log+for+External+Target+and+Consumers) |
+
 **Key findings:**
 - DBA_VCC_COST tracks entity counts for 200+ real institutional clients across EW2, UE1, EC1 — confirmed billing data
 - 19 REP_MONTHEND procedures in DBA_VCC_COST + 14 in DBA_VCC_MEMSQL — who calls them each month end is still open
@@ -281,5 +287,8 @@ It is:
 | SQL Server Investigation Log | Theme A findings with query evidence | [View](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6848282648/SQL+Server+Investigation+Log) |
 | Grafana Inventory | Datasources, dashboards, users, alert rules | [View](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6850314252/Grafana+Inventory) |
 | Grafana Investigation Log | Theme B findings with query evidence | [View](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6851067926/Grafana+-+Investigation+Log) |
+| Consumers & Dependencies | Consumers, service accounts, firewall rules | [View](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6853460033/Consumers+and+Dependencies) |
+| External Targets | External targets and connections | [View](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6854344805/External+Targets+EW1R-REP-01) |
+| Targets & Consumers Investigation Log | TECH-3562 findings with query evidence | [View](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6853918807/Investigation+Log+for+External+Target+and+Consumers) |
 | Topology & Classification | Full topology map and component classification | [View](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6860963905/Topology+Classification+EW1R-REP-01) |
 | Topology Investigation Log | Theme D findings with query evidence | [View](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6860243025/Topology+-+Investigaton+Log) |
