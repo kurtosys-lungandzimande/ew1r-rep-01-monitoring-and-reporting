@@ -238,7 +238,7 @@ It is:
 | 2.4M rows stuck in MON_AWS_Entity_Cost staging | query 4 — COUNT(*) |
 | INFO_AWS_KAPP_Query_API_Detail has 563M rows | query evidence from MERGE session |
 | MERGE on 563M row table already taking 9+ minutes | sys.dm_exec_requests session 67 |
-| S3 backup retention — 30-day lifecycle policy confirmed | S3 lifecycle rule evidence |
+| S3 backup buckets confirmed | `ksys-ew1r-db-backups` (local backups — AWS CLI s3 sync via xp_cmdshell, no encryption specified) and `ksys-ew1p-oct-dbbackup` (EW1P-OCT RDS — KMS key NULL, unencrypted at rest). Retention TBC — check S3 lifecycle rules on both buckets. | USP_DatabaseBackupMoveToS3 definition + job step command |
 | DBA_VCC_COST is the only FULL recovery database on this server | query 1.2 — recovery_model_desc |
 | Grafana reads directly from DBA_VCC on localhost | query 12.6 — grafana.db datasource table |
 | 4 Zabbix datasources use ex-employee credentials inactive since Nov 2024 | query 12.6 — grafana.db |

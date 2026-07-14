@@ -319,7 +319,8 @@ All 20 of these dashboards are showing stale data. Do not re-enable jobs without
 | Type | Location | Notes |
 |---|---|---|
 | Local staging | D:\SQL\Backup\ | Intermediate before S3 copy |
-| S3 destination | ARN referenced in job — bucket name TBC | 30-day retention confirmed via S3 lifecycle rule |
+| S3 destination (local backups) | `ksys-ew1r-db-backups` — path `Backups/Reporting/EW1R-REP-01/` | AWS CLI s3 sync via xp_cmdshell. ⚠️ No encryption specified. Retention TBC — check S3 lifecycle rule on bucket. |
+| S3 destination (EW1P-OCT RDS) | `ksys-ew1p-oct-dbbackup` — path `backup/octopus_db_<date>.bak` | rds_backup_database. ⚠️ KMS key NULL — unencrypted at rest. Retention TBC. |
 
 ### Network
 
@@ -362,6 +363,6 @@ All 20 of these dashboards are showing stale data. Do not re-enable jobs without
 | 3 | Who calls REP_MONTHEND_* procedures each month end? | tashvir.babulal / rayhaan.suleyman |
 | 4 | Who receives the Slack alerts from SSISStatusCheck? | DBA team / ops team |
 | 5 | What IAM role/key does the Python AWS API caller use? | DevOps / cloud team |
-| 6 | What S3 bucket do backups go to — bucket name/ARN? | DevOps / cloud team |
+| 6 | What S3 bucket do backups go to — bucket name/ARN? | DevOps / cloud team | **Closed** — `ksys-ew1r-db-backups` (local backups) and `ksys-ew1p-oct-dbbackup` (EW1P-OCT RDS). ⚠️ Retention still TBC — check S3 lifecycle rules on both buckets. ⚠️ EW1P-OCT backup has KMS key NULL — unencrypted at rest. ⚠️ Local backups use AWS CLI s3 sync via xp_cmdshell — no encryption specified in sync command. |
 | 7 | Is ZabbixProdOld still active or can it be removed? | Infrastructure team |
 | 8 | ~~What does EW1R-TC resolve to — is it TeamCity?~~ | **Closed** — confirmed TeamCity. EW1R-TC appears in LU_EntityList under Shared_Services_Non-Prod, Application=TeamCity, Release environment, EW1 region. |

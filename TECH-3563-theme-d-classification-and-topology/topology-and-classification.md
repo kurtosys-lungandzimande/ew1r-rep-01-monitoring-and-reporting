@@ -118,7 +118,7 @@ EW1R-REP-01 (Custom VCC Monitoring Hub)
 | NiFi API (10.125.9.192:8443) | HTTPS outbound | 8443 | Grafana JSON datasource | Yes — confirmed in grafana.db |
 | EW2P-MSSQL-01/02 | SQL Server outbound | 1433 | VCC monitoring collection | Yes — jobs running |
 | EW1P-OCT RDS | SQL Server outbound | 1433 | Backup job | Yes — job running |
-| S3 bucket (ARN unknown) | HTTPS outbound | 443 | Backup destination | Yes — job running, 30-day retention confirmed, bucket ARN TBC |
+| S3 bucket (local backups) | `ksys-ew1r-db-backups` — `Backups/Reporting/EW1R-REP-01/` | HTTPS outbound | 443 | Backup destination — AWS CLI s3 sync via xp_cmdshell. ⚠️ No encryption specified. Retention TBC. | Yes — job running |
 | Slack webhook (alerts-data-operations) | HTTPS outbound | 443 | Grafana alert delivery | Yes — confirmed in grafana.db |
 | Slack webhook (alert-app-allow2fa-disabled) | HTTPS outbound | 443 | Grafana alert delivery | Yes — confirmed in grafana.db |
 | Grafana clients (browsers) | HTTPS inbound | 443 | Dashboard access | Yes — 3 active users |
