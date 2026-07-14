@@ -21,10 +21,7 @@
 -- service accounts before doing anything else.
 -- ============================================================
 
--- 1.1 Server version, edition, and collation
--- Confirms SQL Server 2019 Developer Edition (15.0.4455.2).
--- Developer Edition means this is NOT a licensed production engine —
--- important context if a migration or licensing review is needed.
+-- 1.1 Server version, edition, and collation.
 SELECT
     @@SERVERNAME                            AS server_name,
     SERVERPROPERTY('ProductVersion')        AS version,
@@ -34,93 +31,8 @@ SELECT
     SERVERPROPERTY('IsClustered')           AS is_clustered,
     SERVERPROPERTY('IsHadrEnabled')         AS is_ag_enabled;
 
--- ============================================================
--- QUERY 1.2 — All Databases with Size and Recovery Model
---
--- WHY THIS QUERY EXISTS:
--- This proves exactly how many databases exist on this server,
--- how large each one is, and what recovery model each uses.
--- Recovery model is the single most important signal for whether
--- a database is treated as business-critical or not.
--- Anyone challenging your findings can run this and get the
--- exact same numbers.
---
--- WHAT EACH COLUMN PROVES:
---
--- name
---   The database name. Expected: 8 user databases.
---   DBA_VCC_AWS, DBA_VCC_MEMSQL, KURTOSYS_BASELINE,
---   DBA_VCC_MYSQL, DBA_VCC, DBA_VCC_COST, DBA_VCC_ATLASSIAN,
---   Utilities. System databases (master, model, msdb, tempdb)
---   also appear because the query joins sys.master_files which
---   includes all databases. They are not part of the investigation
---   scope but confirm the server is a standard standalone instance.
---
--- state_desc
---   All user databases returned ONLINE — the server is healthy.
---   No SUSPECT, RESTORING, or OFFLINE states. If any appear
---   when you re-run this, that is a separate incident requiring
---   immediate escalation before any decommission work proceeds.
---
--- recovery_model_desc
---   THIS IS THE MOST IMPORTANT COLUMN IN THIS QUERY.
---   Every database on this server uses SIMPLE recovery EXCEPT
---   DBA_VCC_COST which uses FULL recovery.
---
---   SIMPLE = SQL Server automatically reclaims log space.
---   Transaction log backups are not taken. If the server
---   crashes you lose everything since the last FULL or DIFF
---   backup. This is acceptable for monitoring data that can
---   be re-collected.
---
---   FULL = Every single transaction is logged and retained
---   until a log backup runs. This means point-in-time restore
---   is possible. Someone deliberately changed DBA_VCC_COST
---   to FULL recovery — that is not a default, it is a
---   conscious decision that says we cannot afford to lose
---   even one transaction from this database.
---   This is the strongest evidence that DBA_VCC_COST contains
---   business-critical data, likely tied to client billing.
---   It is the only database on this server treated this way.
---
--- size_mb / size_gb
---   The physical size of each database including all data and
---   log files. Use this to size the target replacement host.
---   Total across all user databases: ~363 GB.
---   DBA_VCC_AWS is the largest at 189 GB and is actively growing —
---   it increased ~8 GB since the initial investigation, confirming
---   data collection is still running every 30 minutes.
---   DBA_VCC_MEMSQL is 77 GB and has NOT grown — confirming all
---   its collection jobs are disabled and no new data is coming in.
---
--- WHY sys.master_files IS USED INSTEAD OF sys.databases:
---   sys.databases does not store file sizes directly.
---   sys.master_files has one row per file (data + log) per
---   database. The SUM aggregates all files for each database
---   to give the true total size. The * 8.0 / 1024 converts
---   SQL Server internal 8KB page units into megabytes.
---
--- ACTUAL OUTPUT CONFIRMED (run during investigation):
---   DBA_VCC_AWS        189,088 MB  184.66 GB  ONLINE  SIMPLE  <- actively growing
---   DBA_VCC_MEMSQL      77,316 MB   75.50 GB  ONLINE  SIMPLE  <- static, jobs disabled
---   KURTOSYS_BASELINE   52,224 MB   51.00 GB  ONLINE  SIMPLE
---   DBA_VCC_MYSQL       27,262 MB   26.62 GB  ONLINE  SIMPLE
---   DBA_VCC             24,625 MB   24.05 GB  ONLINE  SIMPLE  <- actively growing
---   DBA_VCC_COST         5,120 MB    5.00 GB  ONLINE  FULL    <- only FULL recovery
---   DBA_VCC_ATLASSIAN    2,048 MB    2.00 GB  ONLINE  SIMPLE
---   Utilities              201 MB    0.20 GB  ONLINE  SIMPLE
---   Total user databases: ~363 GB
---   Replacement host minimum storage requirement: 400 GB+
---
--- IF OUTPUT DIFFERS WHEN YOU RE-RUN:
---   DBA_VCC_COST not on FULL = someone changed it, investigate why.
---   DBA_VCC_AWS still growing = collection pipeline is healthy.
---   DBA_VCC_AWS stopped growing = 30-min collection job has failed silently.
---   DBA_VCC_MEMSQL growing again = someone re-enabled the MemSQL jobs.
---   A database missing = it was dropped, confirm with DBA team.
---   A new database present = undocumented workload, investigate
---   before proceeding with any decommission decision.
--- ============================================================
+-- 1.2 All databases with size and recovery model.
+-- DBA_VCC_COST is the only FULL recovery database — treat as business-critical.
 SELECT
     d.name,
     d.state_desc,
@@ -132,68 +44,7 @@ JOIN sys.master_files f ON d.database_id = f.database_id
 GROUP BY d.name, d.state_desc, d.recovery_model_desc
 ORDER BY size_mb DESC;
 
--- ============================================================
--- QUERY 1.3 — Services Running on This Server
---
--- WHY THIS QUERY EXISTS:
--- This confirms exactly which service accounts are running the
--- SQL Server engine, SQL Agent, and the Python extensibility
--- service. These accounts are what the server uses to connect
--- to external systems, run jobs, and call AWS APIs.
--- Anyone reviewing your findings needs to know these accounts
--- exist before they can plan credential rotation or migration.
---
--- WHAT EACH COLUMN PROVES:
---
--- servicename
---   The name of the Windows service. Three services matter here:
---   SQL Server (MSSQLSERVER) — the database engine itself.
---   SQL Server Agent (MSSQLSERVER) — runs all 60 SQL Agent jobs.
---   SQL Server Launchpad (MSSQLSERVER) — runs Python scripts
---   called by the AWS and Jira data collection jobs.
---   If Launchpad is stopped, all Python API calls fail silently
---   and no error is raised in SQL Server — the jobs just return
---   empty results with no indication of why.
---
--- service_account
---   The Windows account running each service.
---   SQL Server engine runs under an AD domain account.
---   SQL Server Agent runs under an AD domain account — this is the account whose
---   permissions determine what the jobs can actually do.
---   SQL Server Launchpad runs under a built-in sandboxed NT Service account —
---   it runs Python in the extensibility framework.
---   All three accounts must be documented before decommission
---   because they may have firewall rules, vault entries, and AD
---   permissions tied to them that need to be cleaned up.
---
--- status_desc
---   All three services returned Running — confirmed healthy.
---   If SQL Server Agent shows anything other than Running,
---   all 60 jobs have stopped and no data is being collected.
---   If Launchpad shows anything other than Running, the AWS
---   and Jira Python jobs are failing silently.
---
--- startup_type_desc
---   All three services returned Automatic — confirmed.
---   This means all three services restart automatically after
---   a server reboot. If any showed Manual or Disabled, a reboot
---   would silently break monitoring until someone noticed.
---
--- ACTUAL OUTPUT CONFIRMED (run during investigation):
---   SQL Server (MSSQLSERVER)          [AD domain account]        Running  Automatic
---   SQL Server Agent (MSSQLSERVER)    [AD domain account]        Running  Automatic
---   SQL Server Launchpad (MSSQLSERVER) [NT Service account]      Running  Automatic
---
--- NOTE — no SQL Full-text Filter Daemon Launcher appeared.
--- This means full-text search is either not installed or not
--- in use on this server. Not relevant to this investigation.
---
--- IF OUTPUT DIFFERS WHEN YOU RE-RUN:
---   Agent not Running = all 60 jobs have stopped, data collection halted.
---   Launchpad not Running = Python jobs failing, AWS and Jira data stale.
---   Startup = Manual = server reboot will silently break monitoring.
---   Different service account = someone changed it, check vault and AD.
--- ============================================================
+-- 1.3 Services running on this server — confirms service accounts and status.
 SELECT
     servicename,
     service_account,
