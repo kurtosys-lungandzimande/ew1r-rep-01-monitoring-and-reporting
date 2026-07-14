@@ -263,24 +263,26 @@ It is:
 
 ## 9. Confirmed Facts (Evidence-Backed)
 
+> All facts below are backed by query evidence. Full queries available in the [Discovery Queries Confluence page](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6841237572/06+-Discovery+Queries).
+
 | Fact | Source |
 |---|---|
-| 109 linked servers (103 MSDASQL + 6 SQLNCLI) | query 3.1 — sys.servers |
-| 90 SingleStore nodes across 4 clusters | query 3.2 — linked server breakdown |
-| 63 jobs (52 enabled, 11 disabled) | query 2.1 — sysjobs |
-| 378 GB total storage | query 1.2 — sys.master_files |
-| 74 Grafana dashboards | query 9.5 + 13.7 — grafana.db |
-| 21 Grafana datasources | query 12.6 — grafana.db |
-| DBA_VCC_AWS_15MIN_CHECKS runs every 30 min (:00 and :30) | query 2.2 — job history evidence |
-| DBA_VCC_COST last collected 4 May 2026 (not 29 June as job history suggests) | query 5.1 — data freshness |
-| 200+ institutional clients in LU_KAPP_ClientList | query 5.2 — DBA_VCC_COST |
-| 2.4M rows stuck in MON_AWS_Entity_Cost staging | query 4 — COUNT(*) |
-| INFO_AWS_KAPP_Query_API_Detail has 563M rows | query evidence from MERGE session |
-| MERGE on 563M row table already taking 9+ minutes | sys.dm_exec_requests session 67 |
-| S3 backup buckets confirmed | `ksys-ew1r-db-backups` (local backups — AWS CLI s3 sync via xp_cmdshell, no encryption specified) and `ksys-ew1p-oct-dbbackup` (EW1P-OCT RDS — KMS key NULL, unencrypted at rest). Retention TBC — check S3 lifecycle rules on both buckets. | USP_DatabaseBackupMoveToS3 definition + job step command |
-| DBA_VCC_COST is the only FULL recovery database on this server | query 1.2 — recovery_model_desc |
-| Grafana reads directly from DBA_VCC on localhost | query 12.6 — grafana.db datasource table |
-| 4 Zabbix datasources use ex-employee credentials inactive since Nov 2024 | query 12.6 — grafana.db |
+| 109 linked servers (103 MSDASQL + 6 SQLNCLI) | [query 3.1](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6841237572/06+-Discovery+Queries) — sys.servers |
+| 90 SingleStore nodes across 4 clusters | [query 3.2](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6841237572/06+-Discovery+Queries) — linked server breakdown |
+| 63 jobs (52 enabled, 11 disabled) | [query 2.1](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6841237572/06+-Discovery+Queries) — sysjobs |
+| 378 GB total storage | [query 1.2](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6841237572/06+-Discovery+Queries) — sys.master_files |
+| 74 Grafana dashboards | [query 9.5 + 13.7](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6841237572/06+-Discovery+Queries) — grafana.db |
+| 21 Grafana datasources | [query 12.6](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6841237572/06+-Discovery+Queries) — grafana.db |
+| DBA_VCC_AWS_15MIN_CHECKS runs every 30 min (:00 and :30) | [query 2.2](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6841237572/06+-Discovery+Queries) — job history evidence |
+| DBA_VCC_COST last collected 4 May 2026 (not 29 June as job history suggests) | [query 5.1](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6841237572/06+-Discovery+Queries) — data freshness |
+| 200+ institutional clients in LU_KAPP_ClientList | [query 5.2](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6841237572/06+-Discovery+Queries) — DBA_VCC_COST |
+| 2.4M rows stuck in MON_AWS_Entity_Cost staging | [query 4](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6841237572/06+-Discovery+Queries) — COUNT(*) |
+| INFO_AWS_KAPP_Query_API_Detail has 563M rows | [query evidence from MERGE session](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6841237572/06+-Discovery+Queries) |
+| MERGE on 563M row table already taking 9+ minutes | [query evidence](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6841237572/06+-Discovery+Queries) — sys.dm_exec_requests session 67 |
+| S3 backup buckets confirmed — `ksys-ew1r-db-backups` (local backups, AWS CLI s3 sync, no encryption specified) and `ksys-ew1p-oct-dbbackup` (EW1P-OCT RDS, KMS key NULL, unencrypted at rest). Retention TBC. | [USP_DatabaseBackupMoveToS3 definition](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6841237572/06+-Discovery+Queries) — job step command |
+| DBA_VCC_COST is the only FULL recovery database on this server | [query 1.2](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6841237572/06+-Discovery+Queries) — recovery_model_desc |
+| Grafana reads directly from DBA_VCC on localhost | [query 12.6](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6841237572/06+-Discovery+Queries) — grafana.db datasource table |
+| 4 Zabbix datasources use ex-employee credentials inactive since Nov 2024 | [query 12.6](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6841237572/06+-Discovery+Queries) — grafana.db |
 
 ---
 
