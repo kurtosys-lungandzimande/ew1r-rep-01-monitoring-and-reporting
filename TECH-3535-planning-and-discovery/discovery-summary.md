@@ -11,48 +11,33 @@ Each folder maps to a Jira ticket. All investigation and discovery work is scope
 
 ```
 TECH-3535-planning-and-discovery/                        ← Parent — Planning & Discovery
-│                                                          Jira: https://kurtosys-prod-eng.atlassian.net/jira/software/c/projects/TECH/boards/795?selectedIssue=TECH-3535
 │
 │   discovery-summary.md                                 ← Master consolidation doc (this file)
 │   discovery-queries.sql                                ← All SQL queries used during investigation (14 sections)
-│                                                          Confluence: https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6841237572/06+-Discovery+Queries
 │   open-questions.md                                    ← All open questions, blockers, and active findings
 │   investigation-log.md                                 ← Critical findings with query evidence
 │   ew1r-rep-01-architecture.drawio                      ← Architecture diagram
 │
 ├── TECH-3560-sql-server/                                ← Child — SQL Server investigation
-│   │                                                      Jira: https://kurtosys-prod-eng.atlassian.net/jira/software/c/projects/TECH/boards/795?selectedIssue=TECH-3560
 │   │
 │   │   sql-server-inventory.md                          ← Databases, jobs, linked servers, service accounts, stored procs
-│   │                                                      Confluence: https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6847725586/SQL+Server+Inventory+EW1R-REP-01
 │   │   investigation-log.md                             ← TECH-3560 findings
-│   │                                                      Confluence: https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6848282648/SQL+Server+Investigation+Log
 │
 ├── TECH-3561-grafana/                                   ← Child — Grafana investigation
-│   │                                                      Jira: https://kurtosys-prod-eng.atlassian.net/jira/software/c/projects/TECH/boards/795?selectedIssue=TECH-3561
 │   │
 │   │   grafana-inventory.md                             ← Datasources, dashboards (74 confirmed), users, alert rules
-│   │                                                      Confluence: https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6850314252/Grafana+Inventory
 │   │   investigation-log.md                             ← TECH-3561 findings
-│   │                                                      Confluence: https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6851067926/Grafana+-+Investigation+Log
 │
 ├── TECH-3562-targets-and-consumers/                     ← Child — Targets & Consumers investigation
-│   │                                                      Jira: https://kurtosys-prod-eng.atlassian.net/jira/software/c/projects/TECH/boards/795?selectedIssue=TECH-3562
 │   │
 │   │   external-targets.md                              ← External targets and connections
-│   │                                                      Confluence: https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6854344805/External+Targets+EW1R-REP-01
 │   │   consumers-and-dependencies.md                    ← Consumers, service accounts, firewall rules
-│   │                                                      Confluence: https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6853460033/Consumers+and+Dependencies
 │   │   investigation-log.md                             ← TECH-3562 findings
-│   │                                                      Confluence: https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6853918807/Investigation+Log+for+External+Target+and+Consumers
 │
 └── TECH-3563-topology-and-classification/               ← Child — Topology & Classification investigation
-    │                                                      Jira: https://kurtosys-prod-eng.atlassian.net/jira/software/c/projects/TECH/boards/795?selectedIssue=TECH-3563
     │
     │   topology-and-classification.md                   ← Topology map and classification outputs
-    │                                                      Confluence: https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6860963905/Topology+Classification+EW1R-REP-01
     │   investigation-log.md                             ← TECH-3563 findings
-    │                                                      Confluence: https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6860243025/Topology+-+Investigaton+Log
 ```
 
 | Document | Description |
