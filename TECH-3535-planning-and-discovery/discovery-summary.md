@@ -2,8 +2,32 @@
 # TECH-3535 — Planning & Discovery
 
 > **Status:** Discovery complete. Decommission blocked on 6 open stakeholder questions.
-> **Epic:** TECH-3410 — EW1R-REP-01 monitoring and reporting — investigation and decommission readiness [2026]
-> **Themes:** TECH-3560 (SQL Server) · TECH-3561 (Grafana) · TECH-3562 (Consumers) · TECH-3563 (Topology)
+> **Epic:** [TECH-3410 — EW1R-REP-01 monitoring and reporting — investigation and decommission readiness [2026]](https://kurtosys-prod-eng.atlassian.net/jira/software/c/projects/TECH/boards/795?selectedIssue=TECH-3410)
+> **Themes:** [TECH-3560 SQL Server](https://kurtosys-prod-eng.atlassian.net/jira/software/c/projects/TECH/boards/795?selectedIssue=TECH-3560) · [TECH-3561 Grafana](https://kurtosys-prod-eng.atlassian.net/jira/software/c/projects/TECH/boards/795?selectedIssue=TECH-3561) · [TECH-3562 Consumers](https://kurtosys-prod-eng.atlassian.net/jira/software/c/projects/TECH/boards/795?selectedIssue=TECH-3562) · [TECH-3563 Topology](https://kurtosys-prod-eng.atlassian.net/jira/software/c/projects/TECH/boards/795?selectedIssue=TECH-3563)
+
+---
+
+## Quick Links
+
+### Jira Tickets
+| Ticket | Description | Link |
+|---|---|---|
+| TECH-3559 | Discovery Queries | [Open ticket](https://kurtosys-prod-eng.atlassian.net/jira/software/c/projects/TECH/boards/795?selectedIssue=TECH-3559) |
+| TECH-3560 | SQL Server Inventory | [Open ticket](https://kurtosys-prod-eng.atlassian.net/jira/software/c/projects/TECH/boards/795?selectedIssue=TECH-3560) |
+| TECH-3561 | Grafana Inventory | [Open ticket](https://kurtosys-prod-eng.atlassian.net/jira/software/c/projects/TECH/boards/795?selectedIssue=TECH-3561) |
+| TECH-3562 | External Targets & Consumers | [Open ticket](https://kurtosys-prod-eng.atlassian.net/jira/software/c/projects/TECH/boards/795?selectedIssue=TECH-3562) |
+| TECH-3563 | Topology & Classification | [Open ticket](https://kurtosys-prod-eng.atlassian.net/jira/software/c/projects/TECH/boards/795?selectedIssue=TECH-3563) |
+
+### Confluence Pages
+| Page | Link |
+|---|---|
+| Discovery Queries | [View in Confluence](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6841237572/06+-Discovery+Queries) |
+| SQL Server Inventory | [View in Confluence](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6847725586/SQL+Server+Inventory+EW1R-REP-01) |
+| SQL Server Investigation Log | [View in Confluence](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6848282648/SQL+Server+Investigation+Log) |
+| Grafana Inventory | [View in Confluence](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6850314252/Grafana+Inventory) |
+| Grafana Investigation Log | [View in Confluence](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6851067926/Grafana+-+Investigation+Log) |
+| Topology & Classification | [View in Confluence](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6860963905/Topology+Classification+EW1R-REP-01) |
+| Topology Investigation Log | [View in Confluence](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6860243025/Topology+-+Investigaton+Log) |
 
 ---
 
@@ -101,8 +125,13 @@ EW1R-REP-01 is a custom-built monitoring and reporting hub. It is not a standard
 
 ## 6. Theme Summaries
 
-### Theme A — SQL Server (TECH-3560)
-Full inventory complete. 8 databases, 378 GB, 63 jobs, 109 linked servers, ~600+ stored procedures documented. All critical failures identified and evidenced with query output. See [sql-server-inventory.md](../TECH-3560-theme-a-sql-server/sql-server-inventory.md) and [investigation-log.md](../TECH-3560-theme-a-sql-server/investigation-log.md).
+### Theme A — SQL Server ([TECH-3560](https://kurtosys-prod-eng.atlassian.net/jira/software/c/projects/TECH/boards/795?selectedIssue=TECH-3560))
+Full inventory complete. 8 databases, 378 GB, 63 jobs, 109 linked servers, ~600+ stored procedures documented. All critical failures identified and evidenced with query output.
+
+| Resource | Link |
+|---|---|
+| SQL Server Inventory | [Confluence](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6847725586/SQL+Server+Inventory+EW1R-REP-01) · [GitHub](../TECH-3560-theme-a-sql-server/sql-server-inventory.md) |
+| SQL Server Investigation Log | [Confluence](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6848282648/SQL+Server+Investigation+Log) · [GitHub](../TECH-3560-theme-a-sql-server/investigation-log.md) |
 
 **Open questions for this theme:**
 
@@ -120,8 +149,13 @@ Full inventory complete. 8 databases, 378 GB, 63 jobs, 109 linked servers, ~600+
 
 ---
 
-### Theme B — Grafana (TECH-3561)
-Full inventory complete. 21 datasources, 74 dashboards, 8 users (3 active admins, 2 inactive), 3 alert rules, 3 contact points. See [grafana-inventory.md](../TECH-3561-theme-b-grafana/grafana-inventory.md) and [investigation-log.md](../TECH-3561-theme-b-grafana/investigation-log.md).
+### Theme B — Grafana ([TECH-3561](https://kurtosys-prod-eng.atlassian.net/jira/software/c/projects/TECH/boards/795?selectedIssue=TECH-3561))
+Full inventory complete. 21 datasources, 74 dashboards, 8 users (3 active admins, 2 inactive), 3 alert rules, 3 contact points.
+
+| Resource | Link |
+|---|---|
+| Grafana Inventory | [Confluence](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6850314252/Grafana+Inventory) · [GitHub](../TECH-3561-theme-b-grafana/grafana-inventory.md) |
+| Grafana Investigation Log | [Confluence](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6851067926/Grafana+-+Investigation+Log) · [GitHub](../TECH-3561-theme-b-grafana/investigation-log.md) |
 
 **Key findings:**
 - 14 dashboards reading from DBA_VCC_MEMSQL — all showing stale data since May 2026
@@ -141,8 +175,14 @@ Full inventory complete. 21 datasources, 74 dashboards, 8 users (3 active admins
 
 ---
 
-### Theme C — Targets & Consumers (TECH-3562)
-External targets and consumers mapped. DBA_VCC_COST confirmed client billing data. DBA_VCC_MEMSQL confirmed broken. Consumer confirmation still needed for month-end procedures. See [consumers-and-dependencies.md](../TECH-3562-theme-c-targets-and-consumers/consumers-and-dependencies.md) and [external-targets.md](../TECH-3562-theme-c-targets-and-consumers/external-targets.md).
+### Theme C — Targets & Consumers ([TECH-3562](https://kurtosys-prod-eng.atlassian.net/jira/software/c/projects/TECH/boards/795?selectedIssue=TECH-3562))
+External targets and consumers mapped. DBA_VCC_COST confirmed client billing data. DBA_VCC_MEMSQL confirmed broken. Consumer confirmation still needed for month-end procedures.
+
+| Resource | Link |
+|---|---|
+| Consumers & Dependencies | [GitHub](../TECH-3562-theme-c-targets-and-consumers/consumers-and-dependencies.md) |
+| External Targets | [GitHub](../TECH-3562-theme-c-targets-and-consumers/external-targets.md) |
+| Investigation Log | [GitHub](../TECH-3562-theme-c-targets-and-consumers/investigation-log.md) |
 
 **Key findings:**
 - DBA_VCC_COST tracks entity counts for 200+ real institutional clients across EW2, UE1, EC1 — confirmed billing data
@@ -163,8 +203,13 @@ External targets and consumers mapped. DBA_VCC_COST confirmed client billing dat
 
 ---
 
-### Theme D — Classification & Topology (TECH-3563)
-Topology map complete. Component classification complete. Preliminary decommission recommendation written. Blocked on 6 stakeholder questions. See [topology-and-classification.md](../TECH-3563-theme-d-classification-and-topology/topology-and-classification.md).
+### Theme D — Classification & Topology ([TECH-3563](https://kurtosys-prod-eng.atlassian.net/jira/software/c/projects/TECH/boards/795?selectedIssue=TECH-3563))
+Topology map complete. Component classification complete. Preliminary decommission recommendation written. Blocked on 6 stakeholder questions.
+
+| Resource | Link |
+|---|---|
+| Topology & Classification | [Confluence](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6860963905/Topology+Classification+EW1R-REP-01) · [GitHub](../TECH-3563-theme-d-classification-and-topology/topology-and-classification.md) |
+| Topology Investigation Log | [Confluence](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6860243025/Topology+-+Investigaton+Log) · [GitHub](../TECH-3563-theme-d-classification-and-topology/investigation-log.md) |
 
 **Classification summary:**
 
@@ -247,29 +292,18 @@ It is:
 
 ## 10. Repository Structure
 
-```
-TECH-3535-planning-and-discovery/
-│   discovery-queries.sql            ← All SQL queries (13 sections)
-│   open-questions.md                ← Full open questions log
-│   investigation-log.md             ← Critical findings with query evidence
-│   discovery-summary.md             ← This document
-│   ew1r-rep-01-architecture.drawio  ← Architecture diagram
-
-TECH-3560-theme-a-sql-server/
-│   sql-server-inventory.md          ← Databases, jobs, linked servers, SPs
-│   investigation-log.md             ← Theme A findings
-
-TECH-3561-theme-b-grafana/
-│   grafana-inventory.md             ← Datasources, dashboards, users, alerts
-│   investigation-log.md             ← Theme B findings
-
-TECH-3562-theme-c-targets-and-consumers/
-│   external-targets.md              ← External targets and connections
-│   consumers-and-dependencies.md    ← Consumers, service accounts, firewall
-│   investigation-log.md             ← Theme C findings
-
-TECH-3563-theme-d-classification-and-topology/
-│   topology-and-classification.md   ← Topology map and classification
-│   investigation-log.md             ← Theme D findings
-│   ew1r-rep-01-architecture.drawio  ← Architecture diagram (copy)
-```
+| File | Description | Link |
+|---|---|---|
+| discovery-queries.sql | All SQL queries — 14 sections | [GitHub](../TECH-3535-planning-and-discovery/discovery-queries.sql) · [Confluence](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6841237572/06+-Discovery+Queries) |
+| open-questions.md | Full open questions log | [GitHub](../TECH-3535-planning-and-discovery/open-questions.md) |
+| investigation-log.md | TECH-3535 critical findings | [GitHub](../TECH-3535-planning-and-discovery/investigation-log.md) |
+| discovery-summary.md | This document | [GitHub](../TECH-3535-planning-and-discovery/discovery-summary.md) |
+| sql-server-inventory.md | Databases, jobs, linked servers, SPs | [GitHub](../TECH-3560-theme-a-sql-server/sql-server-inventory.md) · [Confluence](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6847725586/SQL+Server+Inventory+EW1R-REP-01) |
+| TECH-3560 investigation-log.md | Theme A findings | [GitHub](../TECH-3560-theme-a-sql-server/investigation-log.md) · [Confluence](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6848282648/SQL+Server+Investigation+Log) |
+| grafana-inventory.md | Datasources, dashboards, users, alerts | [GitHub](../TECH-3561-theme-b-grafana/grafana-inventory.md) · [Confluence](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6850314252/Grafana+Inventory) |
+| TECH-3561 investigation-log.md | Theme B findings | [GitHub](../TECH-3561-theme-b-grafana/investigation-log.md) · [Confluence](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6851067926/Grafana+-+Investigation+Log) |
+| external-targets.md | External targets and connections | [GitHub](../TECH-3562-theme-c-targets-and-consumers/external-targets.md) |
+| consumers-and-dependencies.md | Consumers, service accounts, firewall | [GitHub](../TECH-3562-theme-c-targets-and-consumers/consumers-and-dependencies.md) |
+| TECH-3562 investigation-log.md | Theme C findings | [GitHub](../TECH-3562-theme-c-targets-and-consumers/investigation-log.md) |
+| topology-and-classification.md | Topology map and classification | [GitHub](../TECH-3563-theme-d-classification-and-topology/topology-and-classification.md) · [Confluence](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6860963905/Topology+Classification+EW1R-REP-01) |
+| TECH-3563 investigation-log.md | Theme D findings | [GitHub](../TECH-3563-theme-d-classification-and-topology/investigation-log.md) · [Confluence](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6860243025/Topology+-+Investigaton+Log) |
