@@ -3,7 +3,7 @@
 Scope: Initial discovery on EW1R-REP-01 — what is running, what depends on it, what risks exist before decommission.
 Each entry has the question, the query, the evidence, and the finding.
 
-> Status: Discovery complete. All 5 scope items done. Open questions documented in open-questions.md. Topology and classification in progress — TECH-3481.
+> Status: Discovery complete. All 5 scope items done. Open questions documented in open-questions.md. Topology and classification in progress — TECH-3563.
 
 ---
 
@@ -143,7 +143,7 @@ e8597015  DBA_VCC   mssql  localhost  — ⚠️ duplicate entry, same datasourc
 2  Inventory SQL Server and Grafana components         Done  — TECH-3560 (SQL Server), TECH-3561 (Grafana)
 3  Map external targets and consumers                  Done  — TECH-3562
 4  Document open questions and blockers                Done  — 34 questions in open-questions.md
-5  Produce topology and risk classification            In Progress  — TECH-3481, blocked on stakeholder answers
+5  Produce topology and risk classification            In Progress  — TECH-3563, blocked on stakeholder answers
 ```
 
 **Finding:** Discovery complete. Topology blocked on consumer confirmation questions — who uses DBA_VCC_COST for billing, is KAPP Client Utilisation client-facing, who calls REP_MONTHEND procedures. Escalated to tashvir.babulal and rayhaan.suleyman.
@@ -167,7 +167,7 @@ No runbook or documentation exists for this server                              
 Developer Edition not licensed for production use                                    Medium
 ```
 
-**Finding:** 3 critical risks must be resolved before decommission date is set. Full detail per risk in the relevant theme ticket. Topology and classification in TECH-3481.
+**Finding:** 3 critical risks must be resolved before decommission date is set. Full detail per risk in the relevant theme ticket. Topology and classification in TECH-3563.
 
 ---
 
@@ -181,4 +181,4 @@ Developer Edition not licensed for production use                               
 | SQL Server detail | TECH-3560-theme-a-sql-server/investigation-log.md |
 | Grafana detail | TECH-3561-theme-b-grafana/investigation-log.md |
 | Targets & consumers detail | TECH-3562-theme-c-targets-and-consumers/investigation-log.md |
-| Topology & classification | TECH-3481-theme-d-classification-and-topology/investigation-log.md |
+| Topology & classification | TECH-3563-theme-d-classification-and-topology/investigation-log.md |

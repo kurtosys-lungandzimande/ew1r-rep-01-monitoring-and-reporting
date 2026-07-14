@@ -11,7 +11,7 @@
 --           Findings documented across TECH-3560, TECH-3561, TECH-3562.
 --           Consumer confirmation for billing/client-facing use
 --           escalated to stakeholders — tracked in open-questions.md.
---           TECH-3535 closed. TECH-3481 in progress.
+--           TECH-3535 closed. TECH-3563 in progress.
 -- ============================================================
 
 

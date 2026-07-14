@@ -270,5 +270,5 @@ Total across all user databases: ~600+ procedures. Counts per database:
 - `SP_AUDIT_WPv2_CLIENTS_DETAILED` in DBA_VCC_MYSQL — last modified **2022-11-01**. This is the SP called by the failing job `DBA_VCC_MYSQL_AUDIT_DXM_CLIENT_DETAILED`. The SP has not been touched since WPv2 was decommissioned. Likely broken due to missing source tables.
 - DBA_VCC and DBA_VCC_MEMSQL/MYSQL share a large common base of SPs (APP_, SP_MON_, SP_REP_, SP_VDBA_, SP_VCC_) — these were bulk-deployed in 2017 and are largely unchanged. Not all are actively called.
 - DBA_VCC_MEMSQL has the most actively maintained SPs — FP, IP, KAPP-specific procedures modified as recently as 2024-11.
-- Utilities database holds the KAPP schema comparison logic (`USP_KAPP_Schema_details_Capture`, `USP_ZAB_KAPP_schema_compare`) — relevant to TECH-3481.
+- Utilities database holds the KAPP schema comparison logic (`USP_KAPP_Schema_details_Capture`, `USP_ZAB_KAPP_schema_compare`) — relevant to TECH-3563.
 - DBA_VCC_AWS SPs are exclusively ETL cleanup routines — no reporting SPs.

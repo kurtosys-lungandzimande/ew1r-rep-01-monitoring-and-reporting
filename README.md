@@ -20,7 +20,7 @@ Full documentation, findings, analysis, and decisions live in **Confluence**.
 | TECH-3560 | Theme A — SQL Server | In Progress | SQL Server inventory, jobs, databases, linked servers |
 | TECH-3561 | Theme B — Grafana | In Progress | Grafana datasources, dashboards, users, alerts |
 | TECH-3562 | Theme C — Targets & Consumers | In Progress | External targets, consumers, dependencies, firewall |
-| TECH-3481 | Theme D — Classification & Topology | In Progress | Topology, classification, decommission decision |
+| TECH-3563 | Theme D — Classification & Topology | In Progress | Topology, classification, decommission decision |
 
 ---
 
@@ -52,7 +52,7 @@ TECH-3562-theme-c-targets-and-consumers/
 │   consumers-and-dependencies.md    ← Consumers, service accounts, firewall rules
 │   investigation-log.md             ← Theme C findings
 │
-TECH-3481-theme-d-classification-and-topology/
+TECH-3563-theme-d-classification-and-topology/
 │
 │   topology-and-classification.md   ← Topology map and classification outputs
 │   investigation-log.md             ← Theme D findings
@@ -70,7 +70,7 @@ README.md                            ← This file
 | TECH-3560 | SQL Server inventory complete — databases, jobs, linked servers, service accounts, stored proc inventory all confirmed. Critical findings: WPv2 linked servers dead (26 consecutive daily failures since 2026-06-12), MemSQL jobs disabled since May 2026, AWS cost ETL silently broken since Sept 2024, MERGE performance risk on 563M row table. SP_AUDIT_WPv2_CLIENTS_DETAILED last modified 2022-11-01 — never updated after WPv2 decommission. |
 | TECH-3561 | Grafana inventory complete — 21 datasources, 74 dashboards confirmed (query 9.5 + 13.7), 8 users (5 admins, 3 viewers — 3 active admins, 2 inactive), 3 alert rules, 3 contact points (2 active Slack, 1 broken email placeholder). Inactive credentials flagged (donovan.vangraan still used in 4 Zabbix datasources). Default admin account flagged. 10 dashboards actively maintained in 2025. |
 | TECH-3562 | External targets identified. DBA_VCC_COST confirmed active Grafana datasource (4 dashboards). DBA_VCC_MEMSQL confirmed broken datasource (14 dashboards stale since May 2026). Consumer confirmation still needed — who reads DBA_VCC_COST, is KAPP Client Utilisation and Growth Report client-facing. S3 backup retention confirmed — 30-day lifecycle. |
-| TECH-3481 | Topology map and component classification written. Preliminary decommission recommendation documented — server not safe to decommission until 5 stakeholder questions answered. Blocked on consumer confirmation from tashvir.babulal / rayhaan.suleyman / yogeshwar.phull. |
+| TECH-3563 | Topology map and component classification written. Preliminary decommission recommendation documented — server not safe to decommission until 5 stakeholder questions answered. Blocked on consumer confirmation from tashvir.babulal / rayhaan.suleyman / yogeshwar.phull. |
 
 ---
 

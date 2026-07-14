@@ -1,4 +1,4 @@
-# TECH-3481 — Theme D: Classification & Topology — Investigation Log
+# TECH-3563 — Theme D: Classification & Topology — Investigation Log
 
 Scope: Topology map, server classification, decommission decision.
 Each entry has the question, the query, the evidence, and the finding.
