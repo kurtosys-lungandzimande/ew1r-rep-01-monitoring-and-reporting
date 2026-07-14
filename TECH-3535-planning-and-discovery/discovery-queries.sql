@@ -157,11 +157,10 @@ ORDER BY size_mb DESC;
 --
 -- service_account
 --   The Windows account running each service.
---   SHNONPRD\sqlsrv runs the engine — this account needs network
---   access to all linked servers and AWS endpoints.
---   SHNONPRD\sqlagent runs the jobs — this is the account whose
+--   SQL Server engine runs under an AD domain account.
+--   SQL Server Agent runs under an AD domain account — this is the account whose
 --   permissions determine what the jobs can actually do.
---   NT Service\MSSQLLaunchpad is a built-in sandboxed account —
+--   SQL Server Launchpad runs under a built-in sandboxed NT Service account —
 --   it runs Python in the extensibility framework.
 --   All three accounts must be documented before decommission
 --   because they may have firewall rules, vault entries, and AD
@@ -181,9 +180,9 @@ ORDER BY size_mb DESC;
 --   would silently break monitoring until someone noticed.
 --
 -- ACTUAL OUTPUT CONFIRMED (run during investigation):
---   SQL Server (MSSQLSERVER)          SHNONPRD\sqlsrv            Running  Automatic
---   SQL Server Agent (MSSQLSERVER)    SHNONPRD\sqlagent          Running  Automatic
---   SQL Server Launchpad (MSSQLSERVER) NT Service\MSSQLLaunchpad Running  Automatic
+--   SQL Server (MSSQLSERVER)          [AD domain account]        Running  Automatic
+--   SQL Server Agent (MSSQLSERVER)    [AD domain account]        Running  Automatic
+--   SQL Server Launchpad (MSSQLSERVER) [NT Service account]      Running  Automatic
 --
 -- NOTE — no SQL Full-text Filter Daemon Launcher appeared.
 -- This means full-text search is either not installed or not

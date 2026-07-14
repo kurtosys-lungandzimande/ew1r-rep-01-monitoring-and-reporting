@@ -308,9 +308,9 @@ All 20 of these dashboards are showing stale data. Do not re-enable jobs without
 
 | Service | Account |
 |---|---|
-| SQL Server Engine | SHNONPRD\sqlsrv |
-| SQL Server Agent | SHNONPRD\sqlagent |
-| SQL Server Launchpad | NT Service\MSSQLLaunchpad |
+| SQL Server Engine | AD domain account — contact DBA team |
+| SQL Server Agent | AD domain account — contact DBA team |
+| SQL Server Launchpad | NT Service account |
 | Linked server credentials | Unknown — check vault |
 | AWS API access (Python) | Unknown — IAM role or key on server |
 

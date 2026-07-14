@@ -37,25 +37,25 @@ EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python
 
 | UID | Name | Type | URL | User | Notes |
 |---|---|---|---|---|---|
-| a082f27e-c56e-4a68-8a35-2b761fe5a099 | DBA_VCC | mssql | localhost | grafana | Core SQL Server datasource — reads from DBA_VCC on localhost |
-| e8597015-eb43-4adc-8da4-090eed43ee62 | DBA_VCC | mssql | localhost | grafana | ⚠️ Duplicate entry — same datasource registered twice |
-| da173cae-70a4-42da-9340-e04e08b63046 | KAPP Dev | mysql | 10.61.11.70:3306 | root | KAPP Dev environment |
-| d1679f57-82d7-4450-b676-6f71f7099bf3 | KAPP Rel | mysql | 10.77.3.236 | root | KAPP Release environment |
-| cd097e22-006c-4640-8a80-f1615c5c8b45 | KAPP UK Prod | mysql | 10.121.29.82 | root | KAPP UK Production |
-| e792d174-d407-4690-8fe5-97d8460049fb | KAPP EU Prod | mysql | 10.125.6.134 | root | KAPP EU Production |
-| db3d6c01-d578-4052-a636-041a65f38578 | KAPP US Prod | mysql | 10.128.30.6 | root | KAPP US Production |
-| f4830a0f-711b-4a69-898d-5ce8e62e241b | KAPP Monitoring | mysql | 10.120.8.208 | root | KAPP monitoring database |
-| f2ca52be-523b-44bc-a70a-5ede955155eb | MySQL | mysql | 10.77.3.236:3306 | root | ⚠️ Likely duplicate of KAPP Rel — same IP |
-| dce83066-258a-41f8-b5f3-8c35bee807aa | monitoring | mysql | 10.120.8.208 | root | ⚠️ Likely duplicate of KAPP Monitoring — same IP |
-| d8b0939b-9523-4e83-ada8-32ba2dd3cdb6 | SingleStore-Dev | mysql | 10.61.0.95 | FundPressDataReader | SingleStore Dev environment |
-| f1d911af-52de-4255-8a11-94e39eedb62a | SingleStore-Release | mysql | 10.77.6.161 | FundPressDataReader | SingleStore Release environment |
-| a6046586-7d67-428e-93e1-6b274d686900 | SingleStore-Production-UK | mysql | 10.121.22.219 | FundPressDataReader | SingleStore UK Production |
-| df309b44-0d9b-4411-b7f8-7baed30382d0 | SingleStore-Production-EU | mysql | 10.125.12.126 | FundPressDataReader | SingleStore EU Production |
-| bfe8f780-7ecc-4306-9d2c-b691b6352cca | SingleStore-Production-US | mysql | 10.128.24.122 | FundPressDataReader | SingleStore US Production |
-| dbafc322-929d-4fa8-886f-abe9d96a41aa | Zabbix Prod Old | mysql | 10.120.8.120 | donovan.vangraan | ⚠️ Stale credentials — donovan.vangraan inactive since Nov 2024 |
-| d68a35f0-c99b-4ec0-87c7-f714555753de | zabbix-server-data.shprd.kurtosys-internal | mysql | 10.120.8.51 | donovan.vangraan | ⚠️ Stale credentials — donovan.vangraan inactive since Nov 2024 |
-| aafbf2f7-2e78-4fa4-988a-9358fed7bfb3 | Zabbix Nonprod old | mysql | 10.72.8.191 | donovan.vangraan | ⚠️ Stale credentials — donovan.vangraan inactive since Nov 2024 |
-| b10bf74c-1c94-4624-8315-8953c9b407fa | zabbix-server-data.shnonprd.kurtosys-internal | mysql | 10.72.8.186 | donovan.vangraan | ⚠️ Stale credentials — donovan.vangraan inactive since Nov 2024 |
+| a082f27e-c56e-4a68-8a35-2b761fe5a099 | DBA_VCC | mssql | localhost | [redacted] | Core SQL Server datasource — reads from DBA_VCC on localhost |
+| e8597015-eb43-4adc-8da4-090eed43ee62 | DBA_VCC | mssql | localhost | [redacted] | ⚠️ Duplicate entry — same datasource registered twice |
+| da173cae-70a4-42da-9340-e04e08b63046 | KAPP Dev | mysql | 10.61.11.70:3306 | [redacted] | KAPP Dev environment |
+| d1679f57-82d7-4450-b676-6f71f7099bf3 | KAPP Rel | mysql | 10.77.3.236 | [redacted] | KAPP Release environment |
+| cd097e22-006c-4640-8a80-f1615c5c8b45 | KAPP UK Prod | mysql | 10.121.29.82 | [redacted] | KAPP UK Production |
+| e792d174-d407-4690-8fe5-97d8460049fb | KAPP EU Prod | mysql | 10.125.6.134 | [redacted] | KAPP EU Production |
+| db3d6c01-d578-4052-a636-041a65f38578 | KAPP US Prod | mysql | 10.128.30.6 | [redacted] | KAPP US Production |
+| f4830a0f-711b-4a69-898d-5ce8e62e241b | KAPP Monitoring | mysql | 10.120.8.208 | [redacted] | KAPP monitoring database |
+| f2ca52be-523b-44bc-a70a-5ede955155eb | MySQL | mysql | 10.77.3.236:3306 | [redacted] | ⚠️ Likely duplicate of KAPP Rel — same IP |
+| dce83066-258a-41f8-b5f3-8c35bee807aa | monitoring | mysql | 10.120.8.208 | [redacted] | ⚠️ Likely duplicate of KAPP Monitoring — same IP |
+| d8b0939b-9523-4e83-ada8-32ba2dd3cdb6 | SingleStore-Dev | mysql | 10.61.0.95 | [redacted] | SingleStore Dev environment |
+| f1d911af-52de-4255-8a11-94e39eedb62a | SingleStore-Release | mysql | 10.77.6.161 | [redacted] | SingleStore Release environment |
+| a6046586-7d67-428e-93e1-6b274d686900 | SingleStore-Production-UK | mysql | 10.121.22.219 | [redacted] | SingleStore UK Production |
+| df309b44-0d9b-4411-b7f8-7baed30382d0 | SingleStore-Production-EU | mysql | 10.125.12.126 | [redacted] | SingleStore EU Production |
+| bfe8f780-7ecc-4306-9d2c-b691b6352cca | SingleStore-Production-US | mysql | 10.128.24.122 | [redacted] | SingleStore US Production |
+| dbafc322-929d-4fa8-886f-abe9d96a41aa | Zabbix Prod Old | mysql | 10.120.8.120 | [redacted] | ⚠️ Stale credentials — ex-employee account inactive since Nov 2024 |
+| d68a35f0-c99b-4ec0-87c7-f714555753de | zabbix-server-data.shprd.kurtosys-internal | mysql | 10.120.8.51 | [redacted] | ⚠️ Stale credentials — ex-employee account inactive since Nov 2024 |
+| aafbf2f7-2e78-4fa4-988a-9358fed7bfb3 | Zabbix Nonprod old | mysql | 10.72.8.191 | [redacted] | ⚠️ Stale credentials — ex-employee account inactive since Nov 2024 |
+| b10bf74c-1c94-4624-8315-8953c9b407fa | zabbix-server-data.shnonprd.kurtosys-internal | mysql | 10.72.8.186 | [redacted] | ⚠️ Stale credentials — ex-employee account inactive since Nov 2024 |
 | b7838f71-ce6c-4646-9e4b-2dacf777cd53 | JSON API | marcusolsson-json-datasource | https://10.125.9.192:8443/nifi-api/flow/process-groups/root/ | — | NiFi Registry API |
 | bae6c95e-4e84-413f-9c4a-8fd719e7e7b6 | CloudWatch | cloudwatch | — | — | AWS CloudWatch — uses IAM role |
 | aa82f021-baae-4259-a9f6-571d3f5f7f2d | InfluxDB | influxdb | — | — | InfluxDB — connection details not exposed |

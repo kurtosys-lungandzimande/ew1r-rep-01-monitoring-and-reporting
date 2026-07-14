@@ -48,7 +48,7 @@
 |---|---|---|---|---|
 | 17 | What DNS name(s) point to EW1R-REP-01? | High | Unknown | **Closed** — EW1R-REP-01 resolves to 10.72.8.216 (confirmed via netstat) |
 | 18 | What firewall rules allow inbound/outbound connections to this server? | High | Unknown | Open |
-| 19 | What service accounts run the SQL Agent jobs? | Medium | Unknown | **Closed** — SHNONPRD\\sqlagent (Agent), SHNONPRD\\sqlsrv (Engine), NT Service\\MSSQLLaunchpad (Launchpad) |
+| 19 | What service accounts run the SQL Agent jobs? | Medium | Unknown | **Closed** — AD domain accounts confirmed for SQL Server engine and Agent. NT Service account for Launchpad. Contact DBA team for account names. |
 | 20 | Is there a runbook or any existing documentation for this server anywhere? | Medium | Unknown | Open |
 
 ---
@@ -122,7 +122,7 @@
 | # | Question | Answer | Evidence |
 |---|---|---|---|
 | Q17 | What DNS name resolves to this server? | EW1R-REP-01 resolves to 10.72.8.216 | query 9.1 — netstat output confirmed IP |
-| Q19 | What service accounts run the SQL Agent jobs? | SHNONPRD\sqlagent (SQL Agent), SHNONPRD\sqlsrv (SQL Server engine), NT Service\MSSQLLaunchpad (Python extensibility) — all running, all set to Automatic startup | query 1.3 — sys.dm_server_services |
+| Q19 | What service accounts run the SQL Agent jobs? | AD domain accounts confirmed for SQL Server engine and Agent — all running, all set to Automatic startup. Contact DBA team for account names. | query 1.3 — sys.dm_server_services |
 
 ---
 

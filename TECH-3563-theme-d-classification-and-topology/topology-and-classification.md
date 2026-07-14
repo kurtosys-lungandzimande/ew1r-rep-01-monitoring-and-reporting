@@ -102,7 +102,7 @@ EW1R-REP-01 (Custom VCC Monitoring Hub)
 ### What It Needs To Function (Inbound Dependencies)
 | Dependency | Type | Port | Purpose | Confirmed |
 |---|---|---|---|---|
-| SHNONPRD domain controller | Active Directory | 389/636 | Service account auth (sqlsrv, sqlagent) | Yes |
+| SHNONPRD domain controller | Active Directory | 389/636 | Service account auth | Yes |
 | AWS APIs (CloudWatch, S3, EC2, RDS, IAM) | HTTPS outbound | 443 | Python API data collection | Yes — jobs running |
 | Jira API | HTTPS outbound | 443 | Monthly sprint data pull | Yes — job running |
 | KAPP MySQL — Dev (10.61.11.70) | MySQL outbound | 3306 | Grafana datasource | Yes — confirmed in grafana.db |
@@ -126,20 +126,23 @@ EW1R-REP-01 (Custom VCC Monitoring Hub)
 | Zabbix server | TCP inbound | 10050 | Infrastructure monitoring of this server | Yes — zabbix_agentd.exe running |
 
 ### What Credentials It Uses
-| Purpose | Account | Location | Confirmed |
-|---|---|---|---|
-| SQL Server Engine | SHNONPRD\sqlsrv | AD — SHNONPRD domain | Yes |
-| SQL Server Agent | SHNONPRD\sqlagent | AD — SHNONPRD domain | Yes |
-| AWS API calls | IAM role or access key | C:\DBA_Staging\AWS\ or env variable | ⚠️ Still unknown — needs DevOps/cloud team |
-| Grafana → SQL Server | grafana (SQL login) | SQL Server login on localhost | Yes — confirmed in grafana.db |
-| Grafana → KAPP MySQL | root | MySQL on each KAPP environment | Yes — confirmed in grafana.db |
-| Grafana → SingleStore | FundPressDataReader | MySQL on each SingleStore cluster | Yes — confirmed in grafana.db |
-| Grafana → Zabbix MySQL | donovan.vangraan | MySQL on Zabbix servers | ⚠️ Needs rotation — ex-employee, inactive since Nov 2024 |
-| Linked server → SQL Server targets | Unknown | Vault | ⚠️ Still unknown — needs vault check |
-| Linked server → MySQL/SingleStore | Unknown | Vault | ⚠️ Still unknown — needs vault check |
-| Slack webhooks | Encrypted tokens | grafana.db alert_configuration | Yes — encrypted, Grafana admin required to rotate |
 
-> **Security flag:** Grafana Zabbix datasources use donovan.vangraan's personal credentials. This person is no longer active (last seen Nov 2024). These credentials need to be rotated immediately regardless of decommission decision.
+> Credential details are not documented here. Contact the DBA team or DevOps for credential information.
+
+| Purpose | Status |
+|---|---|
+| SQL Server Engine service account | Confirmed — AD domain account |
+| SQL Server Agent service account | Confirmed — AD domain account |
+| AWS API calls | ⚠️ Still unknown — needs DevOps/cloud team |
+| Grafana → SQL Server | Confirmed — SQL login on localhost |
+| Grafana → KAPP MySQL | Confirmed — confirmed in grafana.db |
+| Grafana → SingleStore | Confirmed — confirmed in grafana.db |
+| Grafana → Zabbix MySQL | ⚠️ Needs rotation — ex-employee account, inactive since Nov 2024 |
+| Linked server → SQL Server targets | ⚠️ Still unknown — needs vault check |
+| Linked server → MySQL/SingleStore | ⚠️ Still unknown — needs vault check |
+| Slack webhooks | Confirmed — encrypted, Grafana admin required to rotate |
+
+> **Security flag:** Grafana Zabbix datasources use a personal account belonging to an ex-employee inactive since Nov 2024. These credentials need to be rotated immediately regardless of decommission decision.
 
 ---
 
