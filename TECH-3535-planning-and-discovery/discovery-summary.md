@@ -161,9 +161,19 @@ EW1R-REP-01 is a custom-built monitoring and reporting hub. It is not a standard
 - **Action:** Full reachability audit needed across all 109 linked servers.
 
 ### F6 — KAPP MERGE Performance Risk
-- **What:** INFO_AWS_KAPP_Query_API_Detail has 563M rows with no partitioning. MERGE already taking 9+ minutes per run on a 30-minute schedule.
-- **Impact:** As the table grows this will eventually exceed 30 minutes and runs will overlap. This is a performance risk for any RDS migration — needs redesign before moving.
-- **Action:** Raise as decommission blocker for RDS migration planning.
+- **What:** `INFO_AWS_KAPP_Query_API_Detail` in `DBA_VCC_AWS` has no partitioning and no archiving strategy — every row ever written is still in the table.
+- **At discovery (June 2026):** 563M rows — MERGE already taking 9+ minutes per run on a 30-minute collection schedule.
+- **As of 14 July 2026:** 583M rows, 145 GB — grown by ~20M rows in ~2-3 weeks, approximately 1M new rows per day.
+- **CHECKDB impact:** CHECKDB on `DBA_VCC_AWS` alone takes ~40 minutes every night — confirmed across 10 days of job history (07–14 July 2026). Zabbix 30-minute threshold fires every night as a result.
+- **Growth projection:** At ~1M rows/day — 750M rows within 6 months. MERGE will eventually exceed the 30-minute collection window and runs will overlap, causing data gaps.
+- **Root cause:** No archiving strategy exists. The table has been accumulating rows since it was created with no cleanup, partitioning, or retention policy.
+- **What an archiving strategy would look like:**
+  - Keep only recent data live (e.g. last 90 days) — dashboards and alerts only query recent data
+  - Move older data to S3 as compressed files (cheap, available if needed)
+  - Run a nightly cleanup job to enforce the retention boundary
+  - This alone would reduce the table from 583M rows to a few million — CHECKDB would drop from 40 min to a few minutes
+- **Blocker:** Cannot implement until Q13 is answered — if KAPP query logs are used for SLA reporting, retention period must be confirmed before any rows are deleted.
+- **Action:** Raise as decommission blocker. Escalate growth rate and CHECKDB impact to yogeshwar.phull / tashvir.babulal alongside Q13.
 
 ---
 
