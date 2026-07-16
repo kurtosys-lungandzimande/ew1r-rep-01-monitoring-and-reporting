@@ -47,8 +47,8 @@ EW1R-REP-01 hosts 8 databases totalling 378 GB. Of these:
 - `DBA_VCC_AWS_WEEKLY_CHECKS` — RDS inventory, EC2 inventory, IAM keys (weekly, succeeded)
 - `DBA_VCC_JIRA_MONTHEND_CHECKS` — Jira sprint data (monthly, succeeded)
 
-**Finding — AWS cost ETL broken since Sept 2024:**  
-`DBA_VCC_AWS_DAILY_CHECKS` reports Succeeded but AWS cost data has not updated since September 2024. The job uses Python API calls with CATCH blocks that swallow errors — the job completes without failing even when the API call returns nothing. `MON_AWS_Entity_Cost` has 2.4M rows but the most recent cost data is ~22 months stale. No alert fired. No one raised an incident.
+**Finding — MON_AWS_Entity_Cost is current (last updated 2026-07-15):**  
+`MON_AWS_Entity_Cost` confirmed collecting — last record 2026-07-15. The previously noted "broken since Sept 2024" finding requires re-investigation to identify exactly which Python API call or ETL step stopped writing. `DBA_VCC_AWS_DAILY_CHECKS` uses CATCH blocks that swallow errors — individual step failures do not surface as job failures. Specific broken step still to be identified.
 
 **Finding — MERGE performance risk:**  
 `INFO_AWS_KAPP_Query_API_Detail` has 563M rows and is unpartitioned. The ETL job uses a MERGE statement against this table. At current growth rate, the MERGE execution window is approaching the job schedule interval — risk of job overlap and table lock contention.
@@ -56,8 +56,8 @@ EW1R-REP-01 hosts 8 databases totalling 378 GB. Of these:
 **Proposed resolution:**
 | Action | Owner | Priority |
 |---|---|---|
-| Investigate why AWS cost Python API call stopped writing in Sept 2024 — check CloudWatch log stream, Python script, API credentials | DBA team | High |
-| Fix or replace the ETL — add explicit error handling so failures surface as job failures | DBA team | High |
+| Identify which specific step in DBA_VCC_AWS_DAILY_CHECKS is silently failing — CATCH blocks mask individual step errors | DBA team | High |
+| Add explicit error handling so step failures surface as job failures | DBA team | High |
 | Assess partitioning strategy for INFO_AWS_KAPP_Query_API_Detail before it causes a production incident | DBA team | Medium |
 | Confirm who consumes AWS cost data from this database before decommission | tashvir.babulal / rayhaan.suleyman | Critical — blocks decommission |
 
@@ -204,8 +204,8 @@ WPv2 RDS was decommissioned. `LU_Serverlist` was never updated to remove WPv2 en
 **Finding — FULL recovery model signals this data is critical:**  
 Every other database on this server uses SIMPLE recovery. DBA_VCC_COST is the only one on FULL recovery — meaning someone deliberately set it that way to enable point-in-time restore. This is the strongest signal that this data is considered production-critical.
 
-**Finding — collection job runs weekly not daily:**  
-`DBA_VCC_COST_Entity_Count_Collection` is scheduled weekly. Whether this is intentional or a misconfiguration is unconfirmed.
+**Finding — collection job runs weekly every Monday:**  
+`DBA_VCC_COST_Entity_Count_Collection` confirmed scheduled weekly on Mondays (freq_type=8, freq_interval=2). This appears intentional.
 
 **Finding — KAPP Client Utilisation and Growth Report may be client-facing:**  
 4 Grafana dashboards read from DBA_VCC_COST. `KAPP Client Utilisation and Growth Report` (last updated 2024-02-22) — the name strongly suggests this is shown to clients. If confirmed client-facing, this is the highest-risk dependency on the entire server.
@@ -214,7 +214,7 @@ Every other database on this server uses SIMPLE recovery. DBA_VCC_COST is the on
 | Action | Owner | Priority |
 |---|---|---|
 | Confirm whether KAPP Client Utilisation and Growth Report is client-facing | tashvir.babulal / rayhaan.suleyman | **Critical — blocks decommission** |
-| Confirm whether weekly collection schedule is intentional | DBA team | Medium |
+| Weekly Monday schedule confirmed — no action needed on schedule |  DBA team | Closed |
 | Identify migration target for DBA_VCC_COST before any decommission date is set | DBA team / Platform team | **Critical — blocks decommission** |
 | Confirm S3 backup retention for this database — FULL recovery with no confirmed retention policy is a risk | DBA team / DevOps | High |
 
@@ -276,7 +276,7 @@ DBA_VCC_ATLASSIAN has 0 stored procedures. It is a data store only. No active co
 | Q-DB4 | Who consumes the VCC monitoring data for EW2P-MSSQL-01/02 — what breaks if this server goes away? | DBA team | DBA_VCC decommission |
 | Q-DB5 | Why is DBA_VCC_COST_Entity_Count_Collection running weekly not daily — intentional? | DBA team | DBA_VCC_COST accuracy |
 | Q-DB6 | What writes to DBA_VCC_ATLASSIAN and who reads from it? | DBA team | DBA_VCC_ATLASSIAN archival |
-| Q-DB7 | Why has AWS cost ETL been broken since Sept 2024 with no alert and no incident raised? | DBA team | DBA_VCC_AWS data integrity |
+| Q-DB7 | MON_AWS_Entity_Cost is current — identify which specific step in DBA_VCC_AWS_DAILY_CHECKS is silently failing via CATCH block suppression | DBA team | DBA_VCC_AWS data integrity |
 | Q-DB8 | What is the S3 backup retention policy for DBA_VCC_COST? | DBA team / DevOps | Backup compliance |
 
 ---
