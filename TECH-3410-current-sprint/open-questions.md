@@ -1,6 +1,6 @@
 # Open Questions — TECH-3478
 **Ticket:** TECH-3478 — Theme A SQL Server Inventory  
-**Date:** 2026-07-16  
+**Date:** 2026-07-17 (updated with product status verification)  
 **Total open questions:** 24  
 **Decommission blockers:** 6  
 
@@ -69,6 +69,10 @@ These questions relate to active failures or compliance risks that need resoluti
 | Q-closed-1 | Are gen-rel and gen-prd SingleStore nodes permanently retired? | Yes — confirmed dead, all 26 nodes unreachable, disabled in Zabbix | Linked Servers |
 | Q-closed-2 | Is DBA_VCC_COST_Entity_Count_Collection running weekly intentionally? | Yes — confirmed weekly every Monday (freq_type=8, freq_interval=2) | Database Inventory |
 | Q-closed-3 | Is MON_AWS_Entity_Cost data stale since Sept 2024? | No — last updated 2026-07-15, data is current. Specific broken step in DBA_VCC_AWS_DAILY_CHECKS still to be identified | Database Inventory |
+| Q-closed-4 | Is InvestorPress still an active product? | No — confirmed decommissioned. Procs last modified May 2023, 2,047 rows in live table, zero Zabbix triggers firing. Safe to clean up | Product Verification |
+| Q-closed-5 | Is Encore still an active product? | Yes — confirmed active. `INFO_Encore_Document_Production_Detail` collecting as of 2026-07-17 today. Independent of MemSQL | Product Verification |
+| Q-closed-6 | Was KAPP affected by the May 2026 MemSQL job disable? | Yes — KAPP workflow history stopped 2026-05-08. 268K + 296K rows. Procs maintained Nov 2024. Was active product when jobs were disabled | Product Verification |
+| Q-closed-7 | Was FinancialPortal affected by the May 2026 MemSQL job disable? | Yes — FP client data stopped 2026-05-08. 556K rows. Most recently maintained proc on server (Oct 2024). Was active product when jobs were disabled | Product Verification |
 
 ---
 
