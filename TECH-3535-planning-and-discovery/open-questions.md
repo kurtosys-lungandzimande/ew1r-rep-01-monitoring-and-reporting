@@ -37,7 +37,7 @@
 |---|---|---|---|---|
 | 13 | Who owns the KAPP monitoring data in `DBA_VCC_AWS`? Is it used for SLA reporting? | Critical | Unknown | Open |
 | 14 | Is `INFO_AWS_KAPP_Query_API_Detail` (563M rows) actively read by any application or dashboard? | Critical | Unknown | **Partial** — Grafana has KAPP MySQL datasources and active KAPP dashboards updated Oct 2025. DBA_VCC on localhost also read by Grafana. Confirm if dashboards query this specific table. |
-| 15 | What is Encore — is it a separate product? Who owns it? | Medium | Unknown | Open |
+| 15 | What is Encore — is it a separate product? Who owns it? | Medium | Unknown | **Closed** — Encore is a document production platform. EW1R-REP-01 collects Encore document production metrics via `SP_AUDIT_ENCORE_DOCUMENT_PRODUCTION_DETAILED`, called by `DBA_VCC_DAILY_CHECKS`. Confirmed healthy 2026-07-20 — 5 consecutive Succeeded runs (12:00–16:00). Job runs hourly (not daily as labelled). Data stored in `DBA_VCC`. |
 | 16 | What does `DBA_VCC_ATLASSIAN` feed into Jira/Confluence — reports, metrics? | Medium | Unknown | Open |
 
 ---

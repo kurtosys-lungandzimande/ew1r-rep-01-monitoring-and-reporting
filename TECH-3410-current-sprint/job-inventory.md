@@ -146,7 +146,7 @@
 
 | Job Name | Last Run | Schedule | Feeds | Notes |
 |---|---|---|---|---|
-| DBA_VCC_DAILY_CHECKS | 2026-07-16 14:00 | Daily | DBA_VCC | SP_AUDIT_ENCORE_DOCUMENT_PRODUCTION_DETAILED — Encore document production metrics |
+| DBA_VCC_DAILY_CHECKS | 2026-07-16 16:00 | Hourly | DBA_VCC | SP_AUDIT_ENCORE_DOCUMENT_PRODUCTION_DETAILED — Encore document production metrics. ✅ Confirmed healthy 2026-07-20 — 5 consecutive Succeeded runs (12:00–16:00). Schedule documented as Daily but confirmed Hourly from live job history. |}
 | DBA_VCC_HOURLY_CHECKS | 2026-07-16 14:15 | Hourly | DBA_VCC | BNY IIS logs from CloudWatch — Encore/BNY IIS log ingestion |
 | DBA_VCC_WEEKLY_CHECKS | 2026-07-12 00:00 | Weekly | DBA_VCC | Archives DBA_VCC tables older than 90 days, index fragmentation audit |
 | DBA_VCC_BASE_SERVER_MEMORY_PRESSURE_DETAILED | 2026-07-16 12:00 | SCHED1 | DBA_VCC | Server memory pressure check — sends mail alert if threshold breached |
