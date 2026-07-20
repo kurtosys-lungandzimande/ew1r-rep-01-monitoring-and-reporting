@@ -16,16 +16,16 @@
 
 | Database | Size (MB) | Recovery Model | Purpose |
 |---|---|---|---|
-| DBA_VCC_AWS | 189,088 | SIMPLE | AWS infrastructure and KAPP API monitoring data |
-| DBA_VCC_MEMSQL | 77,316 | SIMPLE | SingleStore/MemSQL monitoring data (jobs disabled) |
-| KURTOSYS_BASELINE | 52,224 | SIMPLE | Performance baseline captures (connections, table sizes) |
-| DBA_VCC_MYSQL | 27,262 | SIMPLE | MySQL and RDS monitoring data |
-| DBA_VCC | 24,625 | SIMPLE | Core VCC monitoring framework data |
-| DBA_VCC_COST | 5,120 | FULL | Cost tracking per entity/client (FULL recovery — critical) |
-| DBA_VCC_ATLASSIAN | 2,048 | SIMPLE | Jira/Confluence integration data |
-| Utilities | 201 | SIMPLE | DBA utility scripts and stored procedures |
+| DBA_VCC_AWS | 190,275 (185.66 GB) | SIMPLE | AWS infrastructure and KAPP API monitoring data |
+| DBA_VCC_MEMSQL | 77,312 (75.50 GB) | SIMPLE | SingleStore/MemSQL monitoring data (jobs disabled) |
+| KURTOSYS_BASELINE | 51,200 (50.00 GB) | SIMPLE | Performance baseline captures (connections, table sizes) |
+| DBA_VCC_MYSQL | 27,648 (27.00 GB) | SIMPLE | MySQL and RDS monitoring data |
+| DBA_VCC | 24,750 (24.17 GB) | SIMPLE | Core VCC monitoring framework data |
+| DBA_VCC_COST | 5,120 (5.00 GB) | FULL | Cost tracking per entity/client (FULL recovery — critical) |
+| DBA_VCC_ATLASSIAN | 2,048 (2.00 GB) | SIMPLE | Jira/Confluence integration data |
+| Utilities | 205 (0.20 GB) | SIMPLE | DBA utility scripts and stored procedures |
 
-**Total data size: ~378 GB** (confirmed — last run July 2026)
+**Total data size: 369 GB** (exact — confirmed 2026-07-20 from sys.master_files)
 
 ---
 
@@ -245,8 +245,8 @@ Core monitoring framework — tracks all monitored SQL Server instances.
 - [ ] Confirm what SSIS packages are being checked by DBA - SSISStatusCheck
 - [ ] Identify what reads from MON_ tables (Grafana datasource?)
 - [ ] Confirm if EW1P-OCT RDS backup job is still needed
-- [ ] Identify owner of DBA_VCC_COST data — who consumes cost reports?
-- [ ] Confirm if MemSQL linked servers are still reachable or all stale
+- [x] Identify owner of DBA_VCC_COST data — **Closed. Confirmed client billing data — 280 institutional clients. Data stale since 4 May 2026.**
+- [x] Confirm if MemSQL linked servers are still reachable — **Closed. 11 confirmed unreachable: 4 WPv2 (DNS gone), 7 gen-rel/gen-prd nodes.**
 
 ---
 
