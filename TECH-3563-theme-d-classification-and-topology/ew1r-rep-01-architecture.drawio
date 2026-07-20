@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mxfile host="app.diagrams.net" modified="2026-07-01" version="21.0.0">
   <diagram id="ew1r-rep-01" name="EW1R-REP-01 Architecture">
-    <mxGraphModel width="1800" height="1200" dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1200" math="0" shadow="0">
+    <mxGraphModel width="1800" height="1800" dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1200" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -81,89 +81,181 @@
         <mxCell id="e_sql_db7" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="20" target="db7" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
         <mxCell id="e_sql_db8" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="20" target="db8" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
 
-        <!-- ===== ROW 4: EXTERNAL TARGETS ===== -->
-        <mxCell id="lbl_ext" value="EXTERNAL TARGETS — COLLECTS FROM" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=11;" vertex="1" parent="1">
-          <mxGeometry x="30" y="570" width="300" height="25" as="geometry" />
+        <!-- ===== ROW 4: EXTERNAL TARGETS — REGION SWIMLANES ===== -->
+        <mxCell id="lbl_ext" value="EXTERNAL TARGETS — COLLECTS FROM (by Region / Environment)" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="30" y="565" width="450" height="25" as="geometry" />
         </mxCell>
 
-        <mxCell id="ext1" value="EW2P-MSSQL-01/02&#xa;SQL Server | EU-West-2&#xa;Production | Port 1433&#xa;ACTIVE — monitored" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
-          <mxGeometry x="30" y="605" width="160" height="75" as="geometry" />
+        <!-- SWIMLANE: EU-WEST-1 (EW1) -->
+        <mxCell id="sw_ew1" value="EU-WEST-1 (EW1)" style="swimlane;startSize=25;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;fontSize=10;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="30" y="600" width="340" height="230" as="geometry" />
+        </mxCell>
+        <mxCell id="ew1_label_rel" value="RELEASE" style="text;html=1;strokeColor=none;fillColor=#dae8fc;fontSize=9;fontStyle=1;align=center;" vertex="1" parent="sw_ew1">
+          <mxGeometry x="10" y="30" width="150" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="ew1_oct" value="EW1P-OCT RDS&#xa;SQL Server | AWS RDS&#xa;Port 1433 | Production&#xa;Backup job active" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="sw_ew1">
+          <mxGeometry x="170" y="30" width="155" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ew1_label_ss" value="SingleStore (RELEASE — EW1R)" style="text;html=1;strokeColor=none;fillColor=none;fontSize=9;fontStyle=2;" vertex="1" parent="sw_ew1">
+          <mxGeometry x="10" y="100" width="200" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="ew1_aggr" value="ew1r-aggr-01/02/03/04/05&#xa;Aggregators | ODBC&#xa;Jobs DISABLED" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="sw_ew1">
+          <mxGeometry x="10" y="122" width="150" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="ew1_leaf" value="ew1r-leaf-01..08&#xa;Leaf nodes | ODBC&#xa;Jobs DISABLED" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="sw_ew1">
+          <mxGeometry x="170" y="122" width="155" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="ew1_stale" value="⚠️ STALE: ew1r-aggr-03.gen-rel (ODBC broken)&#xa;ew1r-aggr-05.gen-rel (Can't connect)&#xa;ew1d-aggr-05/15 (Not online)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="sw_ew1">
+          <mxGeometry x="10" y="178" width="315" height="42" as="geometry" />
         </mxCell>
 
-        <mxCell id="ext2" value="EW1P-OCT RDS&#xa;SQL Server | EU-West-1&#xa;AWS RDS | Port 1433&#xa;Backup job active" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
-          <mxGeometry x="205" y="605" width="160" height="75" as="geometry" />
+        <!-- SWIMLANE: EU-WEST-2 (EW2) -->
+        <mxCell id="sw_ew2" value="EU-WEST-2 (EW2)" style="swimlane;startSize=25;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;fontSize=10;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="385" y="600" width="340" height="230" as="geometry" />
+        </mxCell>
+        <mxCell id="ew2_label_prod" value="PRODUCTION" style="text;html=1;strokeColor=none;fillColor=#d5e8d4;fontSize=9;fontStyle=1;align=center;" vertex="1" parent="sw_ew2">
+          <mxGeometry x="10" y="30" width="150" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="ew2_mssql" value="EW2P-MSSQL-01/02&#xa;SQL Server | Port 1433&#xa;Production | ACTIVE&#xa;Monitored daily" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="sw_ew2">
+          <mxGeometry x="170" y="30" width="155" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ew2_label_ss" value="SingleStore (PRODUCTION — EW2P)" style="text;html=1;strokeColor=none;fillColor=none;fontSize=9;fontStyle=2;" vertex="1" parent="sw_ew2">
+          <mxGeometry x="10" y="100" width="210" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="ew2_aggr" value="ew2p-aggr-01/02/03/04&#xa;Aggregators | ODBC&#xa;Jobs DISABLED" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="sw_ew2">
+          <mxGeometry x="10" y="122" width="150" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="ew2_leaf" value="ew2p-leaf-01..06 + 51..56&#xa;Leaf nodes | ODBC&#xa;Jobs DISABLED" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="sw_ew2">
+          <mxGeometry x="170" y="122" width="155" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="ew2_stale" value="⚠️ DEAD: ew2p-wpv2 / ew2r-wpv2 (DNS gone — WPv2 decommissioned)&#xa;⚠️ STALE: ew2p-aggr-01/02.gen-prd (Can't connect)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="sw_ew2">
+          <mxGeometry x="10" y="178" width="315" height="42" as="geometry" />
         </mxCell>
 
-        <mxCell id="ext3" value="SingleStore Clusters&#xa;EC1/EW1/EW2/UE1&#xa;109 linked servers (incl. stale)&#xa;ALL JOBS DISABLED" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
-          <mxGeometry x="380" y="605" width="160" height="75" as="geometry" />
+        <!-- SWIMLANE: US-EAST-1 (UE1) -->
+        <mxCell id="sw_ue1" value="US-EAST-1 (UE1)" style="swimlane;startSize=25;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;fontSize=10;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="740" y="600" width="340" height="230" as="geometry" />
+        </mxCell>
+        <mxCell id="ue1_label_prod" value="PRODUCTION" style="text;html=1;strokeColor=none;fillColor=#d5e8d4;fontSize=9;fontStyle=1;align=center;" vertex="1" parent="sw_ue1">
+          <mxGeometry x="10" y="30" width="150" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="ue1_kapp" value="KAPP MySQL US Prod&#xa;10.128.30.6 | Port 3306&#xa;Grafana datasource&#xa;ACTIVE" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="sw_ue1">
+          <mxGeometry x="170" y="30" width="155" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ue1_label_ss" value="SingleStore (PRODUCTION — UE1P)" style="text;html=1;strokeColor=none;fillColor=none;fontSize=9;fontStyle=2;" vertex="1" parent="sw_ue1">
+          <mxGeometry x="10" y="100" width="210" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="ue1_aggr" value="ue1p-aggr-01/02/03/04&#xa;Aggregators | ODBC&#xa;Jobs DISABLED" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="sw_ue1">
+          <mxGeometry x="10" y="122" width="150" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="ue1_leaf" value="ue1p-leaf-01..04 + 51..54&#xa;Leaf nodes | ODBC&#xa;Jobs DISABLED" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="sw_ue1">
+          <mxGeometry x="170" y="122" width="155" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="ue1_stale" value="⚠️ DEAD: ue1p-wpv2 / ue1r-wpv2 (DNS gone — WPv2 decommissioned)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="sw_ue1">
+          <mxGeometry x="10" y="178" width="315" height="42" as="geometry" />
         </mxCell>
 
-        <mxCell id="ext4" value="KAPP MySQL&#xa;Dev/Rel/UK/EU/US Prod&#xa;Port 3306 | &#xa;Grafana reads directly" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
-          <mxGeometry x="555" y="605" width="160" height="75" as="geometry" />
+        <!-- SWIMLANE: EU-CENTRAL-1 (EC1) -->
+        <mxCell id="sw_ec1" value="EU-CENTRAL-1 (EC1)" style="swimlane;startSize=25;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;fontSize=10;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="1095" y="600" width="340" height="230" as="geometry" />
+        </mxCell>
+        <mxCell id="ec1_label_prod" value="PRODUCTION" style="text;html=1;strokeColor=none;fillColor=#d5e8d4;fontSize=9;fontStyle=1;align=center;" vertex="1" parent="sw_ec1">
+          <mxGeometry x="10" y="30" width="150" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="ec1_kapp" value="KAPP MySQL EU Prod&#xa;10.125.6.134 | Port 3306&#xa;Grafana datasource&#xa;ACTIVE" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="sw_ec1">
+          <mxGeometry x="170" y="30" width="155" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ec1_label_ss" value="SingleStore (PRODUCTION — EC1P)" style="text;html=1;strokeColor=none;fillColor=none;fontSize=9;fontStyle=2;" vertex="1" parent="sw_ec1">
+          <mxGeometry x="10" y="100" width="210" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="ec1_aggr" value="ec1p-aggr-01/02/03/04&#xa;Aggregators | ODBC&#xa;Jobs DISABLED" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="sw_ec1">
+          <mxGeometry x="10" y="122" width="150" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="ec1_leaf" value="ec1p-leaf-01..04 + 51..54&#xa;Leaf nodes | ODBC&#xa;Jobs DISABLED" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="sw_ec1">
+          <mxGeometry x="170" y="122" width="155" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="ec1_nifi" value="NiFi API&#xa;10.125.9.192:8443&#xa;JSON datasource | Grafana&#xa;ACTIVE" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="sw_ec1">
+          <mxGeometry x="10" y="178" width="150" height="42" as="geometry" />
+        </mxCell>
+        <mxCell id="ec1_ss_prod" value="SingleStore UK Prod&#xa;10.121.22.219 | Grafana&#xa;ACTIVE" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="sw_ec1">
+          <mxGeometry x="170" y="178" width="155" height="42" as="geometry" />
         </mxCell>
 
-        <mxCell id="ext5" value="Zabbix MySQL x4&#xa;NonProd + Prod&#xa;Ex-employee account&#xa;ROTATE CREDENTIALS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
-          <mxGeometry x="730" y="605" width="160" height="75" as="geometry" />
+        <!-- SHARED SERVICES ROW -->
+        <mxCell id="lbl_shared" value="SHARED SERVICES" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1450" y="565" width="200" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="ext_zabbix" value="Zabbix MySQL x4&#xa;NonProd (10.72.8.186/191)&#xa;Prod (10.120.8.51/120)&#xa;⚠️ Ex-employee credentials" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="1450" y="600" width="170" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="ext_aws" value="AWS APIs&#xa;CloudWatch/S3/EC2/RDS&#xa;Python | Port 443&#xa;Every 30min + daily" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="1450" y="680" width="170" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="ext_jira" value="Jira API&#xa;Monthly sprint pull&#xa;Port 443 HTTPS&#xa;Into DBA_VCC_ATLASSIAN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="1450" y="760" width="170" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="ext_influx" value="InfluxDB&#xa;Grafana datasource&#xa;URL not confirmed&#xa;STATUS: UNKNOWN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="1450" y="840" width="170" height="70" as="geometry" />
         </mxCell>
 
-        <mxCell id="ext6" value="AWS APIs&#xa;CloudWatch/S3/EC2/RDS&#xa;Python | Port 443&#xa;Every 15min + daily" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
-          <mxGeometry x="905" y="605" width="160" height="75" as="geometry" />
+        <!-- KAPP MYSQL SHARED ROW (Dev/Rel/UK) -->
+        <mxCell id="lbl_kapp_mysql" value="KAPP MySQL (all regions — Grafana datasources)" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=2;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="30" y="843" width="350" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="kapp_dev" value="KAPP Dev&#xa;10.61.11.70:3306&#xa;EW1 Dev&#xa;Grafana datasource" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="30" y="868" width="130" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="kapp_rel" value="KAPP Release&#xa;10.77.3.236:3306&#xa;EW1 Release&#xa;Grafana datasource" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="170" y="868" width="130" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="kapp_uk" value="KAPP UK Prod&#xa;10.121.29.82:3306&#xa;EW2 Production&#xa;Grafana datasource" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="310" y="868" width="130" height="60" as="geometry" />
         </mxCell>
 
-        <mxCell id="ext7" value="NiFi API&#xa;10.125.9.192:8443&#xa;JSON datasource&#xa;EU Prod" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
-          <mxGeometry x="1080" y="605" width="160" height="75" as="geometry" />
-        </mxCell>
-
-        <mxCell id="ext8" value="Jira API&#xa;Monthly sprint pull&#xa;Port 443 HTTPS&#xa;Into DBA_VCC_ATLASSIAN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
-          <mxGeometry x="1255" y="605" width="160" height="75" as="geometry" />
-        </mxCell>
-
-        <mxCell id="ext9" value="InfluxDB&#xa;Grafana datasource&#xa;URL not confirmed&#xa;STATUS: UNKNOWN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
-          <mxGeometry x="1430" y="605" width="160" height="75" as="geometry" />
-        </mxCell>
-
-        <mxCell id="e_sql_ext1" style="edgeStyle=orthogonalEdgeStyle;dashed=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="20" target="ext1" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
-        <mxCell id="e_sql_ext2" style="edgeStyle=orthogonalEdgeStyle;dashed=1;" edge="1" source="20" target="ext2" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
-        <mxCell id="e_sql_ext3" style="edgeStyle=orthogonalEdgeStyle;dashed=1;" edge="1" source="20" target="ext3" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
-        <mxCell id="e_sql_ext4" style="edgeStyle=orthogonalEdgeStyle;dashed=1;" edge="1" source="20" target="ext4" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
-        <mxCell id="e_sql_ext6" style="edgeStyle=orthogonalEdgeStyle;dashed=1;" edge="1" source="20" target="ext6" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
-        <mxCell id="e_sql_ext8" style="edgeStyle=orthogonalEdgeStyle;dashed=1;" edge="1" source="20" target="ext8" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
-        <mxCell id="e_grf_ext4" style="edgeStyle=orthogonalEdgeStyle;dashed=1;" edge="1" source="21" target="ext4" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
-        <mxCell id="e_grf_ext5" style="edgeStyle=orthogonalEdgeStyle;dashed=1;" edge="1" source="21" target="ext5" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
-        <mxCell id="e_grf_ext7" style="edgeStyle=orthogonalEdgeStyle;dashed=1;" edge="1" source="21" target="ext7" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
-        <mxCell id="e_grf_ext9" style="edgeStyle=orthogonalEdgeStyle;dashed=1;" edge="1" source="21" target="ext9" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <!-- EDGES from SQL/Grafana to swimlanes -->
+        <mxCell id="e_sql_ew1" style="edgeStyle=orthogonalEdgeStyle;dashed=1;" edge="1" source="20" target="sw_ew1" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_sql_ew2" style="edgeStyle=orthogonalEdgeStyle;dashed=1;" edge="1" source="20" target="sw_ew2" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_sql_ue1" style="edgeStyle=orthogonalEdgeStyle;dashed=1;" edge="1" source="20" target="sw_ue1" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_sql_ec1" style="edgeStyle=orthogonalEdgeStyle;dashed=1;" edge="1" source="20" target="sw_ec1" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_sql_aws" style="edgeStyle=orthogonalEdgeStyle;dashed=1;" edge="1" source="20" target="ext_aws" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_sql_jira" style="edgeStyle=orthogonalEdgeStyle;dashed=1;" edge="1" source="20" target="ext_jira" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_grf_zabbix" style="edgeStyle=orthogonalEdgeStyle;dashed=1;" edge="1" source="21" target="ext_zabbix" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_grf_kappdev" style="edgeStyle=orthogonalEdgeStyle;dashed=1;" edge="1" source="21" target="kapp_dev" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_grf_kapprel" style="edgeStyle=orthogonalEdgeStyle;dashed=1;" edge="1" source="21" target="kapp_rel" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_grf_kappuk" style="edgeStyle=orthogonalEdgeStyle;dashed=1;" edge="1" source="21" target="kapp_uk" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_grf_influx" style="edgeStyle=orthogonalEdgeStyle;dashed=1;" edge="1" source="21" target="ext_influx" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
 
         <!-- ===== ROW 5: CONSUMERS ===== -->
         <mxCell id="lbl_con" value="CONSUMERS — SERVED TO" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=11;" vertex="1" parent="1">
-          <mxGeometry x="30" y="750" width="260" height="25" as="geometry" />
+          <mxGeometry x="30" y="960" width="260" height="25" as="geometry" />
         </mxCell>
 
         <mxCell id="con1" value="Grafana Users&#xa;tashvir.babulal (admin)&#xa;yogeshwar.phull (admin)&#xa;rayhaan.suleyman (admin)&#xa;Last seen: June 2026" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
-          <mxGeometry x="30" y="785" width="170" height="90" as="geometry" />
+          <mxGeometry x="30" y="995" width="170" height="90" as="geometry" />
         </mxCell>
 
         <mxCell id="con2" value="Slack&#xa;alerts-data-operations&#xa;KAPP config alerts&#xa;Read query failures&#xa;DEFAULT route" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
-          <mxGeometry x="215" y="785" width="170" height="90" as="geometry" />
+          <mxGeometry x="215" y="995" width="170" height="90" as="geometry" />
         </mxCell>
 
         <mxCell id="con3" value="Slack&#xa;alert-app-allow2fa-disabled&#xa;KAPP auth alerts&#xa;Client Auth = Yes only&#xa;ACTIVE" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
-          <mxGeometry x="400" y="785" width="170" height="90" as="geometry" />
+          <mxGeometry x="400" y="995" width="170" height="90" as="geometry" />
         </mxCell>
 
         <mxCell id="con4" value="dba@kurtosys.com&#xa;CHECKDB failures&#xa;Backup failures&#xa;Disk / VLF alerts&#xa;WHO MONITORS THIS?" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
-          <mxGeometry x="585" y="785" width="170" height="90" as="geometry" />
+          <mxGeometry x="585" y="995" width="170" height="90" as="geometry" />
         </mxCell>
 
         <mxCell id="con5" value="Finance / Acct Mgmt&#xa;DBA_VCC_COST reports&#xa;19 REP_MONTHEND procs&#xa;280 institutional clients&#xa;⚠️ DATA STALE SINCE 2026-05-04" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
-          <mxGeometry x="770" y="785" width="170" height="90" as="geometry" />
+          <mxGeometry x="770" y="995" width="170" height="90" as="geometry" />
         </mxCell>
 
         <mxCell id="con6" value="Zabbix Server&#xa;Monitors this server&#xa;Port 10050 inbound&#xa;Agent PID: 5700&#xa;ACTIVE" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
-          <mxGeometry x="955" y="785" width="170" height="90" as="geometry" />
+          <mxGeometry x="955" y="995" width="170" height="90" as="geometry" />
         </mxCell>
 
         <mxCell id="con7" value="Month-End Dashboards&#xa;KAPP/Encore/DXM/WPv2&#xa;Read from DBA_VCC_MEMSQL&#xa;NO DATA since May 2026&#xa;BROKEN — ESCALATED" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
-          <mxGeometry x="1140" y="785" width="170" height="90" as="geometry" />
+          <mxGeometry x="1140" y="995" width="170" height="90" as="geometry" />
         </mxCell>
 
         <mxCell id="e_grf_con1" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="21" target="con1" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
@@ -176,35 +268,35 @@
 
         <!-- ===== ROW 6: RETIRE / REPLACE / MOVE ===== -->
         <mxCell id="lbl_rrm" value="DECOMMISSION CLASSIFICATION" style="text;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=11;" vertex="1" parent="1">
-          <mxGeometry x="30" y="945" width="280" height="25" as="geometry" />
+          <mxGeometry x="30" y="1155" width="280" height="25" as="geometry" />
         </mxCell>
 
         <mxCell id="rrm1" value="RETIRE&#xa;DBA_VCC_MEMSQL&#xa;63 dead linked servers (30 safe now)&#xa;VCC MemSQL jobs (7)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;fontStyle=1;" vertex="1" parent="1">
-          <mxGeometry x="30" y="980" width="190" height="75" as="geometry" />
+          <mxGeometry x="30" y="1190" width="190" height="75" as="geometry" />
         </mxCell>
 
-        <mxCell id="rrm2" value="REPLACE → TECH-3428&#xa;DBA_VCC_AWS (180GB)&#xa;DBA_VCC_MYSQL (26GB)&#xa;DBA_VCC_COST (billing)&#xa;VCC AWS + MySQL jobs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=1;" vertex="1" parent="1">
-          <mxGeometry x="240" y="980" width="190" height="75" as="geometry" />
+        <mxCell id="rrm2" value="REPLACE → TECH-3428&#xa;DBA_VCC_AWS (185.66GB)&#xa;DBA_VCC_MYSQL (27GB)&#xa;DBA_VCC_COST (billing)&#xa;VCC AWS + MySQL jobs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="240" y="1190" width="190" height="75" as="geometry" />
         </mxCell>
 
         <mxCell id="rrm3" value="REPLACE → Grafana Cloud&#xa;74 dashboards confirmed&#xa;3 active admins&#xa;Re-route Slack alerts" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=1;" vertex="1" parent="1">
-          <mxGeometry x="450" y="980" width="190" height="75" as="geometry" />
+          <mxGeometry x="450" y="1190" width="190" height="75" as="geometry" />
         </mxCell>
 
         <mxCell id="rrm4" value="MOVE → New SQL Host&#xa;DBA Maintenance jobs&#xa;Active linked servers&#xa;Backup jobs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="1">
-          <mxGeometry x="660" y="980" width="190" height="75" as="geometry" />
+          <mxGeometry x="660" y="1190" width="190" height="75" as="geometry" />
         </mxCell>
 
         <mxCell id="rrm5" value="INVESTIGATE FIRST&#xa;DBA_VCC_ATLASSIAN&#xa;KURTOSYS_BASELINE&#xa;EW1P-OCT backup job" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" vertex="1" parent="1">
-          <mxGeometry x="870" y="980" width="190" height="75" as="geometry" />
+          <mxGeometry x="870" y="1190" width="190" height="75" as="geometry" />
         </mxCell>
 
         <mxCell id="rrm6" value="DO NOW — SECURITY&#xa;Rotate Zabbix datasource credentials&#xa;Ex-employee account — last seen Nov 2024" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;fontStyle=1;" vertex="1" parent="1">
-          <mxGeometry x="1080" y="980" width="190" height="75" as="geometry" />
+          <mxGeometry x="1080" y="1190" width="190" height="75" as="geometry" />
         </mxCell>
 
         <mxCell id="rrm7" value="DO NOW — FIX&#xa;2 WPv2 jobs failing daily since decommission&#xa;14 dashboards stale since May 2026&#xa;DBA_VCC_COST silent failure since 2026-05-04&#xa;280 clients receiving stale billing data" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;fontStyle=1;" vertex="1" parent="1">
-          <mxGeometry x="1290" y="980" width="190" height="75" as="geometry" />
+          <mxGeometry x="1290" y="1190" width="190" height="75" as="geometry" />
         </mxCell>
 
         <!-- ===== LEGEND ===== -->
@@ -228,6 +320,9 @@
         </mxCell>
         <mxCell id="leg6" value="Dashed line = collects from" style="text;html=1;strokeColor=none;fillColor=none;fontSize=10;" vertex="1" parent="1">
           <mxGeometry x="1500" y="640" width="160" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="leg7" value="Swimlane = AWS Region" style="text;html=1;strokeColor=none;fillColor=none;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1500" y="665" width="160" height="25" as="geometry" />
         </mxCell>
 
       </root>
