@@ -83,10 +83,14 @@ EW1R-REP-01 is a custom-built monitoring and reporting hub. It is not a standard
 |---|---|
 | Hostname | EW1R-REP-01 |
 | IP Address | 10.72.8.216 |
+| DNS (Replication) | ew1r-rep-01.ad.shnonprd.kurtosys-internal.net |
+| DNS (Primary) | dbe-reports.shnonprd.kurtosys-internal.net |
+| Platform | AWS EC2 — Ireland (eu-west-1) |
+| Environment | Shared NonProd (REL) |
 | SQL Server | 2019 Developer Edition (15.0.4455.2) |
-| OS | Windows Server 2019 Datacenter |
+| OS | Windows Server 2019 Datacenter (AWS EC2 — Hypervisor) |
 | Grafana | 9.5.2 — port 443 (HTTPS) |
-| Environment | Non-production host monitoring production systems |
+| Monitoring role | Non-production host monitoring production systems |
 
 ---
 

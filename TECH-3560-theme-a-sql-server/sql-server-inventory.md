@@ -4,9 +4,14 @@
 | Property | Value |
 |---|---|
 | Hostname | EW1R-REP-01 |
+| IP Address | 10.72.8.216 |
+| DNS (Replication) | ew1r-rep-01.ad.shnonprd.kurtosys-internal.net |
+| DNS (Primary) | dbe-reports.shnonprd.kurtosys-internal.net |
+| Platform | AWS EC2 — Ireland (eu-west-1) |
+| Environment | Shared NonProd (REL) |
 | SQL Server Version | 2019 (RTM-CU32-GDR) KB5068404 — 15.0.4455.2 |
 | Edition | Developer Edition (64-bit) |
-| OS | Windows Server 2019 Datacenter 10.0 (Hypervisor) |
+| OS | Windows Server 2019 Datacenter (AWS EC2 — Hypervisor) |
 | Collation | Latin1_General_CI_AS |
 | Patch Level | Fully patched as of Oct 7 2025 |
 
