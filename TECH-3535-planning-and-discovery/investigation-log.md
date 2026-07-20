@@ -3,7 +3,7 @@
 Scope: Initial discovery on EW1R-REP-01 — what is running, what depends on it, what risks exist before decommission.
 Each entry has the question, the query, the evidence, and the finding.
 
-> Status: Discovery complete. All 5 scope items done. Open questions documented in open-questions.md. Topology and classification in progress — TECH-3563.
+> Status: Discovery complete. All 5 scope items done. 6 critical findings documented. Open questions documented in open-questions.md. Topology and classification complete — TECH-3563.
 
 ---
 
@@ -106,7 +106,7 @@ KAPP Client Utilisation and Growth Report   2024-02-22  ⚠️ name suggests cli
 AWS Cost Report Monthly                     2023-10-06  internal — AWS data stale since Sept 2024
 ```
 
-**Finding:** 4 dashboards confirmed reading from DBA_VCC_COST. DBA_VCC_COST is on FULL recovery — the only database on this server deliberately set that way. Collection job last succeeded 29 June 2026. `KAPP Client Utilisation and Growth Report` is the highest risk — name strongly suggests client-facing use. Must confirm with tashvir.babulal and rayhaan.suleyman before any decommission date is set.
+**Finding:** 4 dashboards confirmed reading from DBA_VCC_COST. DBA_VCC_COST is on FULL recovery — the only database on this server deliberately set that way. Confirmed client billing data — LU_KAPP_ClientList has 280 real institutional clients across EW2, UE1, EC1. All 9 INFO_KAPP_Client_* tables stale since 4 May 2026 — 11+ consecutive silent zero-row runs confirmed 2026-07-20. `KAPP Client Utilisation and Growth Report` confirmed client-facing. Must disclose to tashvir.babulal and rayhaan.suleyman immediately (Q36).
 
 ---
 
@@ -139,14 +139,14 @@ e8597015  DBA_VCC   mssql  localhost  — ⚠️ duplicate entry, same datasourc
 
 **Evidence:**
 ```
-1  Run SQL discovery queries and capture outputs       Done  — 13 sections, all outputs in discovery-queries.sql
+1  Run SQL discovery queries and capture outputs       Done  — 14 sections, all outputs in discovery-queries.sql
 2  Inventory SQL Server and Grafana components         Done  — TECH-3560 (SQL Server), TECH-3561 (Grafana)
-3  Map external targets and consumers                  Done  — TECH-3562
-4  Document open questions and blockers                Done  — 34 questions in open-questions.md
-5  Produce topology and risk classification            In Progress  — TECH-3563, blocked on stakeholder answers
+3  Map external targets and consumers                  Done  — TECH-3562, validated 2026-07-20
+4  Document open questions and blockers                Done  — 36 questions in open-questions.md
+5  Produce topology and risk classification            Done  — TECH-3563, validated 2026-07-20, 6 blockers documented
 ```
 
-**Finding:** Discovery complete. Topology blocked on consumer confirmation questions — who uses DBA_VCC_COST for billing, is KAPP Client Utilisation client-facing, who calls REP_MONTHEND procedures. Escalated to tashvir.babulal and rayhaan.suleyman.
+**Finding:** Discovery complete. All 5 scope items done. DBA_VCC_COST confirmed client billing — 280 institutional clients. KAPP Client Utilisation confirmed client-facing. 6 decommission blockers documented (Q13, Q21, Q22, Q23, Q35, Q36) — all require stakeholder answers before decommission can proceed.
 
 ---
 
