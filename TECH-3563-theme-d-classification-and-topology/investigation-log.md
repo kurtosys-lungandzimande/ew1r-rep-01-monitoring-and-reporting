@@ -3,7 +3,7 @@
 Scope: Topology map, server classification, decommission decision.
 Each entry has the question, the query, the evidence, and the finding.
 
-> Status: IN PROGRESS — Themes A, B, C complete. Topology and classification produced from confirmed findings. Decommission blockers documented. Stakeholder input still required on Q13, Q21, Q22, Q23, Q35, Q36 before any decommission action.
+> Status: Validated 2026-07-20 — all Theme C findings re-confirmed from live queries. Corrections applied and incorporated into topology-and-classification.md. Remaining blockers are stakeholder input (Q13, Q21, Q22, Q23, Q35, Q36).
 
 ---
 
@@ -50,12 +50,17 @@ Each entry has the question, the query, the evidence, and the finding.
 
 | Finding | Evidence |
 |---|---|
-| DBA_VCC_COST confirmed client billing data — 200+ real institutional clients across EW2, UE1, EC1 | query 14.3 — LU_KAPP_ClientList |
-| All 9 INFO_KAPP_Client_* collection tables stale since 4 May 2026 — same day MEMSQL jobs disabled | query 14.2 — data freshness |
-| Root cause confirmed — SP_INFO procedures check MEMSQL ping stats within last 40 min before collecting. With MEMSQL jobs disabled, @SERVERNAMES always empty, zero rows written, job reports Succeeded | SP_INFO_KAPP_CLIENT_ALLOCATIONS_COUNTS definition |
+| DBA_VCC_COST confirmed client billing data — **280** real institutional clients across EW2, UE1, EC1 | query 14.3 re-run 2026-07-20 — COUNT(*) = 280 |
+| All 9 INFO_KAPP_Client_* collection tables frozen at 2026-05-04 08:00 — exact timestamps confirmed, row counts unchanged | query 14.2 re-run 2026-07-20 |
+| Job runs every Sunday, reports Succeeded, writes zero rows — 11+ consecutive silent failures confirmed | last run 2026-07-20 08:00, data still 2026-05-04 |
+| Root cause confirmed — SP_INFO procedures check MEMSQL ping stats within last 40 min. With MEMSQL jobs disabled, @SERVERNAMES always empty, zero rows written, job reports Succeeded | SP_INFO_KAPP_CLIENT_ALLOCATIONS_COUNTS definition |
+| MEMSQL stop dates corrected — InvestorPress data stopped 2026-05-01, KAPP data stopped 2026-05-07 — not the same day | query 6.1 re-run 2026-07-20 |
 | 19 REP_MONTHEND procedures in DBA_VCC_COST + 14 in DBA_VCC_MEMSQL — who calls them each month end is still open | query 14.1 + query 14.5 |
-| EW1R-TC confirmed TeamCity — EW2P-MARKETING-DB owner confirmed Marketing account (232173278818) | query 14.4 — LU_EntityList |
-| EW1R-REP-01 tracks its own AWS costs in LU_EntityList under Reporting / Shared_Services_Non-Prod | query 14.4 — LU_EntityList |
+| EW1R-TC confirmed TeamCity — EW2P-MARKETING-DB owner confirmed Marketing account (232173278818) | query 14.4 re-run 2026-07-20 |
+| EW1R-REP-01 tracks its own AWS costs in LU_EntityList under Reporting / Shared_Services_Non-Prod | query 14.4 |
+| WPv2 jobs still failing daily — full RDS hostname confirmed: `ew2p-wpv2.cmrr9j6takgk.eu-west-2.rds.amazonaws.com` — failures confirmed through 2026-07-20 | job history re-run 2026-07-20 |
+| LU_EntityList data quality issues confirmed — duplicate rows, leading spaces in Region, DELETE orphan row, EW1R-AGGR-31 added after InvestorPress decommission, UE1P-WPV2 under two accounts, EW2P-WPV2-TEMP-ABDUL never cleaned up | query 14.4 re-run 2026-07-20 |
+| All services confirmed running — Grafana 443 PID 3844, SQL Server 1433 PID 3096, Zabbix agent 10050 PID 5700 — PIDs unchanged | netstat re-run 2026-07-20 |
 
 ---
 

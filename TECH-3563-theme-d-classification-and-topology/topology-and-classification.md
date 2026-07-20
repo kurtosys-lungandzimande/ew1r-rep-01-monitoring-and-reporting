@@ -1,6 +1,6 @@
 # Topology & Classification — EW1R-REP-01
 
-> Status: IN PROGRESS — Themes A, B, C complete. All confirmed findings incorporated. Remaining blockers are stakeholder input (Q13, Q21, Q22, Q23, Q35, Q36) — documented in open-questions.md.
+> Status: Validated 2026-07-20 — all Theme C findings re-confirmed from live queries. Corrections applied: client count updated to 280, MEMSQL stop dates corrected, LU_EntityList data quality issues expanded, WPv2 job failure RDS hostname confirmed, services re-confirmed. Remaining blockers are stakeholder input (Q13, Q21, Q22, Q23, Q35, Q36) — documented in open-questions.md.
 
 ---
 
@@ -154,7 +154,7 @@ EW1R-REP-01 (Custom VCC Monitoring Hub)
 |---|---|---|---|
 | DBA_VCC_AWS (KAPP monitoring) | Replace | Core KAPP observability — cannot retire | TECH-3428 unified monitoring |
 | DBA_VCC_MYSQL (MySQL monitoring) | Replace | Active MySQL/RDS monitoring | TECH-3428 or CloudWatch |
-| DBA_VCC_COST (Cost tracking) | Replace | ⚠️ Confirmed client billing data — 200+ institutional clients tracked across EW2, UE1, EC1. Collection stale since 4 May 2026. Cannot retire without confirmed replacement and stakeholder sign-off. | TECH-3428 or dedicated billing host |
+| DBA_VCC_COST (Cost tracking) | Replace | ⚠️ Confirmed client billing data — **280** institutional clients tracked across EW2, UE1, EC1. Collection stale since 4 May 2026 — job runs every Sunday, reports Succeeded, writes zero rows. 11+ consecutive silent failures confirmed 2026-07-20. Cannot retire without confirmed replacement and stakeholder sign-off. | TECH-3428 or dedicated billing host |
 | DBA_VCC_MEMSQL (MemSQL monitoring) | Retire | All jobs disabled, likely superseded | N/A |
 | DBA_VCC_ATLASSIAN (Jira integration) | Investigate | Unknown consumer — needs confirmation | TBC |
 | KURTOSYS_BASELINE | Investigate | Large (51GB) — unknown active consumer | TBC |
@@ -177,7 +177,7 @@ EW1R-REP-01 (Custom VCC Monitoring Hub)
 | KAPP API monitoring loss | Critical | 563M rows actively collected — Grafana KAPP dashboards updated Oct 2025, actively used |
 | Grafana dashboard loss | Critical | 3 active admins as of June 2026 — 74 dashboards confirmed including production KAPP metrics |
 | SingleStore monitoring loss | Critical | Grafana reads directly from SingleStore UK/EU/US Prod — dashboards updated Aug 2025 |
-| Cost tracking loss | Critical | DBA_VCC_COST confirmed client billing data — 200+ real institutional clients (BlackRock, BNY Mellon, Aberdeen, Wellington, T. Rowe Price, Nordea and others). Collection already stale since 4 May 2026. Decommissioning without a confirmed replacement directly impacts client invoicing. |
+| Cost tracking loss | Critical | DBA_VCC_COST confirmed client billing data — **280** real institutional clients (BlackRock, BNY Mellon, Aberdeen, Wellington, T. Rowe Price, Nordea and others). Collection stale since 4 May 2026 — 11+ consecutive silent zero-row runs confirmed 2026-07-20. Decommissioning without a confirmed replacement directly impacts client invoicing. |
 | MySQL/RDS monitoring loss | High | Active jobs monitoring production RDS + Grafana reads KAPP MySQL directly |
 | Zabbix datasource loss | High | Grafana reads 4 Zabbix MySQL databases directly — Zabbix monitoring dashboards active |
 | NiFi API reporting loss | Medium | Grafana JSON datasource reads NiFi API — NiFi API Reporting dashboard active |
@@ -189,7 +189,7 @@ EW1R-REP-01 (Custom VCC Monitoring Hub)
 ## Recommendation (Preliminary)
 
 > **Do not decommission until:**
-> 1. ~~DBA_VCC_COST consumer is identified~~ — **Closed** — confirmed client billing data, 200+ institutional clients
+> 1. ~~DBA_VCC_COST consumer is identified~~ — **Closed** — confirmed client billing data, **280** institutional clients. Collection silently stale since 4 May 2026 — re-validated 2026-07-20.
 > 2. KAPP monitoring data ownership confirmed — who depends on DBA_VCC_AWS for SLA reporting? (Q13)
 > 3. tashvir.babulal / rayhaan.suleyman confirm which Grafana dashboards are client-facing or SLA-related (Q21, Q22)
 > 4. Who disabled DBA_VCC_MEMSQL jobs in May 2026 and why — must be understood before any re-enable (Q35)
@@ -219,4 +219,4 @@ This server is **not safe to decommission** based on current evidence. It is:
 | Q22 | Is any alerting dependent solely on this server — would anyone lose visibility? | yogeshwar.phull / tashvir.babulal | ⚠️ Open |
 | Q23 | Is the VCC framework replicated anywhere else or is this the only instance? | DBA team | ⚠️ Open |
 | Q35 | Who disabled the DBA_VCC_MEMSQL jobs in May 2026 and why? Was the DAILY_CHECKS failure on 8 May 2026 ever investigated? Jobs must not be re-enabled without understanding the root cause. | yogeshwar.phull / tashvir.babulal | ⚠️ Open |
-| Q36 | Has anyone noticed that DBA_VCC_COST client entity counts have been stale since 4 May 2026? The KAPP Client Utilisation and Growth Report dashboard is showing 2-month-old billing data. Whoever uses that report for invoicing has been working with wrong figures since May with no warning. Must be disclosed immediately. | tashvir.babulal / rayhaan.suleyman | ⚠️ Open — must disclose now |
+| Q36 | Has anyone noticed that DBA_VCC_COST client entity counts have been stale since 4 May 2026? The KAPP Client Utilisation and Growth Report dashboard is showing 2.5-month-old billing data. The job runs every Sunday and reports Succeeded but writes zero rows — 11+ consecutive silent failures confirmed 2026-07-20. Whoever uses that report for invoicing has been working with wrong figures since May with no warning. Must be disclosed immediately. | tashvir.babulal / rayhaan.suleyman | ⚠️ Open — must disclose now |}

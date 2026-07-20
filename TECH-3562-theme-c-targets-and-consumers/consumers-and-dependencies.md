@@ -1,6 +1,6 @@
 # Consumers and Dependencies — EW1R-REP-01
 
-> Status: DBA_VCC_COST confirmed client-facing — LU_KAPP_ClientList contains 200+ real institutional clients. Stakeholder disclosure required for billing impact.
+> Status: Validated 2026-07-20 from live queries against EW1R-REP-01. All findings confirmed. Corrections applied — see validation notes inline.
 
 ---
 
@@ -11,7 +11,7 @@
 | Grafana dashboards (74 total) | tashvir.babulal, yogeshwar.phull, rayhaan.suleyman | Confirmed | 3 active admins as of June 2026 |
 | DBA_VCC_COST — Database Engineering Costs | DB engineering team | Confirmed | Dashboard JSON confirmed — last updated Oct 2024 |
 | DBA_VCC_COST — Database Engineering Sprint Reporting | Engineering management | Confirmed | Dashboard JSON confirmed — last updated Mar 2024 |
-| DBA_VCC_COST — KAPP Client Utilisation and Growth Report | Client-facing — confirmed | ⚠️ Critical | LU_KAPP_ClientList contains 200+ real institutional clients across EW2, UE1, EC1 — BlackRock, BNY Mellon, Aberdeen, Wellington, T. Rowe Price, Nordea, Jupiter, M&G, AXA IM, BMO, HSBC and others. This is billing data. |
+| DBA_VCC_COST — KAPP Client Utilisation and Growth Report | Client-facing — confirmed | ⚠️ Critical | LU_KAPP_ClientList contains **280** real institutional clients across EW2, UE1, EC1 — BlackRock, BNY Mellon, Aberdeen, Wellington, T. Rowe Price, Nordea, Jupiter, M&G, AXA IM, BMO, HSBC and others. This is billing data. |
 | DBA_VCC_COST — AWS Cost Report Monthly | Unknown | Medium | Dashboard JSON confirmed — AWS data stale since Nov 2024 |
 | DBA_VCC_COST — INFO_KAPP_Client_* tables | Unknown | ⚠️ High risk | All 9 collection tables stale since 4 May 2026 — job reports Succeeded but no data written, silent failure |
 | DBA_VCC_MEMSQL — 14 dashboards | Unknown | Confirmed broken | All stale since May 2026 — jobs disabled |
@@ -48,26 +48,28 @@
 
 ## DBA_VCC_COST — What It Tracks
 
-Collection job `DBA_VCC_COST_Entity_Count_Collection` runs on schedule SCHED1. Last confirmed successful run: 29 June 2026 at 08:00. Database is on FULL recovery — the only database on this server set that way.
+Collection job `DBA_VCC_COST_Entity_Count_Collection` runs on schedule SCHED1 every Sunday at 08:00. Service account: `SHNONPRD\sqlagent`. Database is on FULL recovery — the only database on this server set that way.
+
+⚠️ The job has run every Sunday and reported Succeeded continuously — most recently **2026-07-20 at 08:00**. Despite this, all 9 collection tables remain frozen at **2026-05-04 08:00** — confirmed 11+ consecutive weeks of silent zero-row runs. The job succeeds because the SP_INFO procedures exit cleanly with no error when MEMSQL ping stats are stale. There is nothing to catch.
 
 Collects 9 entity types per KAPP client across 5 environments.
 
-Data freshness confirmed by query 5.1 (run 2026-07-09):
+Data freshness confirmed by query 14.2 (re-run 2026-07-20):
 
 | Table | Last Collected | Row Count |
 |---|---|---|
-| INFO_KAPP_Client_Allocations_Counts | 2026-05-04 08:00 | 123,374 |
-| INFO_KAPP_Client_Disclaimers_Commentaries_Counts | 2026-05-04 08:00 | 578,926 |
-| INFO_KAPP_Client_Document_Counts | 2026-05-04 08:00 | 471,593 |
-| INFO_KAPP_Client_Entities_Counts | 2026-05-04 08:00 | 145,047 |
-| INFO_KAPP_Client_HistoricalDatasets_Counts | 2026-05-04 08:00 | 33,483 |
-| INFO_KAPP_Client_Snapshots_Counts | 2026-05-04 08:00 | 286,584 |
-| INFO_KAPP_Client_Statstics_Counts | 2026-05-04 08:00 | 134,707 |
-| INFO_KAPP_Client_TimeSeries_Counts | 2026-05-04 08:00 | 120,269 |
-| INFO_KAPP_Client_Users_Counts | 2026-05-04 08:00 | 14,811,776 |
-| INFO_AWS_DE_Entity_Cost | 2024-11-01 ⚠️ Stale — 20 months out of date | 4,382 |
+| INFO_KAPP_Client_Allocations_Counts | 2026-05-04 08:00:02 | 123,374 |
+| INFO_KAPP_Client_Disclaimers_Commentaries_Counts | 2026-05-04 08:00:06 | 578,926 |
+| INFO_KAPP_Client_Document_Counts | 2026-05-04 08:00:09 | 471,593 |
+| INFO_KAPP_Client_Entities_Counts | 2026-05-04 08:00:11 | 145,047 |
+| INFO_KAPP_Client_HistoricalDatasets_Counts | 2026-05-04 08:00:14 | 33,483 |
+| INFO_KAPP_Client_Snapshots_Counts | 2026-05-04 08:00:16 | 286,584 |
+| INFO_KAPP_Client_Statstics_Counts | 2026-05-04 08:00:18 | 134,707 |
+| INFO_KAPP_Client_TimeSeries_Counts | 2026-05-04 08:00:20 | 120,269 |
+| INFO_KAPP_Client_Users_Counts | 2026-05-04 08:00:39 | 14,811,776 |
+| INFO_AWS_DE_Entity_Cost | 2024-11-01 ⚠️ Stale — 20+ months out of date | 4,382 |
 
-⚠️ All 9 collection tables last updated 4 May 2026 — not 29 June 2026 as previously noted from job history. The job reports Succeeded but no data has been written in 2 months.
+⚠️ All 9 collection tables confirmed frozen at 4 May 2026 — re-validated 2026-07-20. Row counts unchanged. The job has run every Sunday since then and reported Succeeded — 11+ consecutive silent zero-row runs.
 
 Root cause confirmed by SP_INFO_KAPP_CLIENT_ALLOCATIONS_COUNTS definition (run 2026-07-09):
 
@@ -143,16 +145,24 @@ Entity registry confirmed by query (run 2026-07-09) — `SELECT * FROM DBA_VCC_C
 | DXM | KurtosysApp_Prod / Non-Prod | Production (EC1P, EW2P, UE1P), Release (EW1R), Dev (EW1D) | DXM nodes, logging, replication, jump, backups | Document generation |
 | InvestorPress | InvestorPress_Encore_Prod / Non-Prod | Production (EW2P), Release (EW1R), Dev (EW1D) | Aggregators, leaves, admin, mops, EFS, IP RDS | |
 | Encore | InvestorPress_Encore_Prod / Non-Prod | Production (EW2P), Release (EW1R), Dev (EW1D) | MSSQL-01/02/03, backups, license exemption node | |
-| WPv2 | Wordpress_V2_Prod / Non-Prod | Production (EW2P, UE1P), Release (EW2R, UE1R) | WPV2 nodes, backups | ⚠️ Decommissioned — entries stale |
+| WPv2 | Wordpress_V2_Prod / Non-Prod | Production (EW2P, UE1P), Release (EW2R, UE1R) | WPV2 nodes, backups | ⚠️ Decommissioned — entries stale. Includes `EW2P-WPV2-TEMP-ABDUL` — temp node named after a person, never cleaned up |
 | Marketing | Marketing (232173278818) | Production (EW2P) | EW2P-MARKETING-DB, EW2P-JUMP-01, backup | ⚠️ EW2P-MARKETING-DB Not Online |
 | NiFi | Shared_Services_Prod | Production (EW1P) | EW1P-NIFIREG-01, backup | |
 | TeamCity | Shared_Services_Prod / Non-Prod | Production (EW1P), Release (EW1R) | EW1P-GIT-01/02, EW1P-JUMP-01, EW1R-TC, EW1R-JUMP-01/02 | EW1R-TC confirmed TeamCity |
-| Octa | Shared_Services_Non-Prod | Production (EW1P) | EW1P-OCT, backups | |
+| Octa | Shared_Services_Non-Prod | Production (EW1P) | EW1P-OCT, backups. Also `KSYS-EW1P-OCT-DBBACKUP2` under Sandbox account 598752988079 | |
 | Reporting | Shared_Services_Non-Prod | Release (EW1R) | EW1R-REP-01 | This server tracks its own costs |
 | Zabbix | Shared_Services_Non-Prod | Release (EW1R) | EW1R-ZABBIX-02 | |
 | REP | Monitoring_Alerting | Production (EW1P) | EW1P-MON-01 | |
 
-⚠️ Data quality issues in LU_EntityList: `Enviroment` column name is a typo, mixed case values (RELEASE vs Release), Region column has leading spaces on some EW1R rows. Never corrected since 2022.
+⚠️ Data quality issues in LU_EntityList confirmed 2026-07-20:
+- `Enviroment` column name is a typo — never corrected since 2022
+- Mixed case values: `RELEASE` vs `Release` vs `Development` in same column
+- Region has leading spaces on some EW1R rows — `EW1R-LEAF-01/02/03/04` show Region = ` EW` (space + EW, truncated) instead of `EW1`
+- `EW1R-LEAF-04` appears twice under KAPP Release — once with Region ` EW` and once with `EW1` — duplicate row with different region values
+- `UE1P-WPV2` appears under two different accounts — `Wordpress_V2_Prod (850398446702)` and `Networking (896537139917)` — duplicate entry under different account owners
+- `DELETE` row exists — `InvestorPress_Encore_Non-Prod`, EntityName = `DELETE`, Application = NULL — orphan row never cleaned up
+- `EW1R-AGGR-31` listed under InvestorPress Release — added 2023-07-06, after InvestorPress was decommissioned
+- `EW1P-GIT-01` classified as Application=`GIT`, `EW1P-GIT-02` classified as Application=`TeamCity` — inconsistent classification of the same infrastructure
 
 Environments collected from:
 
@@ -278,15 +288,16 @@ All 7 collection jobs disabled since May 2026. Last run history:
 | DBA_VCC_MEMSQL_AUDIT_BACKUP_INFO_DETAILED | 8 May 2026 | Succeeded |
 | DBA_VCC_MEMSQL_WEEKLY_CHECKS | 3 May 2026 | Succeeded |
 
-Table freshness:
+Table freshness confirmed by query 6.1 (re-run 2026-07-20):
 
 | Table | Last Data | Row Count |
 |---|---|---|
-| INFO_ClientSizes_Sizes_FP (KAPP) | May 2026 | 2,903,660 |
-| INFO_ClientSizes_Sizes_IP (InvestorPress) | May 2026 | 42,364 |
-| ARC_INFO_ClientSizes_Sizes_FP (KAPP archive) | Feb 2026 | 33,293,391 |
-| ARC_INFO_ClientSizes_Sizes_IP (IP archive) | Feb 2026 | 690,058 |
-| INFO_AWS_DE_Entity_Cost (AWS costs) | Nov 2024 | 4,382 |
+| INFO_ClientSizes_Sizes_FP (KAPP) | 2026-05-07 06:13:50 | 2,903,660 |
+| INFO_ClientSizes_Sizes_IP (InvestorPress) | 2026-05-01 06:29:36 | 42,364 |
+| ARC_INFO_ClientSizes_Sizes_FP (KAPP archive) | 2026-02-01 06:18:53 | 33,293,391 |
+| ARC_INFO_ClientSizes_Sizes_IP (IP archive) | 2026-02-01 06:33:06 | 690,058 |
+
+⚠️ Correction from previous documentation: KAPP and InvestorPress data did not stop on the same day. InvestorPress data stopped **2026-05-01**, KAPP data stopped **2026-05-07** — 6 days later. The MEMSQL jobs were disabled between 2026-05-07 and 2026-05-08 (last job run confirmed 2026-05-08 from job history).
 
 14 dashboards referencing DBA_VCC_MEMSQL confirmed by query 12.5 (run 2026-07-07):
 ```sql
@@ -331,6 +342,8 @@ All 20 of these dashboards are showing stale data. Do not re-enable jobs without
 
 ### Services Running
 
+Confirmed from netstat (re-run 2026-07-20) — all PIDs unchanged since original discovery:
+
 | Service | Port | PID |
 |---|---|---|
 | Grafana | 443 | 3844 |
@@ -338,6 +351,8 @@ All 20 of these dashboards are showing stale data. Do not re-enable jobs without
 | Zabbix Agent | 10050 | 5700 |
 | RDP | 3389 | 360 |
 | WinRM | 5985 | 4 |
+| SQL Server Browser | 1434 (loopback) | 3096 |
+| Unknown | 59563 (loopback) | 9148 | ⚠️ Not previously documented — purpose unknown |}
 
 ### Firewall Rules (needs network team confirmation)
 
@@ -358,8 +373,8 @@ All 20 of these dashboards are showing stale data. Do not re-enable jobs without
 
 | # | Item | Who to Ask |
 |---|---|---|
-| 1 | ~~Is KAPP Client Utilisation and Growth Report client-facing?~~ | **Closed** — confirmed client-facing. LU_KAPP_ClientList contains 200+ real institutional clients (BlackRock, BNY Mellon, Aberdeen, Wellington, T. Rowe Price, Nordea and others). This is billing data. |
-| 2 | ~~Is DBA_VCC_COST used for client billing?~~ | **Closed** — confirmed. See above. |
+| 1 | ~~Is KAPP Client Utilisation and Growth Report client-facing?~~ | **Closed** — confirmed client-facing. LU_KAPP_ClientList contains **280** real institutional clients (BlackRock, BNY Mellon, Aberdeen, Wellington, T. Rowe Price, Nordea and others). This is billing data. |
+| 2 | ~~Is DBA_VCC_COST used for client billing?~~ | **Closed** — confirmed. 280 clients tracked. Collection silently stale since 4 May 2026 — job runs every Sunday and reports Succeeded but writes zero rows. Re-validated 2026-07-20. |
 | 3 | Who calls REP_MONTHEND_* procedures each month end? | tashvir.babulal / rayhaan.suleyman |
 | 4 | Who receives the Slack alerts from SSISStatusCheck? | DBA team / ops team |
 | 5 | What IAM role/key does the Python AWS API caller use? | DevOps / cloud team |

@@ -7,7 +7,7 @@
 
 ## Executive Summary
 
-EW1R-REP-01 is a custom-built monitoring and reporting hub running a bespoke VCC (Virtualised Collection & Consolidation) framework. It is the sole source of 74 Grafana dashboards, production Slack alerts, and billing data for 200+ institutional clients. Discovery is complete across all 4 investigation tracks (SQL Server, Grafana, Targets & Consumers, Topology & Classification).
+EW1R-REP-01 is a custom-built monitoring and reporting hub running a bespoke VCC (Virtualised Collection & Consolidation) framework. It is the sole source of 74 Grafana dashboards, production Slack alerts, and billing data for 280 institutional clients. Discovery is complete across all 4 investigation tracks (SQL Server, Grafana, Targets & Consumers, Topology & Classification).
 
 6 critical failures were identified during investigation — including silent ETL breakage since September 2024, all SingleStore collection jobs disabled since May 2026, and client billing data stale for 2 months with no alert fired. The server is not safe to decommission. 6 stakeholder questions (Q13, Q21, Q22, Q23, Q35, Q36) must be answered before any migration or decommission action can proceed.
 
@@ -95,7 +95,7 @@ EW1R-REP-01 is a custom-built monitoring and reporting hub. It is not a standard
 | Metric | Count |
 |---|---|
 | Total databases | 8 |
-| Total storage | 378 GB |
+| Total storage | 369 GB (exact — confirmed 2026-07-20 from sys.master_files) |
 | SQL Agent jobs | 63 (52 enabled, 11 disabled) |
 | Linked servers | 109 (11 confirmed unreachable) |
 | Stored procedures | ~600+ across all databases |
@@ -109,14 +109,14 @@ EW1R-REP-01 is a custom-built monitoring and reporting hub. It is not a standard
 
 | Database | Size | Purpose | Status |
 |---|---|---|---|
-| DBA_VCC_AWS | 184 GB | AWS + KAPP API monitoring — 563M row KAPP query log | ✅ Active — growing |
-| DBA_VCC_MEMSQL | 75 GB | SingleStore monitoring | ⚠️ All 7 jobs disabled since May 2026 |
-| KURTOSYS_BASELINE | 51 GB | Connection and table size baselines | ✅ Active |
-| DBA_VCC_MYSQL | 26 GB | MySQL/RDS/DXM monitoring | ⚠️ 2 jobs failing (WPv2 DNS dead) |
-| DBA_VCC | 24 GB | Core VCC framework + Encore/BNY IIS logs | ✅ Active |
-| DBA_VCC_COST | 5 GB | KAPP client entity counts — billing data | ⚠️ Stale since 4 May 2026 |
-| DBA_VCC_ATLASSIAN | 2 GB | Jira/Confluence sprint data | ✅ Active |
-| Utilities | 0.2 GB | DBA maintenance scripts | ✅ Active |
+| DBA_VCC_AWS | 185.66 GB | AWS + KAPP API monitoring — 563M row KAPP query log | ✅ Active — growing |
+| DBA_VCC_MEMSQL | 75.50 GB | SingleStore monitoring | ⚠️ All 7 jobs disabled since May 2026 |
+| KURTOSYS_BASELINE | 50.00 GB | Connection and table size baselines | ✅ Active |
+| DBA_VCC_MYSQL | 27.00 GB | MySQL/RDS/DXM monitoring | ⚠️ 2 jobs failing (WPv2 DNS dead) |
+| DBA_VCC | 24.17 GB | Core VCC framework + Encore/BNY IIS logs | ✅ Active |
+| DBA_VCC_COST | 5.00 GB | KAPP client entity counts — billing data | ⚠️ Stale since 4 May 2026 |
+| DBA_VCC_ATLASSIAN | 2.00 GB | Jira/Confluence sprint data | ✅ Active |
+| Utilities | 0.20 GB | DBA maintenance scripts | ✅ Active |
 
 ---
 
@@ -128,7 +128,7 @@ EW1R-REP-01 is a custom-built monitoring and reporting hub. It is not a standard
 | alerts-data-operations (Slack) | KAPP client config and read query failure alerts | High |
 | alert-app-allow2fa-disabled (Slack) | KAPP client auth config alerts | High |
 | dba@kurtosys.com | SQL Agent job failure alerts (backups, CHECKDB, disk) | High |
-| Client-facing (unconfirmed) | KAPP Client Utilisation and Growth Report — 200+ institutional clients tracked | ⚠️ Critical — must confirm |
+| Client-facing (unconfirmed) | KAPP Client Utilisation and Growth Report — 280 institutional clients tracked | ⚠️ Critical — must confirm |
 
 ---
 
@@ -147,7 +147,7 @@ EW1R-REP-01 is a custom-built monitoring and reporting hub. It is not a standard
 
 ### F3 — DBA_VCC_COST Billing Data Stale Since 4 May 2026
 - **What:** All 9 INFO_KAPP_Client_* tables last updated 4 May 2026. KAPP Client Utilisation and Growth Report dashboard is showing 2-month-old data.
-- **Impact:** 200+ real institutional clients tracked (BlackRock, BNY Mellon, Aberdeen, Wellington, T. Rowe Price, Nordea and others). If this feeds billing, May and June 2026 figures are wrong.
+- **Impact:** 280 real institutional clients tracked (BlackRock, BNY Mellon, Aberdeen, Wellington, T. Rowe Price, Nordea and others). If this feeds billing, May and June 2026 figures are wrong.
 - **Action:** Must disclose to tashvir.babulal / rayhaan.suleyman immediately (Q36).
 
 ### F4 — WPv2 Linked Servers Dead — 2 Jobs Failing Silently Since 25 June 2026
@@ -239,7 +239,7 @@ External targets and consumers mapped. DBA_VCC_COST confirmed client billing dat
 | Investigation Log | [View in Confluence](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6853918807/Investigation+Log+for+External+Target+and+Consumers) |
 
 **Key findings:**
-- DBA_VCC_COST tracks entity counts for 200+ real institutional clients across EW2, UE1, EC1 — confirmed billing data
+- DBA_VCC_COST tracks entity counts for 280 real institutional clients across EW2, UE1, EC1 — confirmed billing data
 - 19 REP_MONTHEND procedures in DBA_VCC_COST + 14 in DBA_VCC_MEMSQL — who calls them each month end is still open
 - CLINTGROWTH typo in older DBA_VCC_MEMSQL procedures — both old and new versions still present, never cleaned up
 - REP_MONTHEND_MAXDB_SERVER_STATUS_REPORT created 2017 — predates VCC framework, likely a leftover
@@ -271,7 +271,7 @@ Topology map complete. Component classification complete. Preliminary decommissi
 |---|---|---|
 | DBA_VCC_AWS (KAPP monitoring) | Replace | Core KAPP observability — cannot retire |
 | DBA_VCC_MYSQL (MySQL monitoring) | Replace | Active MySQL/RDS monitoring |
-| DBA_VCC_COST (Cost tracking) | Replace | Confirmed client billing — 200+ clients |
+| DBA_VCC_COST (Cost tracking) | Replace | Confirmed client billing — 280 clients |
 | DBA_VCC_MEMSQL (MemSQL monitoring) | Retire | All jobs disabled, likely superseded |
 | DBA_VCC_ATLASSIAN (Jira integration) | Investigate | Unknown consumer |
 | KURTOSYS_BASELINE | Investigate | Large (51 GB) — unknown active consumer |
@@ -330,12 +330,12 @@ It is:
 | 109 linked servers (103 MSDASQL + 6 SQLNCLI) | [query 3.1](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6841237572/06+-Discovery+Queries) — sys.servers |
 | 90 SingleStore nodes across 4 clusters | [query 3.2](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6841237572/06+-Discovery+Queries) — linked server breakdown |
 | 63 jobs (52 enabled, 11 disabled) | [query 2.1](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6841237572/06+-Discovery+Queries) — sysjobs |
-| 378 GB total storage | [query 1.2](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6841237572/06+-Discovery+Queries) — sys.master_files |
+| 378 GB total storage | [query 1.2](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6841237572/06+-Discovery+Queries) — sys.master_files — exact 369 GB confirmed 2026-07-20 |
 | 74 Grafana dashboards | [query 9.5 + 13.7](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6841237572/06+-Discovery+Queries) — grafana.db |
 | 21 Grafana datasources | [query 12.6](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6841237572/06+-Discovery+Queries) — grafana.db |
 | DBA_VCC_AWS_15MIN_CHECKS runs every 30 min (:00 and :30) | [query 2.2](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6841237572/06+-Discovery+Queries) — job history evidence |
 | DBA_VCC_COST last collected 4 May 2026 (not 29 June as job history suggests) | [query 5.1](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6841237572/06+-Discovery+Queries) — data freshness |
-| 200+ institutional clients in LU_KAPP_ClientList | [query 5.2](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6841237572/06+-Discovery+Queries) — DBA_VCC_COST |
+| 200+ institutional clients in LU_KAPP_ClientList | [query 5.2](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6841237572/06+-Discovery+Queries) — DBA_VCC_COST — COUNT(*) = 280 confirmed 2026-07-20 |
 | 2.4M rows stuck in MON_AWS_Entity_Cost staging | [query 4](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6841237572/06+-Discovery+Queries) — COUNT(*) |
 | INFO_AWS_KAPP_Query_API_Detail has 563M rows | [query evidence from MERGE session](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6841237572/06+-Discovery+Queries) |
 | MERGE on 563M row table already taking 9+ minutes | [query evidence](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6841237572/06+-Discovery+Queries) — sys.dm_exec_requests session 67 |

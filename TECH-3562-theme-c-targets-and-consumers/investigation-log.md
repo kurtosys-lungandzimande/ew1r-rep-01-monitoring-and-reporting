@@ -3,7 +3,7 @@
 Scope: External targets, consumers, service accounts, firewall rules, dependencies.
 Each entry has the question, the query, the evidence, and the finding.
 
-> Status: External targets mapped — 109 linked servers inventoried, 11 confirmed stale. DBA_VCC_COST confirmed client billing data — 200+ real institutional clients tracked. All collection tables stale since 4 May 2026. Full detail in consumers-and-dependencies.md and external-targets.md.
+> Status: External targets mapped — 109 linked servers inventoried, 11 confirmed stale. DBA_VCC_COST confirmed client billing data — 280 real institutional clients tracked. All collection tables stale since 4 May 2026. Full detail in consumers-and-dependencies.md and external-targets.md.
 
 ---
 
@@ -116,7 +116,7 @@ SELECT * FROM DBA_VCC_COST.dbo.LU_KAPP_ClientList ORDER BY ClientName;
 | Ziegler | EW2/UE1 | Ziegler | Prod/staging/dev |
 | C&D Investments | EW2 | C&D (Terminated) | ⚠️ Marked Terminated — still in list |
 
-**Finding:** 200+ real institutional clients confirmed across EW2, UE1, EC1. This is client billing data. Decommissioning this server without a confirmed replacement directly impacts client invoicing. Q2 and Q10 closed.
+**Finding:** 200+ real institutional clients confirmed across EW2, UE1, EC1 — COUNT(*) = 280 confirmed 2026-07-20. This is client billing data. Decommissioning this server without a confirmed replacement directly impacts client invoicing. Q2 and Q10 closed.
 
 ---
 
