@@ -31,10 +31,12 @@ Each folder maps directly to a Jira ticket. Everything inside belongs to that ti
 ```
 TECH-3535-planning-and-discovery/
 │
-│   discovery-queries.sql            ← All SQL queries used during investigation (13 sections)
-│   open-questions.md                ← All open questions, blockers, and active findings
-│   investigation-log.md             ← Critical findings with query evidence (5 findings)
-│   ew1r-rep-01-architecture.drawio  ← Architecture diagram
+│   discovery-queries.sql            ← All SQL queries used during investigation (14 sections)
+│   discovery-summary.md             ← Master consolidation doc — all themes, findings, blockers
+│   open-questions.md                ← All open questions, blockers, and active findings (36 questions)
+│   investigation-log.md             ← Critical findings with query evidence (6 findings)
+│   presentation.md                  ← Full presentation document — architecture, themes, decommission readiness
+│   ew1r-rep-01-architecture.drawio  ← Architecture diagram — 4 AWS region swimlanes
 │
 TECH-3560-theme-a-sql-server/
 │
@@ -56,6 +58,19 @@ TECH-3563-theme-d-classification-and-topology/
 │
 │   topology-and-classification.md   ← Topology map and classification outputs
 │   investigation-log.md             ← Theme D findings
+│
+TECH-3410-current-sprint/
+│
+│   decommission-readiness.md        ← 40/40/20 split, 6 blockers, 5-phase plan
+│   open-questions.md                ← Sprint-level open questions tracker
+│   database-inventory.md            ← Per-database findings and resolutions
+│   job-inventory.md                 ← 63 jobs — status, failures, proposed resolutions
+│   linked-server-inventory.md       ← 109 linked servers — reachability and cleanup plan
+│   theme-a-summary.md               ← Theme A consolidated summary
+│   theme-b-grafana-inventory.md     ← Theme B Grafana full inventory
+│   zabbix-alert-inventory.md        ← Zabbix alert inventory
+│   slack-alert-inventory.md         ← Slack alert inventory
+│   sql-agent-alerts.md              ← SQL Agent alert configuration
 │
 README.md                            ← This file
 ```
