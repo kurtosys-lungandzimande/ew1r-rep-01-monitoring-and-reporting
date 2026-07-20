@@ -42,37 +42,38 @@
 
 **Key findings:**
 - 3 active admins — tashvir, yogeshwar, rayhaan — all logged in June 2026. These are the key contacts for any migration or decommission decision.
-- donovan.vangraan has not logged in since Nov 2024 but his credentials are still embedded in 4 Zabbix datasources — active security risk.
+- donovan.vangraan has not logged in since Nov 2024. His personal account (`donovan.vangraan`) is used as the MySQL DB login across all 4 Zabbix datasources — not just a Grafana credential, an actual database user. Active security risk.
+- All KAPP MySQL datasources (Dev, Rel, UK/EU/US Prod, Monitoring) connect using `root` — root credentials on production MySQL instances is a security finding.
 - Default `admin` account is still enabled with a generic email (admin@localhost) — should be disabled.
 
 ---
 
 ## 3. Datasources — 21 Total
 
-| UID | Name | Type | Host / IP | Database | Status |
+| UID | Name | Type | Host / IP | Database | DB User | Status |
 |---|---|---|---|---|---|
-| a082f27e | DBA_VCC | mssql | localhost | DBA_VCC | ✅ Active — primary VCC datasource |
-| e8597015 | DBA_VCC | mssql | localhost | DBA_VCC | ⚠️ Duplicate — same target, different UID. Dashboards split across both |
-| da173cae | KAPP Dev | mysql | 10.61.11.70:3306 | metrics | ✅ Active |
-| d1679f57 | KAPP Rel | mysql | 10.77.3.236 | metrics | ✅ Active |
-| cd097e22 | KAPP UK Prod | mysql | 10.121.29.82 | metrics | ✅ Active — production |
-| e792d174 | KAPP EU Prod | mysql | 10.125.6.134 | metrics | ✅ Active — production |
-| db3d6c01 | KAPP US Prod | mysql | 10.128.30.6 | metrics | ✅ Active — production |
-| f4830a0f | KAPP Monitoring | mysql | 10.120.8.208 | metrics | ✅ Active |
-| dce83066 | monitoring | mysql | 10.120.8.208 | metrics | ⚠️ Duplicate of KAPP Monitoring — same IP and database |
-| f2ca52be | MySQL | mysql | 10.77.3.236:3306 | metrics | ⚠️ Likely duplicate of KAPP Rel — same IP |
-| d8b0939b | SingleStore-Dev | mysql | 10.61.0.95 | UDM__ | ✅ Active |
-| f1d911af | SingleStore-Release | mysql | 10.77.6.161 | UDM__ | ✅ Active |
-| a6046586 | SingleStore-Production-UK | mysql | 10.121.22.219 | UDM__ | ✅ Active — production |
-| df309b44 | SingleStore-Production-EU | mysql | 10.125.12.126 | UDM__ | ✅ Active — production |
-| bfe8f780 | SingleStore-Production-US | mysql | 10.128.24.122 | UDM__ | ✅ Active — production |
-| aafbf2f7 | Zabbix Nonprod old | mysql | 10.72.8.191 | zabbix | ⚠️ Uses donovan.vangraan credentials — inactive since Nov 2024 |
-| b10bf74c | zabbix-server-data.shnonprd | mysql | 10.72.8.186 | zabbix | ⚠️ Uses donovan.vangraan credentials — inactive since Nov 2024 |
-| dbafc322 | Zabbix Prod Old | mysql | 10.120.8.120 | zabbix | ⚠️ Uses donovan.vangraan credentials — inactive since Nov 2024 |
-| d68a35f0 | zabbix-server-data.shprd | mysql | 10.120.8.51 | zabbix | ⚠️ Uses donovan.vangraan credentials — inactive since Nov 2024 |
-| b7838f71 | JSON API | marcusolsson-json-datasource | 10.125.9.192:8443 | — | ✅ Active — NiFi API, tlsSkipVerify=true |
-| bae6c95e | CloudWatch | cloudwatch | — | — | ✅ Active — AWS CloudWatch via IAM role |
-| aa82f021 | InfluxDB | influxdb | — | — | ⚠️ URL not stored — connection details unconfirmed |
+| a082f27e | DBA_VCC | mssql | localhost | DBA_VCC | grafana | ✅ Active — primary VCC datasource |
+| e8597015 | DBA_VCC | mssql | localhost | DBA_VCC | grafana | ⚠️ Duplicate — same target, same user, different UID. Dashboards split across both |
+| da173cae | KAPP Dev | mysql | 10.61.11.70:3306 | metrics | root | ⚠️ Active — root credentials on production MySQL |
+| d1679f57 | KAPP Rel | mysql | 10.77.3.236 | metrics | root | ⚠️ Active — root credentials |
+| cd097e22 | KAPP UK Prod | mysql | 10.121.29.82 | metrics | root | ⚠️ Active — root credentials on production MySQL |
+| e792d174 | KAPP EU Prod | mysql | 10.125.6.134 | metrics | root | ⚠️ Active — root credentials on production MySQL |
+| db3d6c01 | KAPP US Prod | mysql | 10.128.30.6 | metrics | root | ⚠️ Active — root credentials on production MySQL |
+| f4830a0f | KAPP Monitoring | mysql | 10.120.8.208 | metrics | root | ⚠️ Active — root credentials |
+| dce83066 | monitoring | mysql | 10.120.8.208 | metrics | root | ⚠️ Duplicate of KAPP Monitoring — same IP, same user |
+| f2ca52be | MySQL | mysql | 10.77.3.236:3306 | metrics | root | ⚠️ Likely duplicate of KAPP Rel — same IP |
+| d8b0939b | SingleStore-Dev | mysql | 10.61.0.95 | UDM__ | FundPressDataReader | ✅ Active |
+| f1d911af | SingleStore-Release | mysql | 10.77.6.161 | UDM__ | FundPressDataReader | ✅ Active |
+| a6046586 | SingleStore-Production-UK | mysql | 10.121.22.219 | UDM__ | FundPressDataReader | ✅ Active — production |
+| df309b44 | SingleStore-Production-EU | mysql | 10.125.12.126 | UDM__ | FundPressDataReader | ✅ Active — production |
+| bfe8f780 | SingleStore-Production-US | mysql | 10.128.24.122 | UDM__ | FundPressDataReader | ✅ Active — production |
+| aafbf2f7 | Zabbix Nonprod old | mysql | 10.72.8.191 | zabbix | donovan.vangraan | ⚠️ Personal account used as DB login — inactive since Nov 2024 |
+| b10bf74c | zabbix-server-data.shnonprd | mysql | 10.72.8.186 | zabbix | donovan.vangraan | ⚠️ Personal account used as DB login — inactive since Nov 2024 |
+| dbafc322 | Zabbix Prod Old | mysql | 10.120.8.120 | zabbix | donovan.vangraan | ⚠️ Personal account used as DB login — inactive since Nov 2024 |
+| d68a35f0 | zabbix-server-data.shprd | mysql | 10.120.8.51 | zabbix | donovan.vangraan | ⚠️ Personal account used as DB login — inactive since Nov 2024 |
+| b7838f71 | JSON API | marcusolsson-json-datasource | 10.125.9.192:8443 | — | — | ✅ Active — NiFi API, tlsSkipVerify=true |
+| bae6c95e | CloudWatch | cloudwatch | — | — | — | ✅ Active — AWS CloudWatch via IAM role |
+| aa82f021 | InfluxDB | influxdb | — | — | — | ⚠️ Empty URL — connection details unconfirmed |
 
 **Key findings:**
 - DBA_VCC has 2 entries (UIDs a082f27e and e8597015) pointing to the same localhost target. Dashboards are split across both UIDs — this must be resolved before migration or dashboards will break.
@@ -240,7 +241,8 @@ These 14 dashboards read from DBA_VCC which was fed by the MemSQL collection job
 |---|---|---|---|
 | P1 | 14 dashboards showing stale data since May 2026 | June 2026 month-end reporting impacted silently | tashvir.babulal / yogeshwar.phull |
 | P2 | KAPP Client Utilisation and Growth Report reading stale billing data | Possible client-facing — institutional clients may have received stale reports | tashvir.babulal / rayhaan.suleyman |
-| P3 | 4 Zabbix datasources using donovan.vangraan credentials | Ex-employee credentials embedded in live datasources — security risk | Grafana admin |
+| P3 | 4 Zabbix datasources using donovan.vangraan as MySQL DB login | His personal account is the actual database user — not just a Grafana credential. Ex-employee, inactive Nov 2024 | Grafana admin + DBA team |
+| P3b | All KAPP MySQL datasources connecting as `root` | Root credentials on production MySQL instances (UK/EU/US Prod) — security risk | DBA team |
 | P4 | Default admin account still active | Generic account with no owner — should be disabled | Grafana admin |
 | P5 | Email contact point is a placeholder | Any alert routed to email will silently fail | Grafana admin |
 | P6 | Duplicate DBA_VCC datasource UIDs | Dashboards split across two UIDs — migration will break dashboards if not resolved first | tashvir.babulal / rayhaan.suleyman |
