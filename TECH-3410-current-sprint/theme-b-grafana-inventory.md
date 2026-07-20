@@ -1,6 +1,6 @@
 # Theme B — Grafana Inventory
 **Ticket:** TECH-3479 — EW1R-REP-01  
-**Date:** 2026-07-17  
+**Date:** 2026-07-17 (validated 2026-07-17 — datasources, users, alert rules, dashboards all confirmed from live grafana.db)  
 **Prepared by:** TECH-3479 Investigation  
 **Source data:** TECH-3561 discovery sprint — grafana.db extracted via Python/SQLite on 2026-07-07  
 **Server:** EW1R-REP-01 — 10.72.8.216 — Grafana 9.5.2 — port 443 HTTPS
@@ -33,8 +33,8 @@
 |---|---|---|---|---|
 | tashvir.babulal | Tashvir Babulal | Admin | 2026-06-09 | ✅ Active |
 | yogeshwar.phull | Yogeshwar Phull | Admin | 2026-06-22 | ✅ Active |
-| rayhaan.suleyman | Rayhaan Suleyman | Admin | 2026-06-30 | ✅ Active |
-| ram.jeyaraman | Ram Jeyaraman | Viewer | 2025-09-11 | ✅ Active |
+| rayhaan.suleyman | Rayhaan Suleyman | Admin | 2026-07-07 | ✅ Active |
+| ram.jeyaraman | Ram Jeyaraman | Viewer | 2026-07-15 | ✅ Active — most recently logged in of all users |
 | jason.wolmarans | Jason Wolmarans | Viewer | 2025-02-12 | ✅ Active |
 | admin | (default) | Admin | 2024-11-29 | ⚠️ Inactive — default account, should be disabled |
 | donovan.vangraan | Donovan van Graan | Admin | 2024-11-13 | ⚠️ Inactive — credentials still used in 4 Zabbix datasources |
@@ -195,9 +195,9 @@ These 14 dashboards read from DBA_VCC which was fed by the MemSQL collection job
 
 | Alert Name | Datasource | Contact Point | Channel | No Data State | Functional |
 |---|---|---|---|---|---|
-| Failed Read Queries per Second | DBA_VCC | alerts-data-operations | Slack | NoData | ✅ Yes |
-| KAPP Client Config Alert | DBA_VCC | alerts-data-operations | Slack | OK | ✅ Yes — but data stale since May 2026 |
-| KAPP Client Application Auth Config Alert | DBA_VCC | alert-app-allow2fa-disabled | Slack | OK | ✅ Yes — fires when Client Auth = Yes |
+| Failed Read Queries per Second | DBA_VCC | alerts-data-operations | Slack | NoData | ✅ Yes — last updated 2024-02-07 |
+| KAPP Client Config Alert | DBA_VCC | alerts-data-operations | Slack | OK | ✅ Yes — last updated 2025-03-04, but data stale since May 2026 |
+| KAPP Client Application Auth Config Alert | DBA_VCC | alert-app-allow2fa-disabled | Slack | OK | ✅ Yes — last updated 2025-03-04, fires when Client Auth = Yes |
 
 ---
 
