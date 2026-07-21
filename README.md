@@ -1,5 +1,116 @@
 # EW1R-REP-01 — Monitoring & Reporting Server
 
+<!-- Architecture diagram — replace the path below with your exported image -->
+<!-- ![EW1R-REP-01 Architecture](TECH-3563-theme-d-classification-and-topology/ew1r-rep-01-architecture1.drawio.png) -->
+
+## What Is This Server?
+
+EW1R-REP-01 is a **monitoring and reporting hub**. It does not run any product or serve any customers directly. Its sole job is to **watch over other systems and report on what they are doing**.
+
+Here is what it does in plain terms:
+
+- **It collects data** — every 30 minutes to once a day, it reaches out to production SQL Servers, AWS services, MySQL databases, and application APIs. See the full list of what it collects below.
+- **It stores that data** — everything collected is stored across 8 databases on the server itself, totalling 369 GB.
+- **It serves dashboards** — Grafana (a dashboard tool) runs on this server and reads from those databases. There are 74 dashboards showing things like KAPP API performance, client usage, AWS costs, and application health.
+- **It sends alerts** — when something goes wrong (a backup fails, a disk fills up, a server goes down), this server is supposed to fire an alert to email or Slack. Most of the alerting is currently broken or silent.
+
+Think of it as the **eyes of the platform** — it does not run anything, it just watches everything else and reports on it.
+
+---
+
+## What Data Does It Collect?
+
+### From production SQL Servers (EW2P-MSSQL-01 and EW2P-MSSQL-02)
+- Are the servers up or down
+- Are backups completing successfully
+- Disk space levels
+- SQL Agent job statuses
+- Database sizes and growth
+- Failed login attempts
+- Index fragmentation levels
+- Error log contents
+
+### From AWS
+- Every single KAPP API query made — who ran it, when, how long it took
+- AWS costs per client/entity
+- S3 bucket sizes
+- EC2 instance inventory
+- RDS instance inventory
+- IAM key details
+- NiFi data pipeline logs
+- Lambda timeout events
+
+### From MySQL / DXM
+- DXM client sizes
+- DXM backup results
+- MySQL server status and version
+
+### From SingleStore/MemSQL (stopped May 2026)
+- KAPP workflow run history and timing
+- FinancialPortal client data
+- InvestorPress client data
+- MemSQL node ping stats and status
+
+### From CloudWatch
+- Encore application IIS logs (BNY Mellon)
+- Jira sprint data (monthly)
+
+---
+
+## Why This Investigation Exists
+
+The team is assessing whether this server can be **decommissioned** (shut down and removed). Before that can happen, we need to understand:
+
+1. What is this server actually doing?
+2. Who depends on it?
+3. What breaks if it goes away?
+4. What needs to be moved or replaced before it can be switched off?
+
+This repository contains all the evidence collected during that investigation — raw query results, findings, and decisions.
+
+---
+
+## What We Found — Plain English Summary
+
+### The server is a non-production server monitoring production systems
+This is the most important thing to understand. EW1R-REP-01 lives in a non-production environment, but it is actively monitoring **EW2P-MSSQL-01 and EW2P-MSSQL-02** — two production SQL Servers. If this server is switched off without a replacement plan, those two production servers go completely dark. Nobody will see backup failures, disk problems, or SQL errors on them.
+
+### 8 databases, 369 GB of data
+| Database | Size | What it does | Safe to remove? |
+|---|---|---|---|
+| DBA_VCC_AWS | 182.66 GB | Tracks every KAPP API query, AWS costs, NiFi pipeline logs | ❌ No — consumers not confirmed |
+| DBA_VCC_MEMSQL | 75.50 GB | Was monitoring SingleStore/MemSQL — all jobs stopped May 2026 | ⚠️ Pending — need to know why jobs stopped |
+| KURTOSYS_BASELINE | 50 GB | Captures performance baselines across databases | ⚠️ Pending — nobody confirmed who reads this |
+| DBA_VCC_MYSQL | 25.62 GB | Monitors MySQL and DXM — partially broken | ⚠️ Pending — fix broken jobs first |
+| DBA_VCC | 20.86 GB | Core monitoring framework — watches production SQL Servers | ❌ No — production servers depend on this |
+| DBA_VCC_COST | 5 GB | Tracks usage counts for 280 real institutional clients | ❌ No — possible client-facing data |
+| DBA_VCC_ATLASSIAN | 2 GB | Jira data — no new data written since December 2023 | ⚠️ Pending — confirm nobody reads it |
+| Utilities | 0.18 GB | DBA tooling and maintenance scripts | ⚠️ Decommission last |
+
+### 63 SQL Agent jobs — the things that collect all the data
+- **52 are running** and mostly healthy
+- **11 are disabled** — all MemSQL-related, switched off in May 2026 for unknown reasons
+- **2 are failing every single day** — both caused by WPv2 being decommissioned years ago but never cleaned up. The jobs try to connect to servers that no longer exist. No alert fires when they fail — the failures are invisible unless someone manually checks.
+
+### 109 linked servers — connections to other systems
+- **46 are reachable** and working
+- **63 are dead** — pointing at servers that no longer exist. 30 of these are safe to drop immediately.
+
+### The biggest risks right now
+1. **280 institutional clients** (BlackRock, BNY Mellon, Aberdeen, Wellington etc.) have their usage data stored in DBA_VCC_COST. This database is on FULL recovery — meaning someone deliberately treated it as production-critical. A Grafana dashboard called "KAPP Client Utilisation and Growth Report" reads from it and may be shown directly to clients. This is the highest-risk dependency on the server.
+2. **14 Grafana dashboards have been showing stale data since May 2026** — when the MemSQL jobs were disabled, nobody noticed and no alert fired. Those dashboards are still live and still being viewed.
+3. **2 jobs have been failing every day** since WPv2 was decommissioned — silently, with no alert, for months.
+4. **Backup jobs copy to S3 with no encryption** — compliance risk.
+
+### Decommission readiness
+- **40% can be retired** — dead linked servers, broken MemSQL jobs, legacy WPv2 data
+- **40% must be migrated** — active monitoring, Grafana, DBA_VCC_COST, DBA_VCC_AWS
+- **20% is unknown** — waiting on stakeholder answers
+
+**The server cannot be decommissioned until 6 questions are answered** by tashvir.babulal, rayhaan.suleyman, and yogeshwar.phull. Realistic timeline is **10–12 weeks from stakeholder sign-off**.
+
+---
+
 ## Purpose of This Repository
 
 This repository is the **evidence and proof layer** for the EW1R-REP-01 decommission investigation.
