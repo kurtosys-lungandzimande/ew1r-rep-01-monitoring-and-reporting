@@ -21,11 +21,11 @@
 
 | Database | Size (MB) | Recovery Model | Purpose |
 |---|---|---|---|
-| DBA_VCC_AWS | 190,275 (185.66 GB) | SIMPLE | AWS infrastructure and KAPP API monitoring data |
+| DBA_VCC_AWS | 187,187 (182.66 GB) | SIMPLE | AWS infrastructure and KAPP API monitoring data |
 | DBA_VCC_MEMSQL | 77,312 (75.50 GB) | SIMPLE | SingleStore/MemSQL monitoring data (jobs disabled) |
 | KURTOSYS_BASELINE | 51,200 (50.00 GB) | SIMPLE | Performance baseline captures (connections, table sizes) |
-| DBA_VCC_MYSQL | 27,648 (27.00 GB) | SIMPLE | MySQL and RDS monitoring data |
-| DBA_VCC | 24,750 (24.17 GB) | SIMPLE | Core VCC monitoring framework data |
+| DBA_VCC_MYSQL | 26,235 (25.62 GB) | SIMPLE | MySQL and RDS monitoring data |
+| DBA_VCC | 21,360 (20.86 GB) | SIMPLE | Core VCC monitoring framework data |
 | DBA_VCC_COST | 5,120 (5.00 GB) | FULL | Cost tracking per entity/client (FULL recovery — critical) |
 | DBA_VCC_ATLASSIAN | 2,048 (2.00 GB) | SIMPLE | Jira/Confluence integration data |
 | Utilities | 205 (0.20 GB) | SIMPLE | DBA utility scripts and stored procedures |
@@ -36,30 +36,32 @@
 
 ## Key Database Contents
 
-### DBA_VCC_AWS (180 GB)
+### DBA_VCC_AWS (182.66 GB)
 Core AWS and KAPP monitoring database. Largest on the server.
 
 | Table | Rows | Size (MB) | Notes |
 |---|---|---|---|
-| INFO_AWS_KAPP_Query_API_Detail | 563,685,574 | 143,798 | Every KAPP API query — actively growing |
-| INFO_AWS_KAPP_Query_Datasets_Detail | 59,793,228 | 15,316 | Dataset-level query tracking |
-| INFO_AWS_KAPP_Source_Datasets_Detail | 50,704,002 | 14,461 | Source dataset tracking |
-| ARC_INFO_AWS_Nifi_Loader_API_Detail | 14,122,899 | 3,876 | NiFi pipeline archive |
-| INFO_AWS_Nifi_Loader_API_Detail | 2,699,971 | 759 | NiFi data pipeline monitoring |
-| MON_AWS_Entity_Cost | 2,466,484 | 377 | Cost monitoring per entity |
-| INFO_AWS_EC2_Detail | 22,296 | 7 | EC2 instance inventory |
-| INFO_AWS_RDS_Detail | 9,159 | 7 | RDS instance inventory |
+| INFO_AWS_KAPP_Query_API_Detail | 297,606,716 | 53,665 | Every KAPP API query — actively growing. NOT PARTITIONED — MERGE performance risk |
+| INFO_AWS_KAPP_Query_Datasets_Detail | 62,644,408 | 15,813 | Dataset-level query tracking |
+| INFO_AWS_KAPP_Source_Datasets_Detail | 52,801,576 | 14,872 | Source dataset tracking |
+| ARC_INFO_AWS_Nifi_Loader_API_Detail | 14,586,154 | 4,004 | NiFi pipeline archive |
+| INFO_AWS_Nifi_Loader_API_Detail | 2,718,376 | 762 | NiFi data pipeline monitoring |
+| MON_AWS_Entity_Cost | 2,533,553 | 387 | Cost monitoring per entity — last updated 2026-07-15 |
+| INFO_AWS_KAPP_Query_API_Error_Detail | 276,051 | 157 | KAPP API errors |
+| INFO_AWS_EC2_Detail | 11,286 | 4 | EC2 instance inventory |
+| INFO_AWS_RDS_Detail | 3,053 | 4 | RDS instance inventory |
 
-### DBA_VCC (21 GB)
+### DBA_VCC (20.86 GB)
 Core monitoring framework — tracks all monitored SQL Server instances.
 
 | Table | Rows | Size (MB) | Notes |
 |---|---|---|---|
-| INFO_AWS_Encore_Cloudwatch_IIS_Logs | 65,023,023 | 7,032 | Encore IIS logs via CloudWatch |
-| INFO_Table_Index_Frag_Detail | 34,693,911 | 6,813 | Index fragmentation history |
+| INFO_Table_Index_Frag_Detail | 34,720,728 | 6,824 | Index fragmentation history — actively collected |
+| INFO_AWS_Encore_Cloudwatch_IIS_Logs | 21,674,341 | 4,232 | Encore/BNY IIS logs via CloudWatch — actively collected |
+| ARC_INFO_Table_Index_Frag_Detail | 0 | 3,641 | Index frag archive — 0 rows but 3.6 GB pre-allocated |
 | ARC_SQL_Errorlog_Check | 40,564,851 | 1,400 | SQL error log archive |
-| ARC_Database_Status_Check | 29,829,380 | 1,089 | Database status history |
 | ARC_SQL_Connection_Check | 24,512,430 | 339 | Connection history |
+| ARC_Database_Status_Check | 15,009,730 | 214 | Database status history |
 
 ---
 
@@ -152,8 +154,8 @@ Core monitoring framework — tracks all monitored SQL Server instances.
 | Job Name | Enabled | Last Run | Last Outcome | Schedule | Alert Target | Purpose |
 |---|---|---|---|---|---|---|
 | DBA_VCC_MYSQL_AUDIT_BACKUP_INFO_DETAILED | Yes | 2026-07-06 | Succeeded | SCHED1 | None | Audits MySQL backup info |
-| DBA_VCC_MYSQL_AUDIT_DXM_CLIENT_DETAILED | Yes | 2026-07-06 | **Failed** ⚠️ | Daily | None | Audits DXM client details and WPv2 client details via MySQL linked servers — investigate failure |
-| DBA_VCC_MYSQL_DAILY_CHECKS | Yes | 2026-07-06 | **Failed** ⚠️ | Daily | None | Collects WPv2 and DXM client sizes, DXM Lambda backup details — investigate failure |
+| DBA_VCC_MYSQL_AUDIT_DXM_CLIENT_DETAILED | Yes | 2026-07-21 | **Failed** ⚠️ | Daily | None | Audits DXM client details and WPv2 client details via MySQL linked servers — investigate failure |
+| DBA_VCC_MYSQL_DAILY_CHECKS | Yes | 2026-07-21 | **Failed** ⚠️ | Daily | None | Collects WPv2 and DXM client sizes, DXM Lambda backup details — investigate failure |
 | DBA_VCC_MYSQL_MON_PING_STATS | Yes | 2026-07-06 | Succeeded | SCHED1 | None | Pings MySQL targets and records stats |
 | DBA_VCC_MYSQL_MON_SQL_STATUS | Yes | 2026-07-06 | Succeeded | SCHED1 | None | Checks MySQL instance status |
 | DBA_VCC_MYSQL_MON_SQL_VERSION_CHECK | Yes | 2026-07-06 | Succeeded | SCHED1 | None | Checks MySQL version across targets |
