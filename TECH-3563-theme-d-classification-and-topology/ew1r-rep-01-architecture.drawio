@@ -40,7 +40,7 @@
           <mxGeometry x="30" y="380" width="260" height="25" as="geometry" />
         </mxCell>
 
-        <mxCell id="db1" value="DBA_VCC_AWS&#xa;185.66 GB | SIMPLE&#xa;KAPP API + AWS monitoring&#xa;563M rows | every 30 min&#xa;STATUS: ACTIVE" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+        <mxCell id="db1" value="DBA_VCC_AWS&#xa;182.66 GB | SIMPLE&#xa;KAPP API + AWS monitoring&#xa;297M rows | every 30 min&#xa;STATUS: ACTIVE" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
           <mxGeometry x="30" y="415" width="170" height="90" as="geometry" />
         </mxCell>
 
@@ -48,7 +48,7 @@
           <mxGeometry x="215" y="415" width="170" height="90" as="geometry" />
         </mxCell>
 
-        <mxCell id="db3" value="DBA_VCC_COST&#xa;5 GB | FULL RECOVERY&#xa;280 clients | 19 REP_MONTHEND procs&#xa;⚠️ Collection silent since 2026-05-04&#xa;STATUS: ⚠️ SILENT FAILURE" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+        <mxCell id="db3" value="DBA_VCC_COST&#xa;5 GB | FULL RECOVERY&#xa;280 clients | LU_KAPP_ClientList confirmed&#xa;Weekly Monday collection — active&#xa;STATUS: ACTIVE ⚠️ CLIENT-FACING RISK" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
           <mxGeometry x="400" y="415" width="170" height="90" as="geometry" />
         </mxCell>
 
@@ -60,7 +60,7 @@
           <mxGeometry x="770" y="415" width="170" height="90" as="geometry" />
         </mxCell>
 
-        <mxCell id="db6" value="DBA_VCC_ATLASSIAN&#xa;2 GB | SIMPLE&#xa;Jira/Confluence data&#xa;Monthly sprint pull&#xa;STATUS: ACTIVE" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+        <mxCell id="db6" value="DBA_VCC_ATLASSIAN&#xa;2 GB | SIMPLE&#xa;2 tables only — 181K rows&#xa;No active writer confirmed&#xa;STATUS: FROZEN since 2023-12-12" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
           <mxGeometry x="955" y="415" width="170" height="90" as="geometry" />
         </mxCell>
 
@@ -275,7 +275,7 @@
           <mxGeometry x="30" y="1190" width="190" height="75" as="geometry" />
         </mxCell>
 
-        <mxCell id="rrm2" value="REPLACE → TECH-3428&#xa;DBA_VCC_AWS (185.66GB)&#xa;DBA_VCC_MYSQL (27GB)&#xa;DBA_VCC_COST (billing)&#xa;VCC AWS + MySQL jobs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+        <mxCell id="rrm2" value="REPLACE → TECH-3428&#xa;DBA_VCC_AWS (182.66GB)&#xa;DBA_VCC_MYSQL (25.62GB)&#xa;DBA_VCC_COST (billing)&#xa;VCC AWS + MySQL jobs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=1;" vertex="1" parent="1">
           <mxGeometry x="240" y="1190" width="190" height="75" as="geometry" />
         </mxCell>
 
