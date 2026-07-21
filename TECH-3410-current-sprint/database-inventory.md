@@ -10,7 +10,8 @@
 
 EW1R-REP-01 hosts 8 databases totalling 378 GB. Of these:
 
-- **3 are fully active** — DBA_VCC_AWS, DBA_VCC, DBA_VCC_COST
+- **3 are fully active** — DBA_VCC_AWS, DBA_VCC
+- **1 is active but silently broken** — DBA_VCC_COST (job reports succeeded but data frozen since May 2026 — root cause confirmed 2026-07-21)
 - **2 are partially active / partially broken** — DBA_VCC_MYSQL (DXM side active, WPv2 side broken), KURTOSYS_BASELINE (collecting but purpose unclear post-decommission)
 - **1 is broken / stale** — DBA_VCC_MEMSQL (75 GB, no new data since May 2026, jobs disabled)
 - **1 is reference data only** — DBA_VCC_ATLASSIAN (no stored procedures, no active jobs)
@@ -393,11 +394,20 @@ Every other database on this server uses SIMPLE recovery. DBA_VCC_COST is the on
 **Finding — KAPP Client Utilisation and Growth Report may be client-facing:**  
 4 Grafana dashboards read from DBA_VCC_COST. `KAPP Client Utilisation and Growth Report` (last updated 2024-02-22) — the name strongly suggests this is shown to clients. If confirmed client-facing, this is the highest-risk dependency on the entire server.
 
+**Finding — collection job silently broken since May 2026 — root cause confirmed 2026-07-21:**  
+Job `DBA_VCC_COST_Entity_Count_Collection` reports succeeded every Monday (confirmed runs: 2026-07-20, 2026-07-13, 2026-07-06, 2026-06-29, 2026-06-22). However all 5 main tables have `MAX(DateChecked) = 2026-05-04 08:00` — data has not been written since May 2026 despite the job appearing healthy.
+
+Root cause confirmed by inspecting `SP_INFO_KAPP_CLIENT_USERS_COUNTS` (and all other `SP_INFO_KAPP_CLIENT_*` procs): every collection proc queries `DBA_VCC_MEMSQL.dbo.BAS_Ping_Stat` and `DBA_VCC_MEMSQL.dbo.BAS_SQL_Status` to build a list of live SingleStore servers before running OPENQUERY against them. When the MemSQL jobs were disabled in May 2026, those ping/status tables stopped being updated. The WHERE clause `DATEDIFF(MINUTE, DATECHECKED, GETDATE()) < 40` now returns zero rows — `@SERVERNAMES` is empty, the WHILE loop never executes, zero rows are inserted, and the job completes with no error.
+
+This is the same root cause as the 14 stale Grafana dashboards — everything traces back to the MemSQL jobs being disabled in May 2026. DBA_VCC_COST is a downstream casualty.
+
 **Proposed resolution:**
 | Action | Owner | Priority |
 |---|---|---|
 | Confirm whether KAPP Client Utilisation and Growth Report is client-facing | tashvir.babulal / rayhaan.suleyman | **Critical — blocks decommission** |
-| Weekly Monday schedule confirmed — no action needed on schedule |  DBA team | Closed |
+| Notify tashvir.babulal / rayhaan.suleyman that DBA_VCC_COST data has been frozen since May 2026 — dashboard consumers may not know | tashvir.babulal / rayhaan.suleyman | **High — immediate** |
+| Weekly Monday schedule confirmed — no action needed on schedule | DBA team | Closed |
+| Resolving MemSQL jobs (Q-DB1) will also fix DBA_VCC_COST collection — they share the same root cause | DBA team | Linked to Q-DB1 |
 | Identify migration target for DBA_VCC_COST before any decommission date is set | DBA team / Platform team | **Critical — blocks decommission** |
 | Confirm S3 backup retention for this database — FULL recovery with no confirmed retention policy is a risk | DBA team / DevOps | High |
 
@@ -501,6 +511,6 @@ DBA_VCC_ATLASSIAN has 0 stored procedures. It is a data store only. `MAX(DateChe
 | KURTOSYS_BASELINE | 50 GB | Active, purpose unclear | ⚠️ Pending — confirm consumer |
 | DBA_VCC_MYSQL | 25 GB | Partially broken | ⚠️ Pending — fix WPv2 failures first, confirm DXM consumer |
 | DBA_VCC | 21 GB | Active | ❌ No — monitors production servers EW2P-MSSQL-01/02 |
-| DBA_VCC_COST | 5 GB | Active | ❌ No — FULL recovery, possible client-facing dashboard |
+| DBA_VCC_COST | 5 GB | Active — job silently broken since May 2026 | ❌ No — FULL recovery, possible client-facing dashboard, data frozen |
 | DBA_VCC_ATLASSIAN | 2 GB | Reference only | ⚠️ Pending — confirm no active consumer |
 | Utilities | 0.18 GB | Active utility | ⚠️ Pending — decommission last, after all jobs migrated |

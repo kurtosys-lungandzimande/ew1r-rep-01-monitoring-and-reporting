@@ -1,6 +1,6 @@
 # Grafana Inventory — EW1R-REP-01
 
-> Status: COMPLETE — all data extracted directly from grafana.db via Python/SQLite
+> Status: COMPLETE — validated live from grafana.db via xp_cmdshell/Python 2026-07-21. Dashboard count confirmed 74.
 
 ---
 
@@ -32,6 +32,7 @@
 | ram.jeyaraman | Ram Jeyaraman | ram@kurtosys.com | No | 2025-09-11 |
 | jason.wolmarans | Jason Wolmarans | jason.wolmarans@kurtosys.com | No | 2025-02-12 |
 | sunil.odedra | Sunil Odedra | sunil.odedra@kurtosys.com | No | 2023-07-12 — likely inactive |
+| lunga.ndzimande | Lunga Ndzimande | lunga.ndzimande@kurtosys.com | Yes | 2026-07-21 — investigation only, created 2026-07-20 |
 
 > 3 admins actively using Grafana as of June 2026: tashvir.babulal, yogeshwar.phull, rayhaan.suleyman.
 > 2 admins inactive: donovan.vangraan (last seen Nov 2024 — credentials still in 4 Zabbix datasources, needs rotation) and default admin account (last seen Nov 2024 — should be disabled).
@@ -76,124 +77,190 @@
 
 ## Folders
 
-| Folder | Created | Notes |
-|---|---|---|
-| General Reporting | 2023-05-29 | Top-level reporting folder |
-| SingleStore Monitoring | 2023-06-13 | SingleStore cluster dashboards |
-| AWS | 2023-06-21 | AWS infrastructure reports |
-| Month End Reporting | 2023-07-04 | Month-end business reports |
-| Encore | 2023-07-09 | Encore product dashboards |
-| Database Engineering Reports | 2023-07-09 | Internal DB engineering reports |
-| KAPP | 2023-07-09 | KAPP product dashboards |
-| Database Engineering Month End Reporting | 2023-08-09 | DB engineering month-end |
-| Database Engineering AWS Reports | 2023-08-09 | DB engineering AWS reports |
-| KAPP Reporting | 2023-08-10 | KAPP reporting dashboards |
-| Encore Reporting | 2023-08-11 | Encore reporting dashboards |
-| Monitoring | 2023-10-24 | Infrastructure monitoring |
-| Atlassian Reporting | 2023-12-08 | Jira/Confluence reports |
-| Performance Dashboards | 2024-03-04 | Query/performance dashboards |
-| SingleStore Monitoring (v2) | 2024-03-11 | Updated SingleStore monitoring |
-| KAPP Client Reporting | 2024-09-02 | KAPP client-level reporting |
+> Validated 2026-07-21 from live grafana.db query. SingleStore Monitoring (v2) does not exist — all SingleStore dashboards are in one folder.
+
+| Folder | Notes |
+|---|---|
+| General | Ungrouped dashboards — default Grafana folder |
+| General Reporting | Top-level reporting folder |
+| SingleStore Monitoring | All SingleStore dashboards — active and older copies in same folder |
+| AWS | AWS infrastructure reports |
+| Month End Reporting | Month-end business reports |
+| Encore | Encore product dashboards |
+| Encore Reporting | Encore reporting dashboards |
+| Database Engineering Reports | Internal DB engineering reports |
+| Database Engineering Month End Reporting | DB engineering month-end |
+| Database Engineering AWS Reports | DB engineering AWS reports |
+| KAPP | KAPP product dashboards |
+| KAPP Reporting | KAPP reporting dashboards |
+| KAPP Client Reporting | KAPP client-level reporting |
+| Monitoring | Infrastructure monitoring |
+| Atlassian Reporting | Jira/Confluence reports |
+| Performance Dashboards | Query/performance dashboards |
 
 ---
 
 ## Dashboard Inventory
 
-> Total: 74 dashboards confirmed — query 9.5 / query 13.7 both run 2026-07-07, results match.
-> Several dashboard names appear more than once — these are older versions sitting in different folders, not the same dashboard.
-> Duplicates are noted in the Notes column.
+> Total: 74 dashboards — confirmed live from grafana.db 2026-07-21.
+> SingleStore Monitoring (v2) folder does not exist — all SingleStore dashboards are in one folder with duplicate titles.
+> Amazon EC2 dashboard created and deleted 2026-07-21 by lunga.ndzimande during investigation — accidental, not a production dashboard.
 
-### Actively Maintained — updated 2025
+### General (ungrouped)
 
-| Dashboard | Last Updated | Notes |
-|---|---|---|
-| Prod US Document Generation Run Metrics | 2025-10-29 | Production — actively maintained |
-| Prod UK Document Generation Run Metrics | 2025-10-29 | Production — actively maintained |
-| Prod EU Document Generation Run Metrics | 2025-10-29 | Production — actively maintained |
-| Release Document Generation Run Metrics | 2025-10-29 | Actively maintained |
-| Development Document Generation Run Metrics | 2025-10-29 | Actively maintained |
-| NTAM Workflow by workflowRunId | 2025-09-07 | Very recent — created Sep 2025 |
-| Detailed KAPP Workflow Document Generation Stats | 2025-08-18 | Actively maintained |
-| Query History | 2025-08-07 | SingleStore — actively maintained |
-| Historical Workload Monitoring | 2025-08-07 | SingleStore v2 — actively maintained. Older copy also exists (2024-07-12) |
-| Cluster View | 2025-06-23 | SingleStore v2 — actively maintained. Older copy also exists (2024-07-12) |
+| Dashboard | Created | Last Updated | Status | Notes |
+|---|---|---|---|---|
+| Dashboard Servers Windows | 2023-09-05 | 2023-09-05 | ⚠️ Stale credentials | Zabbix — uses donovan.vangraan credentials |
+| Grafana Dashboard Exporter/Importer | 2024-10-29 | 2024-10-29 | ✅ Active | Admin utility |
+| Home | 2023-08-09 | 2023-08-09 | ✅ Active | Default home dashboard |
+| Microsoft SQL Server | 2023-09-05 | 2023-09-05 | ⚠️ Stale credentials | Zabbix — uses donovan.vangraan credentials |
+| SQL SERVER | 2023-09-05 | 2023-09-05 | ⚠️ Stale credentials | Zabbix — uses donovan.vangraan credentials |
+| Zabbix Server Dashboard | 2023-09-05 | 2023-09-05 | ⚠️ Stale credentials | Zabbix — uses donovan.vangraan credentials |
 
-### KAPP Reporting — updated 2024
+### AWS
 
-| Dashboard | Last Updated | Notes |
-|---|---|---|
-| KAPP Dataset Query and Source Execution | 2024-11-20 | Stale data — DBA_VCC_MEMSQL jobs disabled May 2026 |
-| KAPP Dataset Query Execution | 2024-11-07 | Stale data — DBA_VCC_MEMSQL jobs disabled May 2026 |
-| Grafana Dashboard Exporter/Importer | 2024-10-29 | Admin utility |
-| KAPP Client Application Auth Config | 2024-10-29 | Stale data — DBA_VCC_MEMSQL jobs disabled May 2026 |
-| KAPP Dataset Lambdas Time Outs | 2024-10-23 | Stale data — DBA_VCC_MEMSQL jobs disabled May 2026 |
-| Database Engineering Costs | 2024-10-15 | Reads DBA_VCC_COST — active. Older copy also exists (2023-10-12) |
-| KAPP Client Config | 2024-09-02 | Stale data — DBA_VCC_MEMSQL jobs disabled May 2026 |
-| WPv2 Month End Reporting | 2024-06-20 | Calls REP_MONTHEND — stale. Older copy also exists (2023-07-07) |
-| KAPP Workflow Times History | 2024-06-12 | Stale data — DBA_VCC_MEMSQL jobs disabled May 2026 |
-| KAPP Orphaned and Duplicated Records Report | 2024-03-26 | Stale data. Older copy also exists (2023-08-10) |
-| KAPP API Error Reporting | 2024-03-11 | Stale data — DBA_VCC_MEMSQL jobs disabled May 2026 |
-| Database Engineering Sprint Reporting | 2024-03-08 | Reads DBA_VCC_COST. Older copy also exists (2023-09-15) |
-| Query Performance Dashboard | 2024-03-07 | Stale data — DBA_VCC_MEMSQL jobs disabled May 2026 |
-| KAPP Workflow History | 2024-03-07 | Stale data — DBA_VCC_MEMSQL jobs disabled May 2026 |
-| KAPP Client Growth | 2024-02-28 | Stale data. Older copy also exists (2023-11-16) |
-| KAPP API Query Reporting | 2024-02-23 | Stale data — DBA_VCC_MEMSQL jobs disabled May 2026 |
-| KAPP Client Utilisation and Growth Report | 2024-02-22 | Reads DBA_VCC_COST — **high risk, name suggests client-facing** |
-| AWS DataTransfer AZ Bytes Report | 2024-02-20 | AWS data transfer costs |
-| Nifi API Reporting | 2024-02-15 | NiFi pipeline reporting |
+| Dashboard | Created | Last Updated | Status | Notes |
+|---|---|---|---|---|
+| AWS Cost Report | 2023-07-17 | 2023-08-09 | ❌ Broken | AWS entity cost data frozen at 2024-09-22 — single row only. DBA_VCC_AWS_DAILY_CHECKS step silently failing |
+| AWS Cost Report Monthly | 2023-10-06 | 2023-10-06 | ❌ Broken | Same root cause — AWS entity cost frozen Sept 2024 |
+| AWS EC2 Report | 2023-08-09 | 2023-08-09 | ⚠️ Stale | No recent updates |
+| AWS RDS Report | 2023-08-09 | 2023-08-09 | ⚠️ Stale | No recent updates |
+| AWS S3 Report | 2023-06-21 | 2023-07-13 | ⚠️ Stale | Older copy — newer in Database Engineering AWS Reports |
+| AWS Security Report | 2023-08-09 | 2023-08-10 | ⚠️ Stale | No recent updates |
 
-### SingleStore Monitoring — older copies (2024-07-12)
+### Atlassian Reporting
 
-| Dashboard | Last Updated | Notes |
-|---|---|---|
-| Resource Pool Monitoring | 2024-07-12 | SingleStore monitoring |
-| Pipeline Summary | 2024-07-12 | SingleStore monitoring |
-| Pipeline Performance | 2024-07-12 | SingleStore monitoring |
-| Memory Usage | 2024-07-12 | Older copy — newer version exists (2023-09-07) |
-| Historical Workload Monitoring | 2024-07-12 | Older copy — newer version exists (2025-08-07) |
-| Disk Usage | 2024-07-12 | SingleStore monitoring |
-| Detailed Cluster View By Node | 2024-07-12 | Older copy — newer version exists (2023-09-07) |
-| Cluster View | 2024-07-12 | Older copy — newer version exists (2025-06-23) |
+| Dashboard | Created | Last Updated | Status | Notes |
+|---|---|---|---|---|
+| Database Engineering Sprint Reporting | 2024-03-08 | 2024-03-08 | ✅ Active | Reads DBA_VCC_COST |
+| Jira Projects Info | 2023-12-08 | 2023-12-08 | ⚠️ Stale | No new Jira data since Dec 2023 |
 
-### Other Reporting — 2023
+### Database Engineering AWS Reports
 
-| Dashboard | Last Updated | Notes |
-|---|---|---|
-| Jira Projects Info | 2023-12-08 | Jira sprint data |
-| Zabbix Monitoring | 2023-10-27 | Zabbix infrastructure |
-| Database Engineering Costs | 2023-10-12 | Older copy — newer version exists (2024-10-15) |
-| AWS Cost Report Monthly | 2023-10-06 | Reads DBA_VCC_COST — AWS data stale since Sept 2024 |
-| Nifi API Reporting Copy | 2023-09-21 | Stale data — DBA_VCC_MEMSQL jobs disabled May 2026 |
-| Database Engineering Sprint Reporting | 2023-09-15 | Older copy — newer version exists (2024-03-08) |
-| Memory Usage | 2023-09-07 | SingleStore monitoring |
-| Detailed Cluster View By Node | 2023-09-07 | SingleStore monitoring |
-| Dashboard Servers Windows | 2023-09-05 | Zabbix — Windows server monitoring |
-| SQL SERVER | 2023-09-05 | Zabbix — SQL Server monitoring |
-| Microsoft SQL Server | 2023-09-05 | Zabbix — SQL Server monitoring |
-| Zabbix Server Dashboard | 2023-09-05 | Zabbix server dashboard |
-| AWS RDS Report | 2023-08-21 | RDS inventory. Older copy also exists (2023-08-09) |
-| Encore Document Production Runtimes | 2023-08-16 | Encore runtimes. Older copy also exists (2023-07-09) |
-| Encore Month End Reporting | 2023-08-10 | Calls REP_MONTHEND — stale. Older copy also exists (2023-07-07) |
-| DXM Month End Reporting | 2023-08-10 | Calls REP_MONTHEND — stale. Older copy also exists (2023-07-07) |
-| InvestorPress Month End Reporting | 2023-08-10 | Calls REP_MONTHEND — stale. Older copy also exists (2023-07-05) |
-| KAPP Month End Reporting | 2023-08-10 | Calls REP_MONTHEND — stale. Older copy also exists (2023-07-05) |
-| AWS Security Report | 2023-08-10 | AWS security config |
-| KAPP Orphaned and Duplicated Records Report | 2023-08-10 | Older copy — newer version exists (2024-03-26) |
-| AWS S3 Report | 2023-08-09 | S3 bucket report. Older copy also exists (2023-07-13) |
-| AWS EC2 Report | 2023-08-09 | EC2 inventory. Duplicate also exists same date |
-| AWS RDS Report | 2023-08-09 | Older copy — newer version exists (2023-08-21) |
-| Home | 2023-08-09 | Default home dashboard |
-| AWS Cost Report | 2023-08-09 | AWS cost report |
-| Other Services Month End Reporting -- Draft | 2023-07-21 | Draft — calls REP_MONTHEND |
-| AWS S3 Report | 2023-07-13 | Older copy — newer version exists (2023-08-09) |
-| BNY IIS Log Streams | 2023-07-11 | BNY IIS log data |
-| Encore Document Production Runtimes | 2023-07-09 | Older copy — newer version exists (2023-08-16) |
-| DXM Month End Reporting | 2023-07-07 | Older copy — newer version exists (2023-08-10) |
-| WPv2 Month End Reporting | 2023-07-07 | Older copy — newer version exists (2024-06-20) |
-| Encore Month End Reporting | 2023-07-07 | Older copy — newer version exists (2023-08-10) |
-| KAPP Month End Reporting | 2023-07-05 | Older copy — newer version exists (2023-08-10) |
-| InvestorPress Month End Reporting | 2023-07-05 | Older copy — newer version exists (2023-08-10) |
-| Server States | 2023-05-29 | Server state monitoring |
+| Dashboard | Created | Last Updated | Status | Notes |
+|---|---|---|---|---|
+| AWS DataTransfer AZ Bytes Report | 2024-01-28 | 2024-02-20 | ⚠️ Stale | No recent updates |
+| AWS EC2 Report | 2023-08-09 | 2023-08-09 | ⚠️ Stale | Duplicate — also in AWS folder |
+| AWS RDS Report | 2023-08-09 | 2023-08-21 | ⚠️ Stale | Duplicate — also in AWS folder |
+| AWS S3 Report | 2023-08-09 | 2023-08-09 | ⚠️ Stale | Duplicate — also in AWS folder |
+
+### Database Engineering Month End Reporting
+
+| Dashboard | Created | Last Updated | Status | Notes |
+|---|---|---|---|---|
+| Database Engineering Costs | 2024-01-10 | 2024-10-15 | ✅ Active | Reads DBA_VCC_COST — active |
+| DXM Month End Reporting | 2023-08-09 | 2023-08-10 | ⚠️ Stale | Duplicate — also in Month End Reporting |
+| Encore Month End Reporting | 2023-08-09 | 2023-08-10 | ⚠️ Stale | Duplicate — also in Month End Reporting |
+| InvestorPress Month End Reporting | 2023-08-09 | 2023-08-10 | ⚠️ Stale | Duplicate — also in Month End Reporting |
+| KAPP Month End Reporting | 2023-08-09 | 2023-08-10 | ⚠️ Stale | Duplicate — also in Month End Reporting |
+| WPv2 Month End Reporting | 2023-08-09 | 2024-06-20 | ❌ Broken | WPv2 decommissioned — calls dead stored proc |
+
+### Database Engineering Reports
+
+| Dashboard | Created | Last Updated | Status | Notes |
+|---|---|---|---|---|
+| Database Engineering Costs | 2023-10-06 | 2023-10-12 | ⚠️ Stale | Older copy — newer version in Database Engineering Month End Reporting (2024-10-15) |
+| Database Engineering Sprint Reporting | 2023-07-10 | 2023-09-15 | ⚠️ Stale | Older copy — newer version in Atlassian Reporting (2024-03-08) |
+
+### Encore
+
+| Dashboard | Created | Last Updated | Status | Notes |
+|---|---|---|---|---|
+| BNY IIS Log Streams | 2023-07-11 | 2023-07-11 | ❌ Broken | Encore IIS logs frozen at 2024-09-23 — confirmed from INFO_AWS_Encore_Cloudwatch_IIS_Logs. BNY Mellon — confirm if client-facing |
+| Encore Document Production Runtimes | 2023-07-09 | 2023-07-09 | ⚠️ Stale | Older copy — newer version in Encore Reporting (2023-08-16) |
+
+### Encore Reporting
+
+| Dashboard | Created | Last Updated | Status | Notes |
+|---|---|---|---|---|
+| Encore Document Production Runtimes | 2023-08-11 | 2023-08-16 | ❌ Broken | Encore IIS log data frozen at 2024-09-23 — DBA_VCC_AWS_DAILY_CHECKS step silently failing |
+
+### General Reporting
+
+| Dashboard | Created | Last Updated | Status | Notes |
+|---|---|---|---|---|
+| Server States | 2023-05-29 | 2023-05-29 | ⚠️ Stale | No recent updates |
+
+### KAPP
+
+| Dashboard | Created | Last Updated | Status | Notes |
+|---|---|---|---|---|
+| KAPP Client Growth | 2023-07-09 | 2023-11-16 | ⚠️ Stale | Older copy — newer version in KAPP Reporting (2024-02-28) |
+| KAPP Client Utilisation and Growth Report | 2023-07-14 | 2024-02-22 | ❌ Broken + High risk | Reads DBA_VCC_COST — data frozen May 2026 (MemSQL root cause). Name suggests client-facing — confirm with tashvir/rayhaan |
+| KAPP Orphaned and Duplicated Records Report | 2023-08-10 | 2023-08-10 | ⚠️ Stale | Older copy — newer version in KAPP Reporting (2024-03-26) |
+
+### KAPP Client Reporting
+
+| Dashboard | Created | Last Updated | Status | Notes |
+|---|---|---|---|---|
+| KAPP Client Config | 2024-09-02 | 2024-09-02 | ⚠️ Stale | DBA_VCC_MEMSQL jobs disabled May 2026 |
+| NTAM Workflow by workflowRunId | 2025-09-07 | 2025-09-07 | ✅ Active | Actively maintained |
+
+### KAPP Reporting
+
+| Dashboard | Created | Last Updated | Status | Notes |
+|---|---|---|---|---|
+| Prod US Document Generation Run Metrics | 2025-10-22 | 2025-10-29 | ✅ Active | Actively maintained |
+| Prod UK Document Generation Run Metrics | 2025-10-22 | 2025-10-29 | ✅ Active | Actively maintained |
+| Prod EU Document Generation Run Metrics | 2025-10-22 | 2025-10-29 | ✅ Active | Actively maintained |
+| Release Document Generation Run Metrics | 2025-10-22 | 2025-10-29 | ✅ Active | Actively maintained |
+| Development Document Generation Run Metrics | 2025-10-22 | 2025-10-29 | ✅ Active | Actively maintained |
+| Detailed KAPP Workflow Document Generation Stats | 2025-07-25 | 2025-08-18 | ✅ Active | Actively maintained |
+| KAPP Client Application Auth Config | 2024-10-22 | 2024-10-29 | ⚠️ Stale | DBA_VCC_MEMSQL jobs disabled May 2026 |
+| KAPP Dataset Query and Source Execution | 2024-11-19 | 2024-11-20 | ⚠️ Stale | DBA_VCC_MEMSQL jobs disabled May 2026 |
+| KAPP Dataset Query Execution | 2024-10-18 | 2024-11-07 | ⚠️ Stale | DBA_VCC_MEMSQL jobs disabled May 2026 |
+| KAPP Dataset Lambdas Time Outs | 2024-10-23 | 2024-10-23 | ⚠️ Stale | DBA_VCC_MEMSQL jobs disabled May 2026 |
+| KAPP Workflow Times History | 2024-06-11 | 2024-06-12 | ⚠️ Stale | DBA_VCC_MEMSQL jobs disabled May 2026 |
+| KAPP Orphaned and Duplicated Records Report | 2023-08-10 | 2024-03-26 | ⚠️ Stale | DBA_VCC_MEMSQL jobs disabled May 2026 |
+| KAPP API Error Reporting | 2024-03-05 | 2024-03-11 | ⚠️ Stale | DBA_VCC_MEMSQL jobs disabled May 2026 |
+| KAPP Workflow History | 2024-02-28 | 2024-03-07 | ⚠️ Stale | DBA_VCC_MEMSQL jobs disabled May 2026 |
+| KAPP Client Growth | 2024-02-28 | 2024-02-28 | ⚠️ Stale | DBA_VCC_MEMSQL jobs disabled May 2026 |
+| KAPP API Query Reporting | 2024-02-16 | 2024-02-23 | ⚠️ Stale | DBA_VCC_MEMSQL jobs disabled May 2026 |
+| Nifi API Reporting | 2023-08-24 | 2024-02-15 | ✅ Active | NiFi data confirmed current — INFO_AWS_Nifi_Loader_API_Detail latest 2026-07-21 |
+| Nifi API Reporting Copy | 2023-09-21 | 2023-09-21 | ⚠️ Stale | Duplicate copy |
+
+### Monitoring
+
+| Dashboard | Created | Last Updated | Status | Notes |
+|---|---|---|---|---|
+| Zabbix Monitoring | 2023-10-24 | 2023-10-27 | ⚠️ Stale credentials | Uses donovan.vangraan credentials |
+
+### Month End Reporting
+
+| Dashboard | Created | Last Updated | Status | Notes |
+|---|---|---|---|---|
+| DXM Month End Reporting | 2023-07-06 | 2023-07-07 | ⚠️ Stale | No recent updates |
+| Encore Month End Reporting | 2023-07-05 | 2023-07-07 | ⚠️ Stale | No recent updates |
+| InvestorPress Month End Reporting | 2023-07-05 | 2023-07-05 | ⚠️ Stale | No recent updates |
+| KAPP Month End Reporting | 2023-07-04 | 2023-07-05 | ⚠️ Stale | No recent updates |
+| Other Services Month End Reporting -- Draft | 2023-07-07 | 2023-07-21 | ❌ Broken | Draft — never completed |
+| WPv2 Month End Reporting | 2023-07-06 | 2023-07-07 | ❌ Broken | WPv2 decommissioned |
+
+### Performance Dashboards
+
+| Dashboard | Created | Last Updated | Status | Notes |
+|---|---|---|---|---|
+| Query Performance Dashboard | 2024-03-04 | 2024-03-07 | ⚠️ Stale | DBA_VCC_MEMSQL jobs disabled May 2026 |
+
+### SingleStore Monitoring
+
+> All SingleStore dashboards are in this one folder. Duplicate titles exist — older and newer copies both present.
+
+| Dashboard | Created | Last Updated | Status | Notes |
+|---|---|---|---|---|
+| Cluster View | 2023-06-13 | 2025-06-23 | ✅ Active | Current version — original dashboard updated in place |
+| Cluster View | 2024-07-12 | 2024-07-12 | ⚠️ Stale | Duplicate — same folder |
+| Detailed Cluster View By Node | 2023-06-13 | 2023-09-07 | ⚠️ Stale | Original copy |
+| Detailed Cluster View By Node | 2024-07-12 | 2024-07-12 | ⚠️ Stale | Duplicate — same folder |
+| Disk Usage | 2024-07-12 | 2024-07-12 | ⚠️ Stale | No recent updates |
+| Historical Workload Monitoring | 2023-06-13 | 2025-08-07 | ✅ Active | Current version — original dashboard updated in place |
+| Historical Workload Monitoring | 2024-07-12 | 2024-07-12 | ⚠️ Stale | Duplicate — same folder |
+| Memory Usage | 2023-06-13 | 2023-09-07 | ⚠️ Stale | Original copy |
+| Memory Usage | 2024-07-12 | 2024-07-12 | ⚠️ Stale | Duplicate — same folder |
+| Pipeline Performance | 2024-07-12 | 2024-07-12 | ⚠️ Stale | No recent updates |
+| Pipeline Summary | 2024-07-12 | 2024-07-12 | ⚠️ Stale | No recent updates |
+| Query History | 2024-07-12 | 2025-08-07 | ✅ Active | Actively maintained |
+| Resource Pool Monitoring | 2024-07-12 | 2024-07-12 | ⚠️ Stale | No recent updates |
 
 ---
 
@@ -244,9 +311,120 @@
 
 - [x] ~~What is the Grafana URL and port?~~ — https://ew1r-rep-01 on port 443
 - [x] ~~What datasources are configured?~~ — 21 datasources confirmed, see above
-- [x] ~~Which dashboards are actively used?~~ — 74 dashboards total confirmed (query 9.5, 2026-07-07). 10 updated in 2025 — actively used. Several duplicate dashboard names exist across folders — older versions not cleaned up.
+- [x] ~~Which dashboards are actively used?~~ — 74 dashboards confirmed live from grafana.db 2026-07-21. 11 updated in 2025+ — actively used. SingleStore Monitoring (v2) folder confirmed not to exist — all SingleStore dashboards in one folder with duplicate titles. Amazon EC2 dashboard created and deleted 2026-07-21 by lunga.ndzimande — accidental investigation artefact.
 - [x] ~~Who has admin access to Grafana?~~ — tashvir.babulal, yogeshwar.phull, rayhaan.suleyman, donovan.vangraan
 - [x] ~~Is Grafana version current or end-of-life?~~ — v9.5.2, LTS, not latest but supported
 - [ ] Are any dashboards client-facing or SLA-related? — Month End Reporting and KAPP Client reports are candidates — confirm with tashvir/rayhaan
 - [x] ~~What contact points are configured for Grafana alert rules?~~ — 3 contact points confirmed: alerts-data-operations (Slack, active), alert-app-allow2fa-disabled (Slack, active), email (placeholder — not configured, will not deliver)
 - [ ] Is InfluxDB datasource still active — URL not stored in db, needs confirmation
+
+---
+
+## Conclusion — Recommendations and Proposed Solutions
+
+---
+
+### 1. Ex-Employee Credentials in Zabbix Datasources — Immediate Security Risk
+
+**What we found:**
+All 4 Zabbix datasources in Grafana are configured using credentials belonging to **donovan.vangraan** — an ex-employee who was last seen on this server in November 2024. His account still has active database access to Zabbix MySQL. This is a live security risk that exists today, completely independent of the decommission decision.
+
+**Supporting evidence:**
+- 4 Zabbix datasources confirmed in grafana.db: Zabbix Nonprod old, zabbix-server-data.shnonprd, Zabbix Prod Old, zabbix-server-data.shprd
+- donovan.vangraan last seen: 2024-11-13 — no longer active
+- donovan.vangraan still holds Grafana admin rights
+- Default admin account also still active — last seen 2024-11-29
+
+**Proposed solution:**
+- Revoke donovan.vangraan's Grafana admin access immediately
+- Rotate the Zabbix MySQL credentials used in all 4 datasources — replace with a service account
+- Disable the default admin account — it should never be left active in a production-adjacent system
+- This must happen now — not as part of decommission planning
+
+---
+
+### 2. Zabbix Datasources — This Server Is the Middleman, Cut It Out
+
+**What we found:**
+Grafana on this server reads from 4 Zabbix MySQL databases to power Zabbix monitoring dashboards (Dashboard Servers Windows, SQL SERVER, Microsoft SQL Server, Zabbix Server Dashboard). This server is acting as a middleman — it sits between the user and Zabbix, adding no value. Zabbix already monitors the infrastructure directly. The dashboards can connect to Zabbix directly without this server in the middle.
+
+**Supporting evidence:**
+- 4 Zabbix-related dashboards confirmed: Dashboard Servers Windows (2023-09-05), SQL SERVER (2023-09-05), Microsoft SQL Server (2023-09-05), Zabbix Server Dashboard (2023-09-05)
+- Zabbix Nonprod old and Zabbix Prod Old datasources — pointing at dead/old Zabbix instances
+- alexanderzobnin-zabbix-app plugin installed — reads Zabbix MySQL directly
+- Zabbix agent already running on EW1R-REP-01 (port 10050) — Zabbix watches this server directly
+
+**Proposed solution:**
+- Migrate the 4 Zabbix dashboards to **Amazon Managed Grafana** and connect directly to the current Zabbix MySQL instances (10.72.8.186 and 10.120.8.51)
+- Remove the 2 dead Zabbix datasources (Zabbix Nonprod old pointing at 10.72.8.191, Zabbix Prod Old pointing at 10.120.8.120)
+- Use a proper service account for the Zabbix MySQL connection — not a personal account
+- This eliminates EW1R-REP-01 from the Zabbix monitoring chain entirely
+
+---
+
+### 3. Stale and Broken Dashboards — Multiple Root Causes, All Silent
+
+**What we found:**
+Three separate silent failures are causing dashboards to show stale or wrong data. None of them fired an alert. None were noticed until this investigation.
+
+**Root cause 1 — MemSQL jobs disabled May 2026:**
+- 14 dashboards reading from DBA_VCC_MEMSQL have been stale since May 2026
+- DBA_VCC_COST collection also broken as a downstream casualty — all SP_INFO_KAPP_CLIENT_* procs depend on DBA_VCC_MEMSQL.BAS_Ping_Stat to get live servers. With MemSQL jobs disabled, zero servers returned, zero rows written, job reports succeeded
+- KAPP Client Utilisation and Growth Report showing data frozen at 2026-05-04 — possible client-facing dashboard
+
+**Root cause 2 — DBA_VCC_AWS_DAILY_CHECKS step silently failing since Sept 2024:**
+- INFO_AWS_Encore_Cloudwatch_IIS_Logs frozen at 2024-09-23 — confirmed from live query 2026-07-21
+- INFO_AWS_Entity_Cost frozen at 2024-09-22 — single row only, archive also frozen at 2024-06-21
+- AWS Cost Report and AWS Cost Report Monthly dashboards showing data that is 10 months stale
+- BNY IIS Log Streams (Encore) showing data that is 10 months stale — BNY Mellon is an institutional client
+- CATCH blocks in DBA_VCC_AWS_DAILY_CHECKS swallow the error — job reports succeeded every day
+
+**What is still active and current (confirmed 2026-07-21):**
+- KAPP API query tracking — INFO_AWS_KAPP_Query_API_Detail latest 2026-07-21
+- NiFi pipeline monitoring — INFO_AWS_Nifi_Loader_API_Detail latest 2026-07-21
+
+**Proposed solution:**
+- Notify tashvir.babulal, rayhaan.suleyman, yogeshwar.phull of all three silent failures immediately
+- Identify and fix the broken step in DBA_VCC_AWS_DAILY_CHECKS — add explicit error handling so step failures surface as job failures
+- Add a visible banner to all affected dashboards stating data is stale and from what date
+- Do not migrate broken dashboards to Amazon Managed Grafana — fix or retire them first
+
+---
+
+### 4. Duplicate Datasources and Dashboards — Cleanup Before Migration
+
+**What we found:**
+There are 2 DBA_VCC datasource entries pointing at the same target with different UIDs. There are multiple duplicate dashboards sitting in different folders — older versions that were never cleaned up. Migrating this mess as-is to Amazon Managed Grafana will create confusion.
+
+**Supporting evidence:**
+- DBA_VCC datasource: UIDs a082f27e and e8597015 — both point to localhost DBA_VCC
+- Multiple dashboards with identical names in different folders: AWS RDS Report, Encore Document Production Runtimes, WPv2 Month End Reporting, KAPP Orphaned and Duplicated Records Report, and others
+- KAPP Monitoring and monitoring datasources — both point to 10.120.8.208, same database
+
+**Proposed solution:**
+- Audit all 74 dashboards before migration — identify which version of each duplicate is the current one
+- Retire all older duplicate dashboards
+- Consolidate the 2 DBA_VCC datasources into 1 before migration
+- Target: migrate only the dashboards that are actively used and have live data
+
+---
+
+### 5. Overall Grafana Recommendation
+
+**This server should not be running Grafana.** It is a non-production EC2 instance running a self-hosted Grafana 9.5.2 that requires manual patching, has ex-employee credentials active, and has no proper alerting configured. The platform is in AWS — Grafana should be too.
+
+**Proposed replacement: Amazon Managed Grafana**
+- AWS manages the infrastructure, patching, and availability
+- Integrates natively with CloudWatch, RDS, and other AWS services
+- Supports the same datasources (MySQL, MSSQL, Zabbix, JSON API)
+- Proper IAM-based access control — no more personal account credentials in datasources
+- Existing dashboards can be exported as JSON and imported directly
+
+**Migration order:**
+1. Fix credentials first — rotate donovan.vangraan, disable default admin
+2. Audit and retire stale/duplicate dashboards
+3. Set up Amazon Managed Grafana workspace
+4. Migrate active dashboards one folder at a time
+5. Re-point datasources to their targets directly
+6. Validate all alerts are firing correctly in the new environment
+7. Decommission Grafana on EW1R-REP-01

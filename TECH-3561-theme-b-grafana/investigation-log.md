@@ -84,10 +84,11 @@ EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python
 | ram.jeyaraman | Ram Jeyaraman | ram@kurtosys.com | Viewer | 2025-09-11 | Active |
 | jason.wolmarans | Jason Wolmarans | jason.wolmarans@kurtosys.com | Viewer | 2025-02-12 | Active |
 | sunil.odedra | Sunil Odedra | sunil.odedra@kurtosys.com | Viewer | 2023-07-12 | ⚠️ Inactive since Jul 2023 |
+| lunga.ndzimande | Lunga Ndzimande | lunga.ndzimande@kurtosys.com | Admin | 2026-07-21 | Investigation account — created 2026-07-20, admin |
 
 **Total: 8 users (5 admins, 3 viewers, 1 NULL row ignored)**
 
-> Note: User list re-run on 2026-07-07. Role determined by is_admin column (1 = Admin, 0 = Viewer). Captured on 2026-07-07.
+> Note: User list re-run on 2026-07-07. Role determined by is_admin column (1 = Admin, 0 = Viewer). Captured on 2026-07-07. lunga.ndzimande confirmed as 9th user — created 2026-07-20 for investigation, last seen 2026-07-21.
 
 ---
 
@@ -243,6 +244,9 @@ EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python
 > Note: query 9.8 returns 3 rows from `alert_configuration` — Grafana stores multiple config versions in this table (factory default, old draft, current active). The contact points above are extracted from the current active config (row 2 of 3). Row 1 is an old draft with no sub-routes where all alerts defaulted to the broken email. Row 3 is the factory default Grafana ships with — never customised. The Slack webhook tokens in row 2 are encrypted — a Grafana admin login is required to view or rotate them.
 
 **Finding:** Grafana reads directly from DBA_VCC on localhost. 4 Zabbix datasources use donovan.vangraan credentials — he is an Admin account that has not logged in since November 2024. His credentials need to be rotated and his account should be reviewed before decommission. The default `admin` account is also still active and should be disabled. Email contact point is a placeholder and will never deliver alerts. Month-end dashboards are showing stale data since May 2026 due to MemSQL jobs being disabled — nobody has flagged this.
+
+**Finding — 2026-07-21 — DBA_VCC_COST collection silently broken since May 2026:**  
+`DBA_VCC_COST_Entity_Count_Collection` reports succeeded every Monday but all 5 main tables have `MAX(DateChecked) = 2026-05-04`. Root cause confirmed by inspecting `SP_INFO_KAPP_CLIENT_USERS_COUNTS`: every `SP_INFO_KAPP_CLIENT_*` proc queries `DBA_VCC_MEMSQL.dbo.BAS_Ping_Stat` and `BAS_SQL_Status` to get live SingleStore servers before running OPENQUERY. With MemSQL jobs disabled since May 2026, those tables stopped updating — the `DATEDIFF(MINUTE, DATECHECKED, GETDATE()) < 40` filter returns zero rows, `@SERVERNAMES` is empty, the WHILE loop never runs, zero rows inserted, job exits clean. Same root cause as the 14 stale dashboards. DBA_VCC_COST is a downstream casualty of the MemSQL disable.
 
 **Open questions for TECH-3561:**
 - Are any dashboards client-facing or SLA-related? (Month End Reporting and KAPP Client reports are candidates)
