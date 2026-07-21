@@ -279,3 +279,230 @@ Total across all user databases: ~600+ procedures. Counts per database:
 - DBA_VCC_MEMSQL has the most actively maintained SPs — FP, IP, KAPP-specific procedures modified as recently as 2024-11.
 - Utilities database holds the KAPP schema comparison logic (`USP_KAPP_Schema_details_Capture`, `USP_ZAB_KAPP_schema_compare`) — relevant to TECH-3563.
 - DBA_VCC_AWS SPs are exclusively ETL cleanup routines — no reporting SPs.
+
+---
+
+## Conclusion — Recommendations and Proposed Solutions
+
+This section summarises what we found for each area, why it matters, and what should be done about it. Written for a non-technical audience.
+
+---
+
+### 1. The Server Itself
+
+**What we found:**
+EW1R-REP-01 is running SQL Server 2019 **Developer Edition** — a version that is free but **not licensed for production use**. It is sitting in a non-production environment but is actively monitoring two production SQL Servers (EW2P-MSSQL-01 and EW2P-MSSQL-02). This is a licensing and architecture risk.
+
+**Supporting evidence:**
+- Edition confirmed: `Developer Edition (64-bit)` from sys.servers
+- Environment confirmed: Shared NonProd (REL) — eu-west-1
+- Production servers confirmed in LU_Serverlist: EW2P-MSSQL-01, EW2P-MSSQL-02
+
+**Proposed solution:**
+Decommission this server and replace its monitoring responsibilities with AWS-native tooling. The infrastructure is already in AWS — the monitoring should be too. This server was built before AWS had mature monitoring tools. Those tools now exist.
+
+---
+
+### 2. DBA_VCC — Production SQL Server Monitoring
+
+**What we found:**
+This is the core monitoring database. It watches EW2P-MSSQL-01 and EW2P-MSSQL-02 — two production SQL Servers — checking backups, disk space, job statuses, failed logins, index fragmentation, and error logs. 24 jobs feed this database. If this server is switched off, those two production servers go completely dark.
+
+**Supporting evidence:**
+- 16 VCC Audit Collection jobs + 8 VCC Server Monitoring jobs all confirmed running and succeeding as of 2026-07-06
+- LU_Serverlist confirms EW2P-MSSQL-01 and EW2P-MSSQL-02 as active monitored targets
+- No secondary monitoring path exists — confirmed from Zabbix inventory (EW1R-REP-01 not in Zabbix)
+
+**Proposed solution:**
+Before decommissioning, confirm whether EW2P-MSSQL-01 and EW2P-MSSQL-02 are EC2-hosted or RDS instances.
+- If **RDS** — replace with AWS CloudWatch native SQL Server monitoring. RDS already exposes metrics natively. No custom framework needed.
+- If **EC2-hosted** — install CloudWatch Agent on those servers and configure SQL Server metric collection. This replaces the VCC framework at a fraction of the complexity.
+
+Either way, the custom VCC framework built in 2017 can be retired once AWS-native monitoring is in place.
+
+---
+
+### 3. DBA_VCC_AWS — KAPP API and AWS Infrastructure Data
+
+**What we found:**
+This is the largest database at 182 GB. It stores every KAPP API query ever made (297 million rows), AWS costs per client, NiFi pipeline logs, EC2/RDS inventory, and S3 data. The jobs pulling this data run every 30 minutes. The data is pulled FROM CloudWatch and stored here as a copy — meaning the original data already exists in AWS.
+
+**Supporting evidence:**
+- `INFO_AWS_KAPP_Query_API_Detail` — 297,606,716 rows, 53 GB, NOT PARTITIONED, MERGE performance risk confirmed 2026-07-20
+- Jobs confirmed pulling from CloudWatch log streams via Python: `DBA_VCC_AWS_15MIN_CHECKS`, `DBA_VCC_AWS_DAILY_CHECKS`
+- `MON_AWS_Entity_Cost` last updated 2026-07-15 — actively collecting
+- Database created 2023-06-09, technical owner: sa (no real accountable person)
+
+**Proposed solution:**
+This database is a copy of data that already lives in AWS. The right long-term solution is:
+- **KAPP API query data** → keep in CloudWatch Logs. Use CloudWatch Insights for querying instead of a custom SQL table.
+- **AWS costs** → replace with AWS Cost Explorer. It already tracks costs per account/tag natively.
+- **EC2/RDS inventory** → replace with AWS Config or Systems Manager Inventory.
+- **NiFi logs** → keep in CloudWatch Logs where they originate.
+
+The 297M row table is also a ticking clock — the MERGE job will eventually overlap itself and cause a lock incident. This needs to be addressed before migration regardless.
+
+---
+
+### 4. DBA_VCC_COST — Client Billing Data (Highest Risk)
+
+**What we found:**
+This database tracks usage counts for 280 real institutional clients — BlackRock, BNY Mellon, Aberdeen, Wellington, T. Rowe Price, Nordea and others. It is the only database on this server using FULL recovery model, meaning someone deliberately treated it as production-critical. A Grafana dashboard called "KAPP Client Utilisation and Growth Report" reads from it and may be shown directly to clients.
+
+**Supporting evidence:**
+- FULL recovery model confirmed — only database on server with this setting
+- `LU_KAPP_ClientList` — 280 rows confirmed, real institutional client names
+- 4 Grafana dashboards confirmed reading from this database
+- Collection job `DBA_VCC_COST_Entity_Count_Collection` running weekly on Mondays — confirmed active
+- Data sitting on a Developer Edition non-production server — not appropriate for client-facing data
+
+**Proposed solution:**
+- Immediately confirm with tashvir.babulal / rayhaan.suleyman whether the KAPP Client Utilisation dashboard is shown to clients
+- If client-facing: migrate this database to a proper licensed production RDS instance before any decommission work begins. This is non-negotiable.
+- If internal only: migrate to RDS or integrate with AWS Cost Explorer for cost tracking
+- Either way — this data should not remain on a Developer Edition non-prod server
+
+---
+
+### 5. DBA_VCC_MEMSQL — Dead Since May 2026
+
+**What we found:**
+All 7 jobs feeding this database were disabled in May 2026. Nobody knows why. The database has 75 GB of historical data going back years. 14 Grafana dashboards have been showing stale data ever since — including 6 month-end reporting dashboards. Nobody noticed. No alert fired.
+
+**Supporting evidence:**
+- All 7 jobs confirmed disabled — last ran 2026-05-08
+- `DBA_VCC_MEMSQL_DAILY_CHECKS` failed on its last run before being disabled
+- 14 dashboards confirmed reading from DBA_VCC_MEMSQL datasource in Grafana
+- `INFO_Client_FP_Detail` (556K rows), `INFO_KAPP_Workflow_Run_Detail` (268K rows) — last write May 2026
+- June 2026 month-end reporting impacted — no data pipeline
+
+**Proposed solution:**
+- Get an answer from yogeshwar.phull / tashvir.babulal on why the jobs were disabled
+- If SingleStore is decommissioned: drop all 7 jobs, archive the database, update all 14 dashboards to show "data no longer available" rather than stale numbers
+- If SingleStore migrated: update linked server connections and re-enable jobs
+- Regardless of outcome: notify dashboard consumers that data has been stale since May 2026
+
+---
+
+### 6. DBA_VCC_MYSQL — Partially Broken, WPv2 Legacy
+
+**What we found:**
+This database monitors MySQL and DXM. The DXM side is working fine. The WPv2 side has been broken since WPv2 was decommissioned — but nobody cleaned it up. Two jobs fail every single day because they try to connect to WPv2 servers that no longer exist. No alert fires.
+
+**Supporting evidence:**
+- `DBA_VCC_MYSQL_DAILY_CHECKS` and `DBA_VCC_MYSQL_AUDIT_DXM_CLIENT_DETAILED` — both failing daily, last failure 2026-07-21
+- Root cause confirmed: `SP_AUDIT_WPv2_CLIENTS_DETAILED` last modified 2022-11-01, calls dead linked servers ew2p-wpv2, ew2r-wpv2, ue1p-wpv2, ue1r-wpv2 — all DNS gone
+- `xp_cmdshell` commented out in `SP_MON_PING_STATS` — all servers show as reachable regardless of actual status
+- WPv2 legacy tables still present: `INFO_WPv2_Client_Sizes` (810 rows), `ARC_INFO_WPv2_Client_Sizes` (66K rows)
+
+**Proposed solution:**
+- Fix immediately — remove WPv2 steps from both failing jobs, drop `SP_AUDIT_WPv2_CLIENTS_DETAILED`
+- For DXM monitoring: confirm if DXM monitoring is still needed. If yes, migrate the DXM collection jobs to a new host. If no, retire the database.
+- Clean up all WPv2 legacy tables and linked servers
+
+---
+
+### 7. KURTOSYS_BASELINE — 50 GB With No Confirmed Consumer
+
+**What we found:**
+This database captures performance baselines — connection counts and table sizes across MySQL, MSSQL, and MemSQL. It is 50 GB and growing. Nobody has confirmed they read this data or use it for anything. A significant portion of what it baselines (MemSQL, WPv2) no longer exists.
+
+**Supporting evidence:**
+- `BAS_MYSQL_TABLE_SIZE_PER_DATABASES` — 199M rows, 46 GB — dominant table, still collecting
+- `BAS_MEMSQL_TABLE_SIZE_PER_DATABASES` — 1.6M rows — stale since May 2026 (MemSQL jobs disabled)
+- `BAS_WP_Posts_Tracking_Sizes_Info` — 0 rows — WPv2 baseline table, never populated after WPv2 decommission
+- No confirmed Grafana datasource reading from this database
+- No confirmed consumer identified in any investigation query
+
+**Proposed solution:**
+- Ask the DBA team directly: does anyone use this data? Is it used for capacity planning, incident investigation, or reporting?
+- If no consumer confirmed: retire the database. 50 GB of baselines for systems that no longer exist has no value.
+- If a consumer exists: migrate only the relevant baseline tables (MSSQL side) to a new host
+
+---
+
+### 8. DBA_VCC_ATLASSIAN — Frozen Since December 2023
+
+**What we found:**
+This database has only 2 tables and no stored procedures. The last data written to it was 2023-12-12 — over 2.5 years ago. No SQL Agent job writes to it. No active consumer has been identified.
+
+**Supporting evidence:**
+- `MAX(DateChecked)` on `Jira_Project_Issue_Field_Types` = 2023-12-12 — confirmed from live query
+- Full job-command search across all 63 SQL Agent jobs returned zero matches for this database
+- 0 stored procedures confirmed
+- Only 2 tables: `Jira_Project_Issue_Field_Types` (181,714 rows) and `Jira_Project_Leads` (657 rows)
+
+**Proposed solution:**
+Archive and retire. Export the 2 tables to S3 as a cold archive in case anyone ever needs the historical Jira data, then drop the database. No migration needed — nothing is writing to it and nothing is reading from it.
+
+---
+
+### 9. The 74 Grafana Dashboards
+
+**What we found:**
+74 dashboards exist on this server. 14 are already showing stale data (MemSQL datasource broken since May 2026). Only 10 were actively maintained in 2025. The rest are likely orphaned. The server is running Grafana 9.5.2 — a self-hosted instance that requires maintenance.
+
+**Supporting evidence:**
+- 74 dashboards confirmed from live Grafana SQLite query
+- 14 dashboards confirmed reading from DBA_VCC_MEMSQL — stale since May 2026
+- 3 alert rules only — most alerting is broken or silent
+- 2 inactive admin credentials flagged (donovan.vangraan — ex-employee, still used in 4 Zabbix datasources)
+- Default admin account still active
+
+**Proposed solution:**
+- Audit all 74 dashboards — identify which ones are actually being viewed
+- Retire the 14 stale MemSQL dashboards immediately
+- Migrate the dashboards that matter to **Amazon Managed Grafana** — AWS manages the infrastructure, no self-hosted server needed
+- Rotate or remove ex-employee credentials before any migration
+- Fix or remove the broken email alert contact point
+
+---
+
+### 10. The 63 Dead and Broken Linked Servers
+
+**What we found:**
+63 of 109 linked servers are dead — pointing at servers that no longer exist. 30 are safe to drop immediately with no investigation needed. The remaining 33 need confirmation before dropping. 2 jobs fail every day because of dead WPv2 linked servers that were never cleaned up.
+
+**Supporting evidence:**
+- 63 dead linked servers confirmed from reachability testing
+- 4 WPv2 linked servers confirmed DNS gone: ew2p-wpv2, ew2r-wpv2, ue1p-wpv2, ue1r-wpv2
+- 30 safe to drop immediately confirmed in linked-server-inventory.md
+- 2 daily job failures directly caused by dead linked servers
+
+**Proposed solution:**
+- Drop the 30 safe linked servers immediately — no risk, no investigation needed
+- Investigate and drop the remaining 33 dead linked servers after confirming no dependency
+- Clean up WPv2 linked servers as part of fixing the 2 failing jobs
+
+---
+
+### Overall Recommendation
+
+**This server should be decommissioned. The question is not whether — it is when and in what order.**
+
+The platform has moved to AWS. The tools this server was built to provide in 2017 now exist natively in AWS. Running a custom monitoring framework on a Developer Edition non-production server watching production systems is a risk — licensing, reliability, and compliance.
+
+**The proposed replacement stack:**
+
+| What EW1R-REP-01 does today | Replace with |
+|---|---|
+| SQL Server monitoring (VCC framework) | AWS CloudWatch + CloudWatch Agent |
+| KAPP API query tracking | CloudWatch Logs + CloudWatch Insights |
+| AWS cost tracking | AWS Cost Explorer |
+| EC2/RDS inventory | AWS Config / Systems Manager |
+| Grafana dashboards | Amazon Managed Grafana |
+| Client billing data (DBA_VCC_COST) | Dedicated licensed RDS instance |
+| DXM monitoring | Migrate to new host or retire |
+
+**Before decommission can start, 6 questions must be answered:**
+
+| # | Question | Who |
+|---|---|---|
+| 1 | Is the KAPP Client Utilisation dashboard shown to clients? | tashvir.babulal / rayhaan.suleyman |
+| 2 | Who consumes DBA_VCC_COST data? | tashvir.babulal / rayhaan.suleyman |
+| 3 | Why were MemSQL jobs disabled in May 2026? | yogeshwar.phull / tashvir.babulal |
+| 4 | Who consumes VCC monitoring data for EW2P-MSSQL-01/02? | DBA team |
+| 5 | What is the migration plan for VCC monitoring post-decommission? | DBA team |
+| 6 | Who consumes DBA_VCC_AWS data? | tashvir.babulal / rayhaan.suleyman |
+
+**Realistic timeline: 10–12 weeks from stakeholder sign-off.**
