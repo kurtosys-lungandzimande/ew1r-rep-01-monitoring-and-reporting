@@ -340,6 +340,37 @@ Conclusion from evidence: deliberate decommission action, not a failure or pause
 
 ---
 
+## Datasource Proposed Solutions
+
+> For each datasource: what it was for, whether it is still needed, and what to do with it.
+
+| Datasource | What it was for | Still needed? | Proposed solution |
+|---|---|---|---|
+| DBA_VCC (a082f27e) | Primary datasource — reads all VCC monitoring data from local SQL Server | ✅ Yes — 60+ dashboards depend on it | Migrate to Amazon Managed Grafana pointing at the new SQL Server host after VCC framework is migrated |
+| DBA_VCC (e8597015) | Duplicate of the above — same target, different UID. Likely created by accident or during a config import | ❌ No | Delete before migration — audit which dashboards reference this UID and re-point them to a082f27e first |
+| KAPP Dev | Reads KAPP metrics database in Dev environment | ⚠️ Confirm | Only needed if Dev dashboards are still actively used. If Dev monitoring moves to Amazon Managed Grafana, migrate. If not, retire |
+| KAPP Rel | Reads KAPP metrics database in Release environment | ⚠️ Confirm | Same as KAPP Dev — confirm if Release dashboards are still needed |
+| KAPP UK Prod | Reads KAPP metrics database in UK Production | ✅ Yes — actively maintained dashboards use it | Migrate to Amazon Managed Grafana — confirm firewall allows new Grafana host to reach 10.121.29.82 |
+| KAPP EU Prod | Reads KAPP metrics database in EU Production | ✅ Yes | Migrate — confirm firewall allows new host to reach 10.125.6.134 |
+| KAPP US Prod | Reads KAPP metrics database in US Production | ✅ Yes | Migrate — confirm firewall allows new host to reach 10.128.30.6 |
+| KAPP Monitoring | Reads KAPP monitoring database — used by SingleStore dashboards | ✅ Yes — Query History, Cluster View, Historical Workload Monitoring all use it | Migrate — fix tlsSkipVerify=true, replace with proper certificate validation |
+| monitoring | Duplicate of KAPP Monitoring — same IP (10.120.8.208), same database | ❌ No | Delete — consolidate into KAPP Monitoring before migration |
+| MySQL | Generic MySQL pointing at same IP as KAPP Rel (10.77.3.236) — purpose unclear | ❌ Likely not | Audit which dashboards reference this UID. If none, delete. If any, consolidate into KAPP Rel |
+| SingleStore-Dev | Reads UDM__ schema on SingleStore Dev | ⚠️ Confirm | Needed only if Dev dashboards are still required. Confirm with yogeshwar.phull whether SingleStore Dev is still running |
+| SingleStore-Release | Reads UDM__ schema on SingleStore Release | ⚠️ Confirm | Same as SingleStore-Dev |
+| SingleStore-Production-UK | Reads UDM__ schema on SingleStore UK Prod — powers 5 actively maintained dashboards | ✅ Yes | Migrate to Amazon Managed Grafana — confirm firewall allows new host to reach 10.121.22.219 |
+| SingleStore-Production-EU | Reads UDM__ schema on SingleStore EU Prod | ✅ Yes | Migrate — confirm firewall allows new host to reach 10.125.12.126 |
+| SingleStore-Production-US | Reads UDM__ schema on SingleStore US Prod | ✅ Yes | Migrate — confirm firewall allows new host to reach 10.128.24.122 |
+| Zabbix Nonprod old | Reads old non-prod Zabbix MySQL (10.72.8.191) — uses donovan.vangraan credentials | ❌ No | Delete — old Zabbix instance, dead credentials, no active dashboards depending on it exclusively |
+| zabbix-server-data.shnonprd | Reads current non-prod Zabbix MySQL (10.72.8.186) — uses donovan.vangraan credentials | ⚠️ Replace credentials | Rotate credentials to a service account, then migrate to Amazon Managed Grafana if Zabbix dashboards are still needed |
+| Zabbix Prod Old | Reads old prod Zabbix MySQL (10.120.8.120) — uses donovan.vangraan credentials | ❌ No | Delete — old Zabbix instance, dead credentials |
+| zabbix-server-data.shprd | Reads current prod Zabbix MySQL (10.120.8.51) — uses donovan.vangraan credentials | ⚠️ Replace credentials | Rotate credentials to a service account, then migrate to Amazon Managed Grafana |
+| JSON API | Reads NiFi Registry API (10.125.9.192:8443) — powers Nifi API Reporting dashboard | ✅ Yes — NiFi data confirmed active 2026-07-21 | Migrate to Amazon Managed Grafana — fix tlsSkipVerify=true, confirm firewall allows new host to reach NiFi API |
+| CloudWatch | AWS CloudWatch — uses IAM role, no URL needed | ✅ Yes | Migrate to Amazon Managed Grafana — CloudWatch is natively supported, IAM role just needs to be re-assigned to the new workspace |
+| InfluxDB | Was intended for time-series metrics collection — no URL ever configured, no dashboards ever built against it | ❌ No — never used | **Delete immediately.** Zero dashboards reference it (confirmed 2026-07-21). No URL stored. This was either a placeholder that was never set up or a leftover from a cancelled project. No migration needed. |
+
+---
+
 ## Conclusion — Recommendations and Proposed Solutions
 
 ---
