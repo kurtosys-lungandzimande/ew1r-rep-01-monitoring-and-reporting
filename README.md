@@ -3,6 +3,24 @@
 <!-- Architecture diagram — replace the path below with your exported image -->
 <!-- ![EW1R-REP-01 Architecture](TECH-3563-theme-d-classification-and-topology/ew1r-rep-01-architecture1.drawio.png) -->
 
+## About This Epic
+
+This repository supports **TECH-3535 — EW1R-REP-01 Decommission Investigation**.
+
+Platform Engineering intends to decommission EW1R-REP-01. Before that can happen safely, a full read-only discovery pass was required. The server started as a SQL Server monitoring box but grew over time to also run Grafana, SQL Agent jobs, and monitoring for RDS MySQL, SingleStore, and other systems. There was no authoritative inventory of what it runs, who consumes the output, or what would break if it were switched off.
+
+Without this investigation, decommissioning the server risked silent loss of alerts, orphaned Grafana dashboards, and undocumented SQL Agent jobs that teams still rely on.
+
+**This epic delivers read-only discovery and documentation only.** It does not decommission the server, disable SQL Agent jobs, change Grafana configuration, migrate dashboards, or alter production monitoring. Those actions are tracked under a separate follow-on epic.
+
+**Why this epic exists:**
+- **Decommission safety** — know every job, dashboard, alert, and external target before any change is made
+- **Operational clarity** — document who uses this server and how
+- **Migration planning** — classify each component as retire, replace, or move with rationale
+- **Alignment** with unified database monitoring initiatives (TECH-3428, TECH-3409) where overlap exists
+
+---
+
 ## What Is This Server?
 
 EW1R-REP-01 is a **monitoring and reporting hub**. It does not run any product or serve any customers directly. Its sole job is to **watch over other systems and report on what they are doing**.
@@ -119,7 +137,7 @@ It contains raw query outputs, screenshots, and supporting artefacts collected d
 
 Full documentation, findings, analysis, and decisions live in **Confluence**.
 
-> Confluence: [EW1R-REP-01 Decommission Investigation] — add link here
+> Confluence: [EW1R-REP-01 Decommission Investigation](https://kurtosys-prod-eng.atlassian.net/wiki/spaces/TM/pages/6841237572)
 
 ---
 
