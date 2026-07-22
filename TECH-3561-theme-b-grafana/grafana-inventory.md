@@ -357,11 +357,11 @@ Conclusion from evidence: deliberate decommission action, not a failure or pause
 | KAPP Monitoring | Reads KAPP monitoring database — used by SingleStore dashboards | 🔄 Migrate | Query History, Cluster View, Historical Workload Monitoring all confirmed active. Fix tlsSkipVerify=true before migrating |
 | monitoring | Duplicate of KAPP Monitoring — same IP (10.120.8.208), same database | 🗑️ Retire | Exact duplicate. Consolidate into KAPP Monitoring before migration |
 | MySQL | Generic MySQL — same IP as KAPP Rel, purpose unclear | 🔍 Needs investigation | Audit which dashboards reference this UID. If none, retire. If any, consolidate into KAPP Rel |
-| SingleStore-Dev | Reads UDM__ schema on SingleStore Dev | 🔍 Needs investigation | Confirm with yogeshwar.phull whether SingleStore Dev is still running |
-| SingleStore-Release | Reads UDM__ schema on SingleStore Release | 🔍 Needs investigation | Same as SingleStore-Dev |
-| SingleStore-Production-UK | Reads UDM__ schema on SingleStore UK Prod | 🔄 Migrate | 5 actively maintained dashboards confirmed. Firewall rules for new host must be confirmed |
-| SingleStore-Production-EU | Reads UDM__ schema on SingleStore EU Prod | 🔄 Migrate | Same as SingleStore-Production-UK |
-| SingleStore-Production-US | Reads UDM__ schema on SingleStore US Prod | 🔄 Migrate | Same as SingleStore-Production-UK |
+| SingleStore-Dev | Reads UDM__ schema on SingleStore Dev | 🗑️ Retire | SingleStore Dev confirmed dead — ping to 10.61.0.95 returned 100% packet loss (confirmed 2026-07-22). Linked server ew1d-aggr-05 not in sys.servers — already removed. Datasource has no live target. Delete. |
+| SingleStore-Release | Reads UDM__ schema on SingleStore Release | 🔄 Migrate | Confirmed alive — ping to 10.77.6.161 returned 0% loss, 1ms (confirmed 2026-07-22). Live target. Migrate datasource to replacement Grafana host — confirm firewall rules first |
+| SingleStore-Production-UK | Reads UDM__ schema on SingleStore UK Prod | 🗑️ Retire | Confirmed dead — ping to 10.121.22.219 returned 100% packet loss (confirmed 2026-07-22). No live target. Dashboards reading from this datasource are showing no data. Delete datasource, retire dependent dashboards |
+| SingleStore-Production-EU | Reads UDM__ schema on SingleStore EU Prod | 🗑️ Retire | Confirmed dead — ping to 10.125.12.126 returned 100% packet loss (confirmed 2026-07-22). No live target. Delete datasource, retire dependent dashboards |
+| SingleStore-Production-US | Reads UDM__ schema on SingleStore US Prod | 🗑️ Retire | Confirmed dead — ping to 10.128.24.122 returned 100% packet loss (confirmed 2026-07-22). No live target. Delete datasource, retire dependent dashboards |
 | Zabbix Nonprod old | Reads old non-prod Zabbix MySQL (10.72.8.191) — donovan.vangraan credentials | 🗑️ Retire | Points at a dead old Zabbix instance. No active dashboards depend on it exclusively |
 | zabbix-server-data.shnonprd | Reads current non-prod Zabbix MySQL (10.72.8.186) — donovan.vangraan credentials | 🔍 Needs investigation | Credentials must be rotated immediately regardless. Whether to migrate or retire depends on whether Zabbix dashboards are still needed — confirm with tashvir/rayhaan |
 | Zabbix Prod Old | Reads old prod Zabbix MySQL (10.120.8.120) — donovan.vangraan credentials | 🗑️ Retire | Points at a dead old Zabbix instance. Dead credentials |
@@ -547,9 +547,9 @@ Two options exist and both need a cost assessment before any decision is made:
 
 | Classification | Count | What |
 |---|---|---|
-| 🔄 Migrate | 9 datasources | DBA_VCC (primary), KAPP UK/EU/US Prod, KAPP Monitoring, SingleStore UK/EU/US Prod, JSON API, CloudWatch |
-| 🗑️ Retire | 5 datasources | DBA_VCC duplicate, monitoring duplicate, Zabbix Nonprod old, Zabbix Prod Old, InfluxDB |
-| 🔍 Needs investigation | 8 datasources | KAPP Dev/Rel, MySQL generic, SingleStore Dev/Release, both active Zabbix datasources (credentials first) |
+| 🔄 Migrate | 7 datasources | DBA_VCC (primary), KAPP UK/EU/US Prod, KAPP Monitoring, SingleStore-Release, JSON API, CloudWatch |
+| 🗑️ Retire | 9 datasources | DBA_VCC duplicate, monitoring duplicate, Zabbix Nonprod old, Zabbix Prod Old, InfluxDB, SingleStore-Dev (dead), SingleStore-Production-UK (dead), SingleStore-Production-EU (dead), SingleStore-Production-US (dead) |
+| 🔍 Needs investigation | 6 datasources | KAPP Dev/Rel, MySQL generic, both active Zabbix datasources (credentials first), SingleStore-Release firewall confirmation |
 
 **Dashboard migration classification:**
 
