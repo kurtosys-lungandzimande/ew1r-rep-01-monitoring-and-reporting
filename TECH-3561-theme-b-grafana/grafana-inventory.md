@@ -15,6 +15,12 @@
 | Database | C:\Program Files\GrafanaLabs\grafana\data\grafana.db (162 MB) |
 | Install path | C:\Program Files\GrafanaLabs\grafana\ |
 | Config path | C:\Program Files\GrafanaLabs\grafana\conf\grafana.ini |
+| AWS Region | eu-west-1 (Ireland) |
+| AWS Environment | Shared NonProd (REL) |
+| EC2 Host | EW1R-REP-01 — self-hosted on Windows Server EC2, not a managed service |
+| DNS (Primary) | dbe-reports.shnonprd.kurtosys-internal.net |
+| DNS (Replication) | ew1r-rep-01.ad.shnonprd.kurtosys-internal.net |
+| Hosting model | Self-managed — patching, upgrades, and backups are manual. Version 9.5.2 has not been upgraded since install |
 
 > Browser access unreachable from outside network — requires VPN or RDP from within the server network.
 
