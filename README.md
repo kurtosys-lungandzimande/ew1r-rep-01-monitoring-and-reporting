@@ -7,16 +7,23 @@
 
 This repository supports **TECH-3535 — EW1R-REP-01 Decommission Investigation**.
 
-Platform Engineering intends to decommission EW1R-REP-01. Before that can happen safely, a full read-only discovery pass was required. The server started as a SQL Server monitoring box but grew over time to also run Grafana, SQL Agent jobs, and monitoring for RDS MySQL, SingleStore, and other systems. There was no authoritative inventory of what it runs, who consumes the output, or what would break if it were switched off.
+### Purpose
 
-Without this investigation, decommissioning the server risked silent loss of alerts, orphaned Grafana dashboards, and undocumented SQL Agent jobs that teams still rely on.
+Investigate and document the EW1R-REP-01 monitoring and reporting environment (ew1r-rep-01.ad.shnonprd.kurtosys-internal.net) to establish a complete inventory of workloads, consumers, and dependencies, and produce a decommission readiness assessment with retire / replace / move recommendations.
 
-**This epic delivers read-only discovery and documentation only.** It does not decommission the server, disable SQL Agent jobs, change Grafana configuration, migrate dashboards, or alter production monitoring. Those actions are tracked under a separate follow-on epic.
+This epic delivers read-only discovery and documentation only. It does not decommission the server, disable SQL Agent jobs, change Grafana configs, migrate dashboards, or alter production monitoring (separate follow-on epic(s)).
 
-**Why this epic exists:**
-- **Decommission safety** — know every job, dashboard, alert, and external target before any change is made
-- **Operational clarity** — document who uses this server and how
-- **Migration planning** — classify each component as retire, replace, or move with rationale
+### Background — the problem
+
+The host started as a SQL Server monitoring box but now also runs Grafana, SQL Agent jobs, and monitoring for other systems (RDS MySQL, SingleStore, and others). Platform Engineering intends to decommission this server, but there is no authoritative inventory of what it runs, what it monitors, who consumes the output, or what would break if it were switched off.
+
+Without a structured discovery pass, decommission risks silent loss of alerts, orphaned Grafana dashboards, and undocumented SQL Agent jobs that teams still rely on.
+
+### Why this epic exists
+
+- **Decommission safety** — know every job, dashboard, alert, and external target before any change
+- **Operational clarity** — document who uses this server and how (URL/DNS, teams, alert recipients)
+- **Migration planning** — classify each component as retire, replace (e.g. CloudWatch, Grafana Cloud, unified monitoring), or move to another host
 - **Alignment** with unified database monitoring initiatives (TECH-3428, TECH-3409) where overlap exists
 
 ---
@@ -96,14 +103,14 @@ This is the most important thing to understand. EW1R-REP-01 lives in a non-produ
 ### 8 databases, 369 GB of data
 | Database | Size | What it does | Safe to remove? |
 |---|---|---|---|
-| DBA_VCC_AWS | 182.66 GB | Tracks every KAPP API query, AWS costs, NiFi pipeline logs | ❌ No — consumers not confirmed |
-| DBA_VCC_MEMSQL | 75.50 GB | Was monitoring SingleStore/MemSQL — all jobs stopped May 2026 | ⚠️ Pending — need to know why jobs stopped |
-| KURTOSYS_BASELINE | 50 GB | Captures performance baselines across databases | ⚠️ Pending — nobody confirmed who reads this |
-| DBA_VCC_MYSQL | 25.62 GB | Monitors MySQL and DXM — partially broken | ⚠️ Pending — fix broken jobs first |
-| DBA_VCC | 20.86 GB | Core monitoring framework — watches production SQL Servers | ❌ No — production servers depend on this |
-| DBA_VCC_COST | 5 GB | Tracks usage counts for 280 real institutional clients | ❌ No — possible client-facing data |
-| DBA_VCC_ATLASSIAN | 2 GB | Jira data — no new data written since December 2023 | ⚠️ Pending — confirm nobody reads it |
-| Utilities | 0.18 GB | DBA tooling and maintenance scripts | ⚠️ Decommission last |
+| DBA_VCC_AWS | 182.66 GB | Tracks every KAPP API query, AWS costs, NiFi pipeline logs | No — consumers not confirmed |
+| DBA_VCC_MEMSQL | 75.50 GB | Was monitoring SingleStore/MemSQL — all jobs stopped May 2026 | Pending — need to know why jobs stopped |
+| KURTOSYS_BASELINE | 50 GB | Captures performance baselines across databases | Pending — nobody confirmed who reads this |
+| DBA_VCC_MYSQL | 25.62 GB | Monitors MySQL and DXM — partially broken | Pending — fix broken jobs first |
+| DBA_VCC | 20.86 GB | Core monitoring framework — watches production SQL Servers | No — production servers depend on this |
+| DBA_VCC_COST | 5 GB | Tracks usage counts for 280 real institutional clients | No — possible client-facing data |
+| DBA_VCC_ATLASSIAN | 2 GB | Jira data — no new data written since December 2023 | Pending — confirm nobody reads it |
+| Utilities | 0.18 GB | DBA tooling and maintenance scripts | Decommission last |
 
 ### 63 SQL Agent jobs — the things that collect all the data
 - **52 are running** and mostly healthy
