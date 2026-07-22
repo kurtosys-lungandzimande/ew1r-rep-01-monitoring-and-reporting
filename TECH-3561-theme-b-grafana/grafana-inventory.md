@@ -21,6 +21,7 @@
 | DNS (Primary) | dbe-reports.shnonprd.kurtosys-internal.net |
 | DNS (Replication) | ew1r-rep-01.ad.shnonprd.kurtosys-internal.net |
 | Hosting model | Self-managed — patching, upgrades, and backups are manual. Version 9.5.2 has not been upgraded since install |
+| Process | grafana.exe — PID 3844, confirmed running 2026-07-22 via Get-Process on EC2 instance. Session 0 — running as system service, not a user session. Working set 97 MB |
 
 > Browser access unreachable from outside network — requires VPN or RDP from within the server network.
 
