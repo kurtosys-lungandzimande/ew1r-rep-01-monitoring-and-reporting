@@ -243,7 +243,34 @@ EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python
 
 > Note: query 9.8 returns 3 rows from `alert_configuration` — Grafana stores multiple config versions in this table (factory default, old draft, current active). The contact points above are extracted from the current active config (row 2 of 3). Row 1 is an old draft with no sub-routes where all alerts defaulted to the broken email. Row 3 is the factory default Grafana ships with — never customised. The Slack webhook tokens in row 2 are encrypted — a Grafana admin login is required to view or rotate them.
 
-**Finding — 2026-07-22 — Prod EU/UK/US and NTAM dashboards confirmed broken despite appearing active:**
+**Finding — 2026-07-22 — Dashboard snapshots confirm external sharing:**
+
+**Query used:**
+```sql
+EXEC xp_cmdshell 'del C:\temp\gf_snap.py';
+EXEC xp_cmdshell 'echo import sqlite3 > C:\temp\gf_snap.py';
+EXEC xp_cmdshell 'echo conn = sqlite3.connect(r"C:\Program Files\GrafanaLabs\grafana\data\grafana.db") >> C:\temp\gf_snap.py';
+EXEC xp_cmdshell 'echo rows = conn.execute("SELECT * FROM dashboard_snapshot LIMIT 5").fetchall() >> C:\temp\gf_snap.py';
+EXEC xp_cmdshell 'echo print(len(rows)) >> C:\temp\gf_snap.py';
+EXEC xp_cmdshell 'echo [print(r) for r in rows] >> C:\temp\gf_snap.py';
+EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python.exe C:\temp\gf_snap.py';
+```
+
+**Evidence:** 2 snapshots found:
+
+| Dashboard | Created | Expires | Notes |
+|---|---|---|---|
+| Database Engineering Sprint Reporting | 2023-07-13 | 2073-06-30 | 50-year expiry — permanent shareable link |
+| KAPP Month End Reporting | 2024-01-17 | 2074-01-04 | 50-year expiry — permanent shareable link |
+
+**Finding:** Snapshots in Grafana create a public URL that anyone can access without logging in. A 50-year expiry means these links were deliberately set to never expire. KAPP Month End Reporting snapshot created January 2024 — this is the strongest evidence of external/client-facing access found in the investigation. Neither BNY IIS Log Streams nor KAPP Client Utilisation and Growth Report have snapshots, but KAPP Month End Reporting is in the same reporting family. Must confirm with tashvir.babulal / rayhaan.suleyman who these snapshot links were shared with.
+
+**Additional checks performed — all returned null (no evidence of external access):**
+- API keys: 0 configured — no programmatic/external access
+- Grafana log search for BNY: no hits in current log
+- Log files available: only 8 days (2026-07-15 to 2026-07-22)
+- Playlists: 0 configured — no kiosk/TV display mode
+
 
 **Query used — extract actual datasource UIDs from dashboard JSON:**
 ```sql
