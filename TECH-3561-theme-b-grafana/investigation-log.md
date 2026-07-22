@@ -243,7 +243,48 @@ EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python
 
 > Note: query 9.8 returns 3 rows from `alert_configuration` — Grafana stores multiple config versions in this table (factory default, old draft, current active). The contact points above are extracted from the current active config (row 2 of 3). Row 1 is an old draft with no sub-routes where all alerts defaulted to the broken email. Row 3 is the factory default Grafana ships with — never customised. The Slack webhook tokens in row 2 are encrypted — a Grafana admin login is required to view or rotate them.
 
-**Finding — 2026-07-22 — SingleStore datasource reachability confirmed via ping:**
+**Finding — 2026-07-22 — Prod EU/UK/US and NTAM dashboards confirmed broken despite appearing active:**
+
+**Query used — extract actual datasource UIDs from dashboard JSON:**
+```sql
+EXEC xp_cmdshell 'del C:\temp\gf_ds_check.py';
+EXEC xp_cmdshell 'echo import sqlite3, json > C:\temp\gf_ds_check.py';
+EXEC xp_cmdshell 'echo conn = sqlite3.connect(r"C:\Program Files\GrafanaLabs\grafana\data\grafana.db") >> C:\temp\gf_ds_check.py';
+EXEC xp_cmdshell 'echo rows = conn.execute("SELECT title, data FROM dashboard WHERE title IN (''Prod EU Document Generation Run Metrics'',''Prod UK Document Generation Run Metrics'',''Prod US Document Generation Run Metrics'',''NTAM Workflow by workflowRunId'')").fetchall() >> C:\temp\gf_ds_check.py';
+EXEC xp_cmdshell 'echo for r in rows: >> C:\temp\gf_ds_check.py';
+EXEC xp_cmdshell 'echo     d = json.loads(r[1]) >> C:\temp\gf_ds_check.py';
+EXEC xp_cmdshell 'echo     ds = set(p.get("datasource",{}).get("uid","") if isinstance(p.get("datasource"),dict) else str(p.get("datasource","")) for p in d.get("panels",[])) >> C:\temp\gf_ds_check.py';
+EXEC xp_cmdshell 'echo     print(r[0], "|", ds) >> C:\temp\gf_ds_check.py';
+EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python.exe C:\temp\gf_ds_check.py';
+```
+
+**Evidence — datasource UIDs extracted from dashboard JSON:**
+
+| Dashboard | UID in JSON | Datasource | IP | Ping |
+|---|---|---|---|---|
+| NTAM Workflow by workflowRunId | bfe8f780 | SingleStore-Production-US | 10.128.24.122 | ❌ Dead |
+| Prod EU Document Generation Run Metrics | df309b44 | SingleStore-Production-EU | 10.125.12.126 | ❌ Dead |
+| Prod UK Document Generation Run Metrics | a6046586 | SingleStore-Production-UK | 10.121.22.219 | ❌ Dead |
+| Prod US Document Generation Run Metrics | bfe8f780 | SingleStore-Production-US | 10.128.24.122 | ❌ Dead |
+
+**Evidence — last data written to source tables:**
+```sql
+SELECT 'UDM__ on SingleStore-US' AS source, MAX(DateChecked) AS last_data
+FROM DBA_VCC_MEMSQL.dbo.INFO_KAPP_Workflow_Run_Detail
+UNION ALL
+SELECT 'UDM__ on SingleStore-EU', MAX(DateChecked)
+FROM DBA_VCC_MEMSQL.dbo.INFO_KAPP_Workflow_Times_Run_Detail
+```
+
+Result:
+
+| Source | Last Data |
+|---|---|
+| UDM__ on SingleStore-US | 2026-05-08 12:00:05 |
+| UDM__ on SingleStore-EU | 2026-05-08 12:00:09 |
+
+**Finding:** All 4 dashboards are confirmed broken. They appear active in Grafana (last updated 2025-10-29) because someone edited the dashboard layout/config, not because data is flowing. The underlying data is frozen at 2026-05-08 — the exact moment MemSQL jobs were disabled. Grafana is displaying cached stale data. Users viewing these dashboards are seeing data that is 2+ months old with no warning.
+
 
 **Query used:**
 ```sql

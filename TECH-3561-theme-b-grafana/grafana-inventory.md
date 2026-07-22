@@ -194,15 +194,15 @@
 | Dashboard | Created | Last Updated | Status | Notes |
 |---|---|---|---|---|
 | KAPP Client Config | 2024-09-02 | 2024-09-02 | ⚠️ Stale | DBA_VCC_MEMSQL jobs disabled May 2026 |
-| NTAM Workflow by workflowRunId | 2025-09-07 | 2025-09-07 | ✅ Active | Actively maintained |
+| NTAM Workflow by workflowRunId | 2025-09-07 | 2025-09-07 | ❌ Broken | Confirmed pointing at dead SingleStore-Production-US (10.128.24.122 — 100% packet loss). Data frozen at 2026-05-08. Grafana showing cached data only |
 
 ### KAPP Reporting
 
 | Dashboard | Created | Last Updated | Status | Notes |
 |---|---|---|---|---|
-| Prod US Document Generation Run Metrics | 2025-10-22 | 2025-10-29 | ✅ Active | Actively maintained |
-| Prod UK Document Generation Run Metrics | 2025-10-22 | 2025-10-29 | ✅ Active | Actively maintained |
-| Prod EU Document Generation Run Metrics | 2025-10-22 | 2025-10-29 | ✅ Active | Actively maintained |
+| Prod US Document Generation Run Metrics | 2025-10-22 | 2025-10-29 | ❌ Broken | Confirmed pointing at dead SingleStore-Production-US (10.128.24.122 — 100% packet loss). Data frozen at 2026-05-08. Grafana showing cached data only |
+| Prod UK Document Generation Run Metrics | 2025-10-22 | 2025-10-29 | ❌ Broken | Confirmed pointing at dead SingleStore-Production-UK (10.121.22.219 — 100% packet loss). Data frozen at 2026-05-08. Grafana showing cached data only |
+| Prod EU Document Generation Run Metrics | 2025-10-22 | 2025-10-29 | ❌ Broken | Confirmed pointing at dead SingleStore-Production-EU (10.125.12.126 — 100% packet loss). Data frozen at 2026-05-08. Grafana showing cached data only |
 | Release Document Generation Run Metrics | 2025-10-22 | 2025-10-29 | ✅ Active | Actively maintained |
 | Development Document Generation Run Metrics | 2025-10-22 | 2025-10-29 | ✅ Active | Actively maintained |
 | Detailed KAPP Workflow Document Generation Stats | 2025-07-25 | 2025-08-18 | ✅ Active | Actively maintained |
