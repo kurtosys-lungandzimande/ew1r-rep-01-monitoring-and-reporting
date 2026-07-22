@@ -132,7 +132,7 @@
 
 | Dashboard | Created | Last Updated | Status | Notes |
 |---|---|---|---|---|
-| Database Engineering Sprint Reporting | 2024-03-08 | 2024-03-08 | ✅ Active | Reads DBA_VCC_COST |
+| Database Engineering Sprint Reporting | 2024-03-08 | 2024-03-08 | ✅ Active | Reads DBA_VCC_COST. ⚠️ Snapshot exists — permanent shareable link created 2023-07-13, expires 2073-06-30. Confirm who this was shared with |
 | Jira Projects Info | 2023-12-08 | 2023-12-08 | ⚠️ Stale | No new Jira data since Dec 2023 |
 
 ### Database Engineering AWS Reports
@@ -232,7 +232,7 @@
 | DXM Month End Reporting | 2023-07-06 | 2023-07-07 | ⚠️ Stale | No recent updates |
 | Encore Month End Reporting | 2023-07-05 | 2023-07-07 | ⚠️ Stale | No recent updates |
 | InvestorPress Month End Reporting | 2023-07-05 | 2023-07-05 | ⚠️ Stale | No recent updates |
-| KAPP Month End Reporting | 2023-07-04 | 2023-07-05 | ⚠️ Stale | No recent updates |
+| KAPP Month End Reporting | 2023-07-04 | 2023-07-05 | ⚠️ Stale | No recent updates. ⚠️ Snapshot exists — permanent shareable link created 2024-01-17, expires 2074-01-04. Confirm who this was shared with |
 | Other Services Month End Reporting -- Draft | 2023-07-07 | 2023-07-21 | ❌ Broken | Draft — never completed |
 | WPv2 Month End Reporting | 2023-07-06 | 2023-07-07 | ❌ Broken | WPv2 decommissioned |
 
@@ -261,6 +261,19 @@
 | Pipeline Summary | 2024-07-12 | 2024-07-12 | ⚠️ Stale | No recent updates |
 | Query History | 2024-07-12 | 2025-08-07 | ✅ Active | Actively maintained |
 | Resource Pool Monitoring | 2024-07-12 | 2024-07-12 | ⚠️ Stale | No recent updates |
+
+---
+
+## Dashboard Snapshots
+
+> Confirmed from grafana.db 2026-07-22. Snapshots create a public URL accessible without Grafana login.
+
+| Dashboard | Created | Expires | Risk |
+|---|---|---|---|
+| Database Engineering Sprint Reporting | 2023-07-13 | 2073-06-30 | ⚠️ 50-year expiry — permanent link. Confirm who it was shared with |
+| KAPP Month End Reporting | 2024-01-17 | 2074-01-04 | 🔴 50-year expiry — permanent link. Strongest evidence of external/client-facing access on this server. Confirm with tashvir/rayhaan immediately |
+
+> No snapshots exist for BNY IIS Log Streams or KAPP Client Utilisation and Growth Report.
 
 ---
 
