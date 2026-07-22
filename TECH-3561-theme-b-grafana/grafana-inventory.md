@@ -104,7 +104,7 @@
 
 > Total: 74 dashboards — confirmed live from grafana.db 2026-07-21.
 > SingleStore Monitoring (v2) folder does not exist — all SingleStore dashboards are in one folder with duplicate titles.
-> Amazon EC2 dashboard created and deleted 2026-07-21 by lunga.ndzimande during investigation — accidental, not a production dashboard.
+> Total confirmed from live grafana.db query 2026-07-21.
 
 ### General (ungrouped)
 
@@ -311,7 +311,7 @@
 
 - [x] ~~What is the Grafana URL and port?~~ — https://ew1r-rep-01 on port 443
 - [x] ~~What datasources are configured?~~ — 21 datasources confirmed, see above
-- [x] ~~Which dashboards are actively used?~~ — 74 dashboards confirmed live from grafana.db 2026-07-21. 11 updated in 2025+ — actively used. SingleStore Monitoring (v2) folder confirmed not to exist — all SingleStore dashboards in one folder with duplicate titles. Amazon EC2 dashboard created and deleted 2026-07-21 by lunga.ndzimande — accidental investigation artefact.
+- [x] ~~Which dashboards are actively used?~~ — 74 dashboards confirmed live from grafana.db 2026-07-21. 11 updated in 2025+ — actively used. SingleStore Monitoring (v2) folder confirmed not to exist — all SingleStore dashboards in one folder with duplicate titles.
 - [x] ~~Who has admin access to Grafana?~~ — tashvir.babulal, yogeshwar.phull, rayhaan.suleyman, donovan.vangraan
 - [x] ~~Is Grafana version current or end-of-life?~~ — v9.5.2, LTS, not latest but supported
 - [ ] Are any dashboards client-facing or SLA-related? — KAPP Client Utilisation and Growth Report and BNY IIS Log Streams are the two candidates. Evidence: LU_KAPP_ClientList contains 280 real institutional clients (BlackRock, BNY Mellon, Aberdeen, Wellington etc.) with entity IDs and regions. REP_MONTHEND_CLIENT_* stored procs (19 procs, created Jan 2023) form a per-client reporting layer. grafana login confirmed CONNECT permission on DBA_VCC_COST. Data frozen May 2026 — must disclose to tashvir/rayhaan before any decommission action.

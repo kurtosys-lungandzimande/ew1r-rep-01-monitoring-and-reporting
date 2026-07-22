@@ -84,11 +84,11 @@ EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python
 | ram.jeyaraman | Ram Jeyaraman | ram@kurtosys.com | Viewer | 2025-09-11 | Active |
 | jason.wolmarans | Jason Wolmarans | jason.wolmarans@kurtosys.com | Viewer | 2025-02-12 | Active |
 | sunil.odedra | Sunil Odedra | sunil.odedra@kurtosys.com | Viewer | 2023-07-12 | ⚠️ Inactive since Jul 2023 |
-| lunga.ndzimande | Lunga Ndzimande | lunga.ndzimande@kurtosys.com | Admin | 2026-07-21 | Investigation account — created 2026-07-20, admin |
+| lunga.ndzimande | Lunga Ndzimande | lunga.ndzimande@kurtosys.com | Admin | 2026-07-21 | Investigation account — created 2026-07-20 |
 
 **Total: 8 users (5 admins, 3 viewers, 1 NULL row ignored)**
 
-> Note: User list re-run on 2026-07-07. Role determined by is_admin column (1 = Admin, 0 = Viewer). Captured on 2026-07-07. lunga.ndzimande confirmed as 9th user — created 2026-07-20 for investigation, last seen 2026-07-21.
+> Note: User list re-run on 2026-07-07. Role determined by is_admin column (1 = Admin, 0 = Viewer). lunga.ndzimande confirmed as 9th user — created 2026-07-20 for investigation, last seen 2026-07-21.
 
 ---
 
