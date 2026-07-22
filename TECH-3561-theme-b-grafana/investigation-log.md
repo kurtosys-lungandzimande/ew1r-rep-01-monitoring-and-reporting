@@ -3,8 +3,7 @@
 Scope: Grafana inventory  datasources, dashboards, users, alert rules, contact points.
 Each entry has the question, the query, the evidence, and the finding.
 
-> Status: Initial inventory complete. Not being investigated further in current sprint (TECH-3535).
-> Full Grafana investigation deferred to when TECH-3561 is picked up.
+> Status: COMPLETE — validated live from grafana.db via xp_cmdshell/Python 2026-07-21. All findings documented. Open questions escalated to DBA Team.
 
 ---
 
@@ -78,9 +77,9 @@ EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python
 |---|---|---|---|---|---|
 | admin |  | admin@localhost | Admin | 2024-11-29 | Default admin account  no real name, should be disabled |
 | donovan.vangraan | Donovan van Graan | donovan.vangraan@kurtosys.com | Admin | 2024-11-13 | Inactive since Nov 2024  credentials still in 4 Zabbix datasources |
-| DBA Team | Tashvir Babulal | DBA Team@kurtosys.com | Admin | 2026-06-09 | Active |
-| DBA Team | Yogeshwar Phull | DBA Team@kurtosys.com | Admin | 2026-06-22 | Active |
-| DBA Team | Rayhaan Suleyman | DBA Team@kurtosys.com | Admin | 2026-07-07 | Active |
+| tashvir.babulal | Tashvir Babulal | tashvir.babulal@kurtosys.com | Admin | 2026-06-09 | Active |
+| yogeshwar.phull | Yogeshwar Phull | yogeshwar.phull@kurtosys.com | Admin | 2026-06-22 | Active |
+| rayhaan.suleyman | Rayhaan Suleyman | rayhaan.suleyman@kurtosys.com | Admin | 2026-07-07 | Active |
 | ram.jeyaraman | Ram Jeyaraman | ram@kurtosys.com | Viewer | 2025-09-11 | Active |
 | jason.wolmarans | Jason Wolmarans | jason.wolmarans@kurtosys.com | Viewer | 2025-02-12 | Active |
 | sunil.odedra | Sunil Odedra | sunil.odedra@kurtosys.com | Viewer | 2023-07-12 | Inactive since Jul 2023 |

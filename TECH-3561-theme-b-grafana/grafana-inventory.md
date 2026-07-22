@@ -33,9 +33,9 @@
 |---|---|---|---|---|
 | admin | (default) | admin@localhost | Yes | 2024-11-29 |
 | donovan.vangraan | donovan.vangraan | donovan.vangraan@kurtosys.com | Yes | 2024-11-13  builder, no longer active |
-| DBA Team | Tashvir Babulal | DBA Team@kurtosys.com | Yes | 2026-06-09  **actively using** |
-| DBA Team | Yogeshwar Phull | DBA Team@kurtosys.com | Yes | 2026-06-22  **actively using** |
-| DBA Team | Rayhaan Suleyman | DBA Team@kurtosys.com | Yes | 2026-06-30  **actively using** |
+| tashvir.babulal | Tashvir Babulal | tashvir.babulal@kurtosys.com | Yes | 2026-06-09 — **actively using** |
+| yogeshwar.phull | Yogeshwar Phull | yogeshwar.phull@kurtosys.com | Yes | 2026-06-22 — **actively using** |
+| rayhaan.suleyman | Rayhaan Suleyman | rayhaan.suleyman@kurtosys.com | Yes | 2026-06-30 — **actively using** |
 | ram.jeyaraman | Ram Jeyaraman | ram@kurtosys.com | No | 2025-09-11 |
 | jason.wolmarans | Jason Wolmarans | jason.wolmarans@kurtosys.com | No | 2025-02-12 |
 | sunil.odedra | Sunil Odedra | sunil.odedra@kurtosys.com | No | 2023-07-12  likely inactive |
