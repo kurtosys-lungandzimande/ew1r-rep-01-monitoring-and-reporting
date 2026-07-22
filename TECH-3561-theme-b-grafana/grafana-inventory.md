@@ -343,31 +343,32 @@ Conclusion from evidence: deliberate decommission action, not a failure or pause
 ## Datasource Proposed Solutions
 
 > For each datasource: what it was for, whether it is still needed, and what to do with it.
+> ⚠️ Note: The replacement Grafana platform (self-hosted vs Amazon Managed Grafana) and any SQL Server migration target (EC2 vs RDS) have **not been costed or approved**. Those decisions must go through a separate cost assessment before any migration work begins. The actions below are classified as Migrate, Retire, or Needs Investigation — not as approved work.
 
-| Datasource | What it was for | Still needed? | Proposed solution |
+| Datasource | What it was for | Action | Reason |
 |---|---|---|---|
-| DBA_VCC (a082f27e) | Primary datasource — reads all VCC monitoring data from local SQL Server | ✅ Yes — 60+ dashboards depend on it | Migrate to Amazon Managed Grafana pointing at the new SQL Server host after VCC framework is migrated |
-| DBA_VCC (e8597015) | Duplicate of the above — same target, different UID. Likely created by accident or during a config import | ❌ No | Delete before migration — audit which dashboards reference this UID and re-point them to a082f27e first |
-| KAPP Dev | Reads KAPP metrics database in Dev environment | ⚠️ Confirm | Only needed if Dev dashboards are still actively used. If Dev monitoring moves to Amazon Managed Grafana, migrate. If not, retire |
-| KAPP Rel | Reads KAPP metrics database in Release environment | ⚠️ Confirm | Same as KAPP Dev — confirm if Release dashboards are still needed |
-| KAPP UK Prod | Reads KAPP metrics database in UK Production | ✅ Yes — actively maintained dashboards use it | Migrate to Amazon Managed Grafana — confirm firewall allows new Grafana host to reach 10.121.29.82 |
-| KAPP EU Prod | Reads KAPP metrics database in EU Production | ✅ Yes | Migrate — confirm firewall allows new host to reach 10.125.6.134 |
-| KAPP US Prod | Reads KAPP metrics database in US Production | ✅ Yes | Migrate — confirm firewall allows new host to reach 10.128.30.6 |
-| KAPP Monitoring | Reads KAPP monitoring database — used by SingleStore dashboards | ✅ Yes — Query History, Cluster View, Historical Workload Monitoring all use it | Migrate — fix tlsSkipVerify=true, replace with proper certificate validation |
-| monitoring | Duplicate of KAPP Monitoring — same IP (10.120.8.208), same database | ❌ No | Delete — consolidate into KAPP Monitoring before migration |
-| MySQL | Generic MySQL pointing at same IP as KAPP Rel (10.77.3.236) — purpose unclear | ❌ Likely not | Audit which dashboards reference this UID. If none, delete. If any, consolidate into KAPP Rel |
-| SingleStore-Dev | Reads UDM__ schema on SingleStore Dev | ⚠️ Confirm | Needed only if Dev dashboards are still required. Confirm with yogeshwar.phull whether SingleStore Dev is still running |
-| SingleStore-Release | Reads UDM__ schema on SingleStore Release | ⚠️ Confirm | Same as SingleStore-Dev |
-| SingleStore-Production-UK | Reads UDM__ schema on SingleStore UK Prod — powers 5 actively maintained dashboards | ✅ Yes | Migrate to Amazon Managed Grafana — confirm firewall allows new host to reach 10.121.22.219 |
-| SingleStore-Production-EU | Reads UDM__ schema on SingleStore EU Prod | ✅ Yes | Migrate — confirm firewall allows new host to reach 10.125.12.126 |
-| SingleStore-Production-US | Reads UDM__ schema on SingleStore US Prod | ✅ Yes | Migrate — confirm firewall allows new host to reach 10.128.24.122 |
-| Zabbix Nonprod old | Reads old non-prod Zabbix MySQL (10.72.8.191) — uses donovan.vangraan credentials | ❌ No | Delete — old Zabbix instance, dead credentials, no active dashboards depending on it exclusively |
-| zabbix-server-data.shnonprd | Reads current non-prod Zabbix MySQL (10.72.8.186) — uses donovan.vangraan credentials | ⚠️ Replace credentials | Rotate credentials to a service account, then migrate to Amazon Managed Grafana if Zabbix dashboards are still needed |
-| Zabbix Prod Old | Reads old prod Zabbix MySQL (10.120.8.120) — uses donovan.vangraan credentials | ❌ No | Delete — old Zabbix instance, dead credentials |
-| zabbix-server-data.shprd | Reads current prod Zabbix MySQL (10.120.8.51) — uses donovan.vangraan credentials | ⚠️ Replace credentials | Rotate credentials to a service account, then migrate to Amazon Managed Grafana |
-| JSON API | Reads NiFi Registry API (10.125.9.192:8443) — powers Nifi API Reporting dashboard | ✅ Yes — NiFi data confirmed active 2026-07-21 | Migrate to Amazon Managed Grafana — fix tlsSkipVerify=true, confirm firewall allows new host to reach NiFi API |
-| CloudWatch | AWS CloudWatch — uses IAM role, no URL needed | ✅ Yes | Migrate to Amazon Managed Grafana — CloudWatch is natively supported, IAM role just needs to be re-assigned to the new workspace |
-| InfluxDB | Was intended for time-series metrics collection — no URL ever configured, no dashboards ever built against it | ❌ No — never used | **Delete immediately.** Zero dashboards reference it (confirmed 2026-07-21). No URL stored. This was either a placeholder that was never set up or a leftover from a cancelled project. No migration needed. |
+| DBA_VCC (a082f27e) | Primary datasource — reads all VCC monitoring data from local SQL Server | 🔄 Migrate | 60+ dashboards depend on it. Target platform TBC — pending cost assessment |
+| DBA_VCC (e8597015) | Duplicate of the above — same target, different UID | 🗑️ Retire | Same target as a082f27e. Audit which dashboards reference this UID and re-point them before deleting |
+| KAPP Dev | Reads KAPP metrics database in Dev environment | 🔍 Needs investigation | Confirm if Dev dashboards are still actively used before deciding migrate or retire |
+| KAPP Rel | Reads KAPP metrics database in Release environment | 🔍 Needs investigation | Confirm if Release dashboards are still actively used before deciding migrate or retire |
+| KAPP UK Prod | Reads KAPP metrics database in UK Production | 🔄 Migrate | Actively maintained dashboards confirmed using it. Firewall rules for new host must be confirmed |
+| KAPP EU Prod | Reads KAPP metrics database in EU Production | 🔄 Migrate | Same as KAPP UK Prod |
+| KAPP US Prod | Reads KAPP metrics database in US Production | 🔄 Migrate | Same as KAPP UK Prod |
+| KAPP Monitoring | Reads KAPP monitoring database — used by SingleStore dashboards | 🔄 Migrate | Query History, Cluster View, Historical Workload Monitoring all confirmed active. Fix tlsSkipVerify=true before migrating |
+| monitoring | Duplicate of KAPP Monitoring — same IP (10.120.8.208), same database | 🗑️ Retire | Exact duplicate. Consolidate into KAPP Monitoring before migration |
+| MySQL | Generic MySQL — same IP as KAPP Rel, purpose unclear | 🔍 Needs investigation | Audit which dashboards reference this UID. If none, retire. If any, consolidate into KAPP Rel |
+| SingleStore-Dev | Reads UDM__ schema on SingleStore Dev | 🔍 Needs investigation | Confirm with yogeshwar.phull whether SingleStore Dev is still running |
+| SingleStore-Release | Reads UDM__ schema on SingleStore Release | 🔍 Needs investigation | Same as SingleStore-Dev |
+| SingleStore-Production-UK | Reads UDM__ schema on SingleStore UK Prod | 🔄 Migrate | 5 actively maintained dashboards confirmed. Firewall rules for new host must be confirmed |
+| SingleStore-Production-EU | Reads UDM__ schema on SingleStore EU Prod | 🔄 Migrate | Same as SingleStore-Production-UK |
+| SingleStore-Production-US | Reads UDM__ schema on SingleStore US Prod | 🔄 Migrate | Same as SingleStore-Production-UK |
+| Zabbix Nonprod old | Reads old non-prod Zabbix MySQL (10.72.8.191) — donovan.vangraan credentials | 🗑️ Retire | Points at a dead old Zabbix instance. No active dashboards depend on it exclusively |
+| zabbix-server-data.shnonprd | Reads current non-prod Zabbix MySQL (10.72.8.186) — donovan.vangraan credentials | 🔍 Needs investigation | Credentials must be rotated immediately regardless. Whether to migrate or retire depends on whether Zabbix dashboards are still needed — confirm with tashvir/rayhaan |
+| Zabbix Prod Old | Reads old prod Zabbix MySQL (10.120.8.120) — donovan.vangraan credentials | 🗑️ Retire | Points at a dead old Zabbix instance. Dead credentials |
+| zabbix-server-data.shprd | Reads current prod Zabbix MySQL (10.120.8.51) — donovan.vangraan credentials | 🔍 Needs investigation | Credentials must be rotated immediately regardless. Whether to migrate or retire depends on whether Zabbix dashboards are still needed |
+| JSON API | Reads NiFi Registry API (10.125.9.192:8443) — NiFi pipeline monitoring | 🔄 Migrate | NiFi data confirmed active 2026-07-21. Fix tlsSkipVerify=true before migrating. Firewall rules for new host must be confirmed |
+| CloudWatch | AWS CloudWatch — uses IAM role | 🔄 Migrate | Natively supported on any AWS-hosted Grafana. IAM role re-assignment needed |
+| InfluxDB | Intended for time-series metrics — no URL ever configured, no dashboards ever built against it | 🗑️ Retire immediately | Zero dashboards reference it (confirmed 2026-07-21). Never used. Leftover placeholder — no migration needed |
 
 ---
 
@@ -525,31 +526,37 @@ Two WPv2 Month End Reporting dashboards exist — one in Month End Reporting fol
 
 ### 8. Overall Grafana Recommendation
 
-**This server should not be running Grafana.** It is a non-production EC2 instance running a self-hosted Grafana 9.5.2 that requires manual patching, has ex-employee credentials active, and has no proper alerting configured. The platform is in AWS — Grafana should be too.
+**This server should not be running Grafana long term.** It is a non-production EC2 instance running a self-hosted Grafana 9.5.2 that requires manual patching, has ex-employee credentials active, and has no proper alerting configured.
 
-**Proposed replacement: Amazon Managed Grafana**
-- AWS manages the infrastructure, patching, and availability
-- Integrates natively with CloudWatch, RDS, and other AWS services
-- Supports the same datasources (MySQL, MSSQL, Zabbix, JSON API)
-- Proper IAM-based access control — no more personal account credentials in datasources
-- Existing dashboards can be exported as JSON and imported directly
+**However — the replacement platform has not been decided and must not be assumed.**
 
-**Migration order:**
-1. Fix credentials first — rotate donovan.vangraan, disable default admin
-2. Retire WPv2 dashboards and all confirmed stale/duplicate dashboards
-3. Fix broken jobs and data pipelines — do not migrate broken dashboards
-4. Set up Amazon Managed Grafana workspace
-5. Migrate active dashboards one folder at a time — validate data freshness after each folder
-6. Re-point datasources to their targets directly — confirm firewall rules first
-7. Validate all alerts are firing correctly in the new environment
-8. Decommission Grafana on EW1R-REP-01
+Two options exist and both need a cost assessment before any decision is made:
 
-**Dashboard migration priority:**
+| Option | Consideration |
+|---|---|
+| Amazon Managed Grafana | Managed service — AWS handles patching and availability. Has a per-user/per-editor monthly cost. Needs cost assessment before committing |
+| Self-hosted Grafana on a new EC2 or RDS-backed instance | More control, lower licensing cost, but still requires someone to manage it. Needs infrastructure sizing and cost assessment |
+
+**What is confirmed regardless of platform choice:**
+- Existing dashboards can be exported as JSON and imported to any Grafana instance
+- The datasources (MySQL, MSSQL, Zabbix, JSON API, CloudWatch) are all standard and supported on any Grafana version
+- Firewall rules for the new host must be confirmed before any migration — Grafana currently connects directly to production MySQL instances
+- Ex-employee credentials must be rotated before migration regardless of platform
+
+**Migration classification summary:**
+
+| Classification | Count | What |
+|---|---|---|
+| 🔄 Migrate | 9 datasources | DBA_VCC (primary), KAPP UK/EU/US Prod, KAPP Monitoring, SingleStore UK/EU/US Prod, JSON API, CloudWatch |
+| 🗑️ Retire | 5 datasources | DBA_VCC duplicate, monitoring duplicate, Zabbix Nonprod old, Zabbix Prod Old, InfluxDB |
+| 🔍 Needs investigation | 8 datasources | KAPP Dev/Rel, MySQL generic, SingleStore Dev/Release, both active Zabbix datasources (credentials first) |
+
+**Dashboard migration classification:**
 
 | Priority | Dashboards | Action |
 |---|---|---|
-| Migrate first | KAPP Document Generation Run Metrics (5 dashboards), NTAM Workflow, Detailed KAPP Workflow Stats, Cluster View, Historical Workload Monitoring, Query History | Active — confirmed live data |
-| Fix then migrate | Nifi API Reporting, Database Engineering Costs, Database Engineering Sprint Reporting | Active but need datasource validation |
-| Investigate before migrating | KAPP Client Utilisation and Growth Report, BNY IIS Log Streams | Possible client-facing — confirm with stakeholders first |
+| Migrate | KAPP Document Generation Run Metrics (5), NTAM Workflow, Detailed KAPP Workflow Stats, Cluster View, Historical Workload Monitoring, Query History, Nifi API Reporting | Active — confirmed live data |
+| Fix first then migrate | Database Engineering Costs, Database Engineering Sprint Reporting | Active but data pipeline issues need resolving first |
+| Investigate before migrating | KAPP Client Utilisation and Growth Report, BNY IIS Log Streams | Possible client-facing — confirm with stakeholders before any action |
 | Retire — do not migrate | All 14 DBA_VCC_MEMSQL stale dashboards, both WPv2 dashboards, all duplicate older copies | No live data, no value |
-| Retire immediately | Other Services Month End Reporting -- Draft | Never completed |
+| Retire immediately | Other Services Month End Reporting -- Draft, InfluxDB datasource | Never completed / never used |
