@@ -243,8 +243,61 @@ EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python
 
 > Note: query 9.8 returns 3 rows from `alert_configuration` — Grafana stores multiple config versions in this table (factory default, old draft, current active). The contact points above are extracted from the current active config (row 2 of 3). Row 1 is an old draft with no sub-routes where all alerts defaulted to the broken email. Row 3 is the factory default Grafana ships with — never customised. The Slack webhook tokens in row 2 are encrypted — a Grafana admin login is required to view or rotate them.
 
-**Finding — 2026-07-21 — InfluxDB datasource confirmed orphaned:**  
-Zero dashboards reference InfluxDB UID `aa82f021` — confirmed via grafana.db full scan. No URL stored, no connection details, no dashboards using it. Safe to delete. Q36 closed.
+**Finding — 2026-07-22 — SingleStore datasource reachability confirmed via ping:**
+
+**Query used:**
+```sql
+EXEC xp_cmdshell 'ping 10.61.0.95 -n 2'   -- SingleStore-Dev
+EXEC xp_cmdshell 'ping 10.77.6.161 -n 2'  -- SingleStore-Release
+EXEC xp_cmdshell 'ping 10.121.22.219 -n 2' -- SingleStore-Production-UK
+EXEC xp_cmdshell 'ping 10.125.12.126 -n 2' -- SingleStore-Production-EU
+EXEC xp_cmdshell 'ping 10.128.24.122 -n 2' -- SingleStore-Production-US
+```
+
+Linked server name check:
+```sql
+SELECT name FROM sys.servers
+WHERE name LIKE '%ew1d%' OR name LIKE '%dev%' OR name LIKE '%aggr%'
+ORDER BY name
+```
+
+Linked server test:
+```sql
+EXEC sp_testlinkedserver N'ew1d-admin-01'
+```
+
+**Evidence:**
+
+| Datasource | IP | Ping Result | Status |
+|---|---|---|---|
+| SingleStore-Dev | 10.61.0.95 | 100% packet loss — Request timed out | 🗑️ Dead |
+| SingleStore-Release | 10.77.6.161 | 0% loss, 1ms round trip | ✅ Alive |
+| SingleStore-Production-UK | 10.121.22.219 | 100% packet loss — Request timed out | 🗑️ Dead |
+| SingleStore-Production-EU | 10.125.12.126 | 100% packet loss — Request timed out | 🗑️ Dead |
+| SingleStore-Production-US | 10.128.24.122 | 100% packet loss — Request timed out | 🗑️ Dead |
+
+Additional findings:
+- `ew1d-aggr-05` and `ew1d-aggr-15` are not in `sys.servers` — linked servers already removed
+- `ew1d-admin-01` is in `sys.servers` and `sp_testlinkedserver` returned no error — admin node reachable
+- Last ping recorded in `DBA_VCC_MEMSQL.dbo.BAS_Ping_Stat` for all EW1D nodes: 2026-05-08 12:00:00 — monitoring stopped when MemSQL jobs were disabled
+
+**Finding:** 4 out of 5 SingleStore datasources in Grafana are pointing at dead servers. Only SingleStore-Release (10.77.6.161) is alive. Dashboards listed as reading from SingleStore-Production-UK/EU/US are connecting to dead targets — those dashboards are broken regardless of what the last updated date says.
+
+**Finding — 2026-07-22 — InfluxDB confirmed orphaned:**
+
+**Query used:**
+```sql
+EXEC xp_cmdshell 'del C:\temp\gf_influx.py';
+EXEC xp_cmdshell 'echo import sqlite3 > C:\temp\gf_influx.py';
+EXEC xp_cmdshell 'echo conn = sqlite3.connect(r"C:\Program Files\GrafanaLabs\grafana\data\grafana.db") >> C:\temp\gf_influx.py';
+EXEC xp_cmdshell 'echo rows = conn.execute("SELECT title, data FROM dashboard WHERE is_folder=0").fetchall() >> C:\temp\gf_influx.py';
+EXEC xp_cmdshell 'echo hits = [r[0] for r in rows if "aa82f021" in str(r[1])] >> C:\temp\gf_influx.py';
+EXEC xp_cmdshell 'echo print(len(hits)) >> C:\temp\gf_influx.py';
+EXEC xp_cmdshell 'echo [print(h) for h in hits] >> C:\temp\gf_influx.py';
+EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python.exe C:\temp\gf_influx.py';
+```
+
+**Evidence:** Output returned `0` — zero dashboards reference InfluxDB UID `aa82f021`. No URL stored in datasource config. InfluxDB was never configured and never used. Safe to delete.
 
 **Finding — 2026-07-21 — MemSQL jobs deliberately disabled 2026-05-08:**  
 All 6 MemSQL jobs disabled within 90 seconds on 2026-05-08 12:00–12:01 — confirmed from `msdb.dbo.sysjobs.date_modified`. This is a deliberate action, not a failure. DBA_VCC_MEMSQL_GLOBAL_STATUS_CAPTURE was disabled separately on 2025-05-05. Q21/Q22 partially closed — stakeholder confirmation of who and why still needed from yogeshwar.phull / tashvir.babulal.
