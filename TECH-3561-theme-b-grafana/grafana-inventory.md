@@ -405,17 +405,36 @@ Conclusion from evidence: deliberate decommission action, not a failure or pause
 **What we found:**
 All 4 Zabbix datasources in Grafana are configured using credentials belonging to **donovan.vangraan** — an ex-employee who was last seen on this server in November 2024. His account still has active database access to Zabbix MySQL. This is a live security risk that exists today, completely independent of the decommission decision.
 
-**Supporting evidence:**
-- 4 Zabbix datasources confirmed in grafana.db: Zabbix Nonprod old, zabbix-server-data.shnonprd, Zabbix Prod Old, zabbix-server-data.shprd
-- donovan.vangraan last seen: 2024-11-13 — no longer active
-- donovan.vangraan still holds Grafana admin rights
+**Which datasources use donovan.vangraan's credentials:**
+
+| Datasource | Uses donovan.vangraan? |
+|---|---|
+| DBA_VCC (primary SQL Server) | ❌ No — uses `grafana` SQL login |
+| KAPP UK/EU/US Prod MySQL | ❌ No — uses a separate MySQL service account |
+| SingleStore UK/EU/US | ❌ No — separate credentials |
+| JSON API (NiFi) | ❌ No |
+| CloudWatch | ❌ No — uses IAM role |
+| Zabbix Nonprod old | ✅ Yes — donovan.vangraan |
+| zabbix-server-data.shnonprd | ✅ Yes — donovan.vangraan |
+| Zabbix Prod Old | ✅ Yes — donovan.vangraan |
+| zabbix-server-data.shprd | ✅ Yes — donovan.vangraan |
+
+Every other datasource uses its own service account or IAM role. Only the 4 Zabbix datasources are affected.
+
+**The risk specifically:**
+- donovan.vangraan left the organisation — his credentials should have been revoked at offboarding
+- His MySQL credentials for Zabbix are still stored in Grafana and still active
+- Anyone who can access Grafana can query Zabbix data using his account
+- If his password was reused elsewhere, that is an additional risk beyond this server
+- donovan.vangraan still holds Grafana admin rights — he could log back in
 - Default admin account also still active — last seen 2024-11-29
 
 **Proposed solution:**
 - Revoke donovan.vangraan's Grafana admin access immediately
-- Rotate the Zabbix MySQL credentials used in all 4 datasources — replace with a service account
-- Disable the default admin account — it should never be left active in a production-adjacent system
-- This must happen now — not as part of decommission planning
+- Create a dedicated `grafana_readonly` service account in Zabbix MySQL
+- Replace his credentials in all 4 Zabbix datasources with the new service account
+- Disable the default admin account
+- This must happen now — independent of the decommission decision
 
 ---
 
