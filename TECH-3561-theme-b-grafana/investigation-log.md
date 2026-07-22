@@ -243,12 +243,15 @@ EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python
 
 > Note: query 9.8 returns 3 rows from `alert_configuration` — Grafana stores multiple config versions in this table (factory default, old draft, current active). The contact points above are extracted from the current active config (row 2 of 3). Row 1 is an old draft with no sub-routes where all alerts defaulted to the broken email. Row 3 is the factory default Grafana ships with — never customised. The Slack webhook tokens in row 2 are encrypted — a Grafana admin login is required to view or rotate them.
 
-**Finding:** Grafana reads directly from DBA_VCC on localhost. 4 Zabbix datasources use donovan.vangraan credentials — he is an Admin account that has not logged in since November 2024. His credentials need to be rotated and his account should be reviewed before decommission. The default `admin` account is also still active and should be disabled. Email contact point is a placeholder and will never deliver alerts. Month-end dashboards are showing stale data since May 2026 due to MemSQL jobs being disabled — nobody has flagged this.
+**Finding — 2026-07-21 — InfluxDB datasource confirmed orphaned:**  
+Zero dashboards reference InfluxDB UID `aa82f021` — confirmed via grafana.db full scan. No URL stored, no connection details, no dashboards using it. Safe to delete. Q36 closed.
 
-**Finding — 2026-07-21 — DBA_VCC_COST collection silently broken since May 2026:**  
-`DBA_VCC_COST_Entity_Count_Collection` reports succeeded every Monday but all 5 main tables have `MAX(DateChecked) = 2026-05-04`. Root cause confirmed by inspecting `SP_INFO_KAPP_CLIENT_USERS_COUNTS`: every `SP_INFO_KAPP_CLIENT_*` proc queries `DBA_VCC_MEMSQL.dbo.BAS_Ping_Stat` and `BAS_SQL_Status` to get live SingleStore servers before running OPENQUERY. With MemSQL jobs disabled since May 2026, those tables stopped updating — the `DATEDIFF(MINUTE, DATECHECKED, GETDATE()) < 40` filter returns zero rows, `@SERVERNAMES` is empty, the WHILE loop never runs, zero rows inserted, job exits clean. Same root cause as the 14 stale dashboards. DBA_VCC_COST is a downstream casualty of the MemSQL disable.
+**Finding — 2026-07-21 — MemSQL jobs deliberately disabled 2026-05-08:**  
+All 6 MemSQL jobs disabled within 90 seconds on 2026-05-08 12:00–12:01 — confirmed from `msdb.dbo.sysjobs.date_modified`. This is a deliberate action, not a failure. DBA_VCC_MEMSQL_GLOBAL_STATUS_CAPTURE was disabled separately on 2025-05-05. Q21/Q22 partially closed — stakeholder confirmation of who and why still needed from yogeshwar.phull / tashvir.babulal.
+
+**Finding — 2026-07-21 — DBA_VCC_COST client data confirmed, grafana has CONNECT access:**  
+grafana SQL login confirmed with CONNECT permission on DBA_VCC_COST. LU_KAPP_ClientList contains 280 real institutional clients. 19 REP_MONTHEND_CLIENT_* stored procs form a per-client reporting layer — created Jan 2023. Dashboard reads this data directly via three-part SQL in dashboard queries. Client-facing status still requires stakeholder confirmation.
 
 **Open questions for TECH-3561:**
-- Are any dashboards client-facing or SLA-related? (Month End Reporting and KAPP Client reports are candidates)
-- Which teams use the dashboards — engineering only or wider?
-- Confirm with tashvir.babulal / rayhaan.suleyman before decommission decision
+- Are any dashboards client-facing or SLA-related? — KAPP Client Utilisation and Growth Report and BNY IIS Log Streams are the two candidates. Evidence gathered — blocked on tashvir.babulal / rayhaan.suleyman confirmation
+- Q21/Q22 — who disabled MemSQL jobs on 2026-05-08 and was SingleStore decommissioned? — blocked on yogeshwar.phull / tashvir.babulal

@@ -54,7 +54,7 @@
 | e792d174 | KAPP EU Prod | mysql | 10.125.6.134 | metrics | KAPP EU Production MySQL |
 | db3d6c01 | KAPP US Prod | mysql | 10.128.30.6 | metrics | KAPP US Production MySQL |
 | f4830a0f | KAPP Monitoring | mysql | 10.120.8.208 | metrics | KAPP monitoring — tlsSkipVerify=true |
-| dce83066 | monitoring | mysql | 10.120.8.208 | metrics | Duplicate of KAPP Monitoring — same IP, same database |
+| dce83066 | monitoring | mysql | 10.120.8.208 | metrics | Duplicate of KAPP Monitoring — same IP, same database. tlsSkipVerify=true |
 | f2ca52be | MySQL | mysql | 10.77.3.236:3306 | metrics | Generic MySQL — same IP as KAPP Rel |
 | d8b0939b | SingleStore-Dev | mysql | 10.61.0.95 | UDM__ | SingleStore Dev — queries UDM__ schema |
 | f1d911af | SingleStore-Release | mysql | 10.77.6.161 | UDM__ | SingleStore Release — queries UDM__ schema |
@@ -314,9 +314,29 @@
 - [x] ~~Which dashboards are actively used?~~ — 74 dashboards confirmed live from grafana.db 2026-07-21. 11 updated in 2025+ — actively used. SingleStore Monitoring (v2) folder confirmed not to exist — all SingleStore dashboards in one folder with duplicate titles. Amazon EC2 dashboard created and deleted 2026-07-21 by lunga.ndzimande — accidental investigation artefact.
 - [x] ~~Who has admin access to Grafana?~~ — tashvir.babulal, yogeshwar.phull, rayhaan.suleyman, donovan.vangraan
 - [x] ~~Is Grafana version current or end-of-life?~~ — v9.5.2, LTS, not latest but supported
-- [ ] Are any dashboards client-facing or SLA-related? — Month End Reporting and KAPP Client reports are candidates — confirm with tashvir/rayhaan
+- [ ] Are any dashboards client-facing or SLA-related? — KAPP Client Utilisation and Growth Report and BNY IIS Log Streams are the two candidates. Evidence: LU_KAPP_ClientList contains 280 real institutional clients (BlackRock, BNY Mellon, Aberdeen, Wellington etc.) with entity IDs and regions. REP_MONTHEND_CLIENT_* stored procs (19 procs, created Jan 2023) form a per-client reporting layer. grafana login confirmed CONNECT permission on DBA_VCC_COST. Data frozen May 2026 — must disclose to tashvir/rayhaan before any decommission action.
 - [x] ~~What contact points are configured for Grafana alert rules?~~ — 3 contact points confirmed: alerts-data-operations (Slack, active), alert-app-allow2fa-disabled (Slack, active), email (placeholder — not configured, will not deliver)
-- [ ] Is InfluxDB datasource still active — URL not stored in db, needs confirmation
+- [x] ~~Is InfluxDB datasource still active?~~ — **Closed. Zero dashboards reference InfluxDB UID aa82f021 — confirmed via grafana.db scan 2026-07-21. No URL stored, no dashboards using it. Safe to delete.**
+
+### Q21/Q22 — Why were MemSQL jobs disabled?
+
+> Partially closed from evidence — stakeholder confirmation still needed.
+
+All 7 MemSQL jobs were disabled on **2026-05-08 between 12:00:32 and 12:01:10** — within 90 seconds of each other. This is not organic failure. Someone deliberately disabled all 7 jobs in a single session. DBA_VCC_MEMSQL_GLOBAL_STATUS_CAPTURE was disabled separately a year earlier (2025-05-05).
+
+Evidence from `msdb.dbo.sysjobs`:
+
+| Job | Enabled | date_modified |
+|---|---|---|
+| DBA_VCC_MEMSQL_WEEKLY_CHECKS | 0 | 2026-05-08 12:01:10 |
+| DBA_VCC_MEMSQL_MON_SQL_STATUS | 0 | 2026-05-08 12:01:05 |
+| DBA_VCC_MEMSQL_MON_PING_STATS | 0 | 2026-05-08 12:01:01 |
+| DBA_VCC_MEMSQL_HOURLY_CHECKS | 0 | 2026-05-08 12:00:58 |
+| DBA_VCC_MEMSQL_DAILY_CHECKS | 0 | 2026-05-08 12:00:52 |
+| DBA_VCC_MEMSQL_AUDIT_BACKUP_INFO_DETAILED | 0 | 2026-05-08 12:00:32 |
+| DBA_VCC_MEMSQL_GLOBAL_STATUS_CAPTURE | 0 | 2025-05-05 11:00:17 |
+
+Conclusion from evidence: deliberate decommission action, not a failure or pause. Still need yogeshwar.phull or tashvir.babulal to confirm who did it and whether SingleStore itself was decommissioned at the same time.
 
 ---
 
@@ -409,7 +429,70 @@ There are 2 DBA_VCC datasource entries pointing at the same target with differen
 
 ---
 
-### 5. Overall Grafana Recommendation
+### 5. Alerting Is Effectively Broken — Only 3 Rules, Email Never Fires
+
+**What we found:**
+Grafana has 74 dashboards and only 3 alert rules. The email contact point has a placeholder address and will never deliver. All active alerts route to Slack only. The 3 existing alert rules cover KAPP client config and read query failures — nothing covers the broken dashboards, stale data, or datasource failures that this investigation uncovered. The server has been silently failing for months with no alert firing.
+
+**Supporting evidence:**
+- 3 alert rules confirmed: Failed Read Queries per Second, KAPP Client Config Alert, KAPP Client Application Auth Config Alert
+- Email contact point destination: `<example@email.com>` — placeholder, never configured
+- No alert rule exists for: stale data detection, job failure notification, datasource connectivity, or dashboard data freshness
+- 14 dashboards stale since May 2026 — no alert fired
+- AWS cost and Encore IIS data frozen since Sept 2024 — no alert fired
+- DBA_VCC_COST collection silently broken since May 2026 — no alert fired
+
+**Proposed solution:**
+- Replace the placeholder email contact point with a real address before migration
+- Add alert rules for data freshness — alert when MAX(DateChecked) on key tables exceeds expected refresh interval
+- Add a datasource health check alert — alert when a datasource returns no data for more than 2 consecutive collection cycles
+- When migrating to Amazon Managed Grafana, configure SNS or SES as a contact point alongside Slack — email should not be optional for a monitoring platform
+
+---
+
+### 6. Grafana Connects Directly to Production MySQL — Network Dependency
+
+**What we found:**
+Grafana on this server has direct MySQL connections to 6 production databases — KAPP UK Prod, KAPP EU Prod, KAPP US Prod, SingleStore UK Prod, SingleStore EU Prod, and SingleStore US Prod. These connections bypass any data layer and read production data directly. If this server is decommissioned without migrating these datasources, those dashboards break immediately.
+
+**Supporting evidence:**
+- KAPP UK Prod: 10.121.29.82 — direct MySQL connection
+- KAPP EU Prod: 10.125.6.134 — direct MySQL connection
+- KAPP US Prod: 10.128.30.6 — direct MySQL connection
+- SingleStore-Production-UK: 10.121.22.219 — direct MySQL connection, UDM__ schema
+- SingleStore-Production-EU: 10.125.12.126 — direct MySQL connection, UDM__ schema
+- SingleStore-Production-US: 10.128.24.122 — direct MySQL connection, UDM__ schema
+- 10 dashboards confirmed reading from these datasources — all actively maintained in 2025
+
+**Proposed solution:**
+- Before decommissioning, confirm firewall rules allow Amazon Managed Grafana to reach these MySQL endpoints
+- Migrate these datasources to Amazon Managed Grafana using a service account — not the current credentials
+- Validate each dashboard against live data after migration before cutting over
+- tlsSkipVerify=true is set on KAPP Monitoring datasource — this must be replaced with proper certificate validation in the new environment
+
+---
+
+### 7. WPv2 Dashboards — Dead Data, Should Be Retired Now
+
+**What we found:**
+Two WPv2 Month End Reporting dashboards exist — one in Month End Reporting folder, one in Database Engineering Month End Reporting folder. WPv2 was decommissioned years ago. These dashboards call stored procedures that reference dead linked servers. They will never show live data again.
+
+**Supporting evidence:**
+- WPv2 Month End Reporting (Month End Reporting folder) — last updated 2023-07-07
+- WPv2 Month End Reporting (Database Engineering Month End Reporting folder) — last updated 2024-06-20
+- SP_AUDIT_WPv2_CLIENTS_DETAILED last modified 2022-11-01 — never updated after WPv2 decommission
+- WPv2 linked servers ew2p-wpv2, ew2r-wpv2, ue1p-wpv2, ue1r-wpv2 — all DNS gone, confirmed unreachable
+- DBA_VCC_MYSQL_AUDIT_DXM_CLIENT_DETAILED and DBA_VCC_MYSQL_DAILY_CHECKS both failing daily because of these dead dependencies
+
+**Proposed solution:**
+- Delete both WPv2 Month End Reporting dashboards — no migration needed, no data to preserve
+- Drop SP_AUDIT_WPv2_CLIENTS_DETAILED from DBA_VCC_MYSQL
+- Remove WPv2 steps from the 2 failing jobs — this is the same fix proposed in Theme A finding 6
+- This is a zero-risk cleanup that can be done immediately
+
+---
+
+### 8. Overall Grafana Recommendation
 
 **This server should not be running Grafana.** It is a non-production EC2 instance running a self-hosted Grafana 9.5.2 that requires manual patching, has ex-employee credentials active, and has no proper alerting configured. The platform is in AWS — Grafana should be too.
 
@@ -422,9 +505,20 @@ There are 2 DBA_VCC datasource entries pointing at the same target with differen
 
 **Migration order:**
 1. Fix credentials first — rotate donovan.vangraan, disable default admin
-2. Audit and retire stale/duplicate dashboards
-3. Set up Amazon Managed Grafana workspace
-4. Migrate active dashboards one folder at a time
-5. Re-point datasources to their targets directly
-6. Validate all alerts are firing correctly in the new environment
-7. Decommission Grafana on EW1R-REP-01
+2. Retire WPv2 dashboards and all confirmed stale/duplicate dashboards
+3. Fix broken jobs and data pipelines — do not migrate broken dashboards
+4. Set up Amazon Managed Grafana workspace
+5. Migrate active dashboards one folder at a time — validate data freshness after each folder
+6. Re-point datasources to their targets directly — confirm firewall rules first
+7. Validate all alerts are firing correctly in the new environment
+8. Decommission Grafana on EW1R-REP-01
+
+**Dashboard migration priority:**
+
+| Priority | Dashboards | Action |
+|---|---|---|
+| Migrate first | KAPP Document Generation Run Metrics (5 dashboards), NTAM Workflow, Detailed KAPP Workflow Stats, Cluster View, Historical Workload Monitoring, Query History | Active — confirmed live data |
+| Fix then migrate | Nifi API Reporting, Database Engineering Costs, Database Engineering Sprint Reporting | Active but need datasource validation |
+| Investigate before migrating | KAPP Client Utilisation and Growth Report, BNY IIS Log Streams | Possible client-facing — confirm with stakeholders first |
+| Retire — do not migrate | All 14 DBA_VCC_MEMSQL stale dashboards, both WPv2 dashboards, all duplicate older copies | No live data, no value |
+| Retire immediately | Other Services Month End Reporting -- Draft | Never completed |
