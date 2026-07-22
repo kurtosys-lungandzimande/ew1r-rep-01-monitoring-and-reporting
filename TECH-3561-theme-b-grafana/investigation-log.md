@@ -78,9 +78,9 @@ EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python
 |---|---|---|---|---|---|
 | admin | — | admin@localhost | Admin | 2024-11-29 | ⚠️ Default admin account — no real name, should be disabled |
 | donovan.vangraan | Donovan van Graan | donovan.vangraan@kurtosys.com | Admin | 2024-11-13 | ⚠️ Inactive since Nov 2024 — credentials still in 4 Zabbix datasources |
-| tashvir.babulal | Tashvir Babulal | tashvir.babulal@kurtosys.com | Admin | 2026-06-09 | Active |
-| yogeshwar.phull | Yogeshwar Phull | yogeshwar.phull@kurtosys.com | Admin | 2026-06-22 | Active |
-| rayhaan.suleyman | Rayhaan Suleyman | rayhaan.suleyman@kurtosys.com | Admin | 2026-07-07 | Active |
+| DBA Team | Tashvir Babulal | DBA Team@kurtosys.com | Admin | 2026-06-09 | Active |
+| DBA Team | Yogeshwar Phull | DBA Team@kurtosys.com | Admin | 2026-06-22 | Active |
+| DBA Team | Rayhaan Suleyman | DBA Team@kurtosys.com | Admin | 2026-07-07 | Active |
 | ram.jeyaraman | Ram Jeyaraman | ram@kurtosys.com | Viewer | 2025-09-11 | Active |
 | jason.wolmarans | Jason Wolmarans | jason.wolmarans@kurtosys.com | Viewer | 2025-02-12 | Active |
 | sunil.odedra | Sunil Odedra | sunil.odedra@kurtosys.com | Viewer | 2023-07-12 | ⚠️ Inactive since Jul 2023 |
@@ -263,7 +263,7 @@ EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python
 | Database Engineering Sprint Reporting | 2023-07-13 | 2073-06-30 | 50-year expiry — permanent shareable link |
 | KAPP Month End Reporting | 2024-01-17 | 2074-01-04 | 50-year expiry — permanent shareable link |
 
-**Finding:** Snapshots in Grafana create a public URL that anyone can access without logging in. A 50-year expiry means these links were deliberately set to never expire. KAPP Month End Reporting snapshot created January 2024 — this is the strongest evidence of external/client-facing access found in the investigation. Neither BNY IIS Log Streams nor KAPP Client Utilisation and Growth Report have snapshots, but KAPP Month End Reporting is in the same reporting family. Must confirm with tashvir.babulal / rayhaan.suleyman who these snapshot links were shared with.
+**Finding:** Snapshots in Grafana create a public URL that anyone can access without logging in. A 50-year expiry means these links were deliberately set to never expire. KAPP Month End Reporting snapshot created January 2024 — this is the strongest evidence of external/client-facing access found in the investigation. Neither BNY IIS Log Streams nor KAPP Client Utilisation and Growth Report have snapshots, but KAPP Month End Reporting is in the same reporting family. Must confirm with DBA Team who these snapshot links were shared with.
 
 **Additional checks performed — all returned null (no evidence of external access):**
 - API keys: 0 configured — no programmatic/external access
@@ -368,11 +368,11 @@ EXEC xp_cmdshell 'C:\Users\sqlsrv\AppData\Local\Programs\Python\Python311\python
 **Evidence:** Output returned `0` — zero dashboards reference InfluxDB UID `aa82f021`. No URL stored in datasource config. InfluxDB was never configured and never used. Safe to delete.
 
 **Finding — 2026-07-21 — MemSQL jobs deliberately disabled 2026-05-08:**  
-All 6 MemSQL jobs disabled within 90 seconds on 2026-05-08 12:00–12:01 — confirmed from `msdb.dbo.sysjobs.date_modified`. This is a deliberate action, not a failure. DBA_VCC_MEMSQL_GLOBAL_STATUS_CAPTURE was disabled separately on 2025-05-05. Q21/Q22 partially closed — stakeholder confirmation of who and why still needed from yogeshwar.phull / tashvir.babulal.
+All 6 MemSQL jobs disabled within 90 seconds on 2026-05-08 12:00–12:01 — confirmed from `msdb.dbo.sysjobs.date_modified`. This is a deliberate action, not a failure. DBA_VCC_MEMSQL_GLOBAL_STATUS_CAPTURE was disabled separately on 2025-05-05. Q21/Q22 partially closed — stakeholder confirmation of who and why still needed from DBA Team.
 
 **Finding — 2026-07-21 — DBA_VCC_COST client data confirmed, grafana has CONNECT access:**  
 grafana SQL login confirmed with CONNECT permission on DBA_VCC_COST. LU_KAPP_ClientList contains 280 real institutional clients. 19 REP_MONTHEND_CLIENT_* stored procs form a per-client reporting layer — created Jan 2023. Dashboard reads this data directly via three-part SQL in dashboard queries. Client-facing status still requires stakeholder confirmation.
 
 **Open questions for TECH-3561:**
-- Are any dashboards client-facing or SLA-related? — KAPP Client Utilisation and Growth Report and BNY IIS Log Streams are the two candidates. Evidence gathered — blocked on tashvir.babulal / rayhaan.suleyman confirmation
-- Q21/Q22 — who disabled MemSQL jobs on 2026-05-08 and was SingleStore decommissioned? — blocked on yogeshwar.phull / tashvir.babulal
+- Are any dashboards client-facing or SLA-related? — KAPP Client Utilisation and Growth Report and BNY IIS Log Streams are the two candidates. Evidence gathered — blocked on DBA Team confirmation
+- Q21/Q22 — who disabled MemSQL jobs on 2026-05-08 and was SingleStore decommissioned? — blocked on DBA Team

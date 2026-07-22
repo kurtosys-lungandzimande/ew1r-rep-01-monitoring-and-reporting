@@ -33,15 +33,15 @@
 |---|---|---|---|---|
 | admin | (default) | admin@localhost | Yes | 2024-11-29 |
 | donovan.vangraan | donovan.vangraan | donovan.vangraan@kurtosys.com | Yes | 2024-11-13 — builder, no longer active |
-| tashvir.babulal | Tashvir Babulal | tashvir.babulal@kurtosys.com | Yes | 2026-06-09 — **actively using** |
-| yogeshwar.phull | Yogeshwar Phull | yogeshwar.phull@kurtosys.com | Yes | 2026-06-22 — **actively using** |
-| rayhaan.suleyman | Rayhaan Suleyman | rayhaan.suleyman@kurtosys.com | Yes | 2026-06-30 — **actively using** |
+| DBA Team | Tashvir Babulal | DBA Team@kurtosys.com | Yes | 2026-06-09 — **actively using** |
+| DBA Team | Yogeshwar Phull | DBA Team@kurtosys.com | Yes | 2026-06-22 — **actively using** |
+| DBA Team | Rayhaan Suleyman | DBA Team@kurtosys.com | Yes | 2026-06-30 — **actively using** |
 | ram.jeyaraman | Ram Jeyaraman | ram@kurtosys.com | No | 2025-09-11 |
 | jason.wolmarans | Jason Wolmarans | jason.wolmarans@kurtosys.com | No | 2025-02-12 |
 | sunil.odedra | Sunil Odedra | sunil.odedra@kurtosys.com | No | 2023-07-12 — likely inactive |
 | lunga.ndzimande | Lunga Ndzimande | lunga.ndzimande@kurtosys.com | Yes | 2026-07-21 — investigation only, created 2026-07-20 |
 
-> 3 admins actively using Grafana as of June 2026: tashvir.babulal, yogeshwar.phull, rayhaan.suleyman.
+> 3 admins actively using Grafana as of June 2026: DBA Team.
 > 2 admins inactive: donovan.vangraan (last seen Nov 2024 — credentials still in 4 Zabbix datasources, needs rotation) and default admin account (last seen Nov 2024 — should be disabled).
 > These are the key contacts before any decommission or migration decision.
 
@@ -193,7 +193,7 @@
 | Dashboard | Created | Last Updated | Status | Notes |
 |---|---|---|---|---|
 | KAPP Client Growth | 2023-07-09 | 2023-11-16 | ⚠️ Stale | Older copy — newer version in KAPP Reporting (2024-02-28) |
-| KAPP Client Utilisation and Growth Report | 2023-07-14 | 2024-02-22 | ❌ Broken + High risk | Reads DBA_VCC_COST — data frozen May 2026 (MemSQL root cause). Name suggests client-facing — confirm with tashvir/rayhaan |
+| KAPP Client Utilisation and Growth Report | 2023-07-14 | 2024-02-22 | ❌ Broken + High risk | Reads DBA_VCC_COST — data frozen May 2026 (MemSQL root cause). Name suggests client-facing — confirm with DBA Team |
 | KAPP Orphaned and Duplicated Records Report | 2023-08-10 | 2023-08-10 | ⚠️ Stale | Older copy — newer version in KAPP Reporting (2024-03-26) |
 
 ### KAPP Client Reporting
@@ -278,7 +278,7 @@
 | Dashboard | Created | Expires | Risk |
 |---|---|---|---|
 | Database Engineering Sprint Reporting | 2023-07-13 | 2073-06-30 | ⚠️ 50-year expiry — permanent link. Confirm who it was shared with |
-| KAPP Month End Reporting | 2024-01-17 | 2074-01-04 | 🔴 50-year expiry — permanent link. Strongest evidence of external/client-facing access on this server. Confirm with tashvir/rayhaan immediately |
+| KAPP Month End Reporting | 2024-01-17 | 2074-01-04 | 🔴 50-year expiry — permanent link. Strongest evidence of external/client-facing access on this server. Confirm with DBA Team immediately |
 
 > No snapshots exist for BNY IIS Log Streams or KAPP Client Utilisation and Growth Report.
 
@@ -332,11 +332,11 @@
 - [x] ~~What is the Grafana URL and port?~~ — https://ew1r-rep-01 on port 443
 - [x] ~~What datasources are configured?~~ — 21 datasources confirmed, see above
 - [x] ~~Which dashboards are actively used?~~ — 74 dashboards confirmed live from grafana.db 2026-07-21. 11 updated in 2025+ — actively used. SingleStore Monitoring (v2) folder confirmed not to exist — all SingleStore dashboards in one folder with duplicate titles.
-- [x] ~~Who has admin access to Grafana?~~ — tashvir.babulal, yogeshwar.phull, rayhaan.suleyman, donovan.vangraan
+- [x] ~~Who has admin access to Grafana?~~ — DBA Team, donovan.vangraan
 - [x] ~~Is Grafana version current or end-of-life?~~ — v9.5.2, LTS, not latest but supported
 - [ ] Are any dashboards client-facing or SLA-related? — Evidence gathered but not conclusive. Summary:
-  - **BNY IIS Log Streams** — uses DBA_VCC datasource (a082f27e). No snapshot, no API key, no log hits. Data frozen Sept 2024. Cannot confirm client-facing from evidence alone — blocked on tashvir/rayhaan
-  - **KAPP Client Utilisation and Growth Report** — uses DBA_VCC (a082f27e) + KAPP Dev (da173cae). No snapshot, no API key, no log hits. LU_KAPP_ClientList has 280 real institutional clients. REP_MONTHEND_CLIENT_* procs (19 procs) form a per-client reporting layer. Data frozen May 2026. Cannot confirm client-facing from evidence alone — blocked on tashvir/rayhaan
+  - **BNY IIS Log Streams** — uses DBA_VCC datasource (a082f27e). No snapshot, no API key, no log hits. Data frozen Sept 2024. Cannot confirm client-facing from evidence alone — blocked on DBA Team
+  - **KAPP Client Utilisation and Growth Report** — uses DBA_VCC (a082f27e) + KAPP Dev (da173cae). No snapshot, no API key, no log hits. LU_KAPP_ClientList has 280 real institutional clients. REP_MONTHEND_CLIENT_* procs (19 procs) form a per-client reporting layer. Data frozen May 2026. Cannot confirm client-facing from evidence alone — blocked on DBA Team
   - **KAPP Month End Reporting** — has a snapshot with 50-year expiry (expires 2074-01-04, created 2024-01-17). This is a permanent shareable link — used to share dashboards externally without requiring a Grafana login. This is the strongest evidence of external/client-facing access found in the investigation
   - **Database Engineering Sprint Reporting** — also has a snapshot with 50-year expiry (expires 2073-06-30, created 2023-07-13). Likely internal sharing but worth confirming
 - [x] ~~What contact points are configured for Grafana alert rules?~~ — 3 contact points confirmed: alerts-data-operations (Slack, active), alert-app-allow2fa-disabled (Slack, active), email (placeholder — not configured, will not deliver)
@@ -360,7 +360,7 @@ Evidence from `msdb.dbo.sysjobs`:
 | DBA_VCC_MEMSQL_AUDIT_BACKUP_INFO_DETAILED | 0 | 2026-05-08 12:00:32 |
 | DBA_VCC_MEMSQL_GLOBAL_STATUS_CAPTURE | 0 | 2025-05-05 11:00:17 |
 
-Conclusion from evidence: deliberate decommission action, not a failure or pause. Still need yogeshwar.phull or tashvir.babulal to confirm who did it and whether SingleStore itself was decommissioned at the same time.
+Conclusion from evidence: deliberate decommission action, not a failure or pause. Still need DBA Team to confirm who did it and whether SingleStore itself was decommissioned at the same time.
 
 ---
 
@@ -451,7 +451,7 @@ Grafana on this server reads from 4 Zabbix MySQL databases to power Zabbix monit
 **Recommendation:**
 - These 4 dashboards are candidates for retirement — Zabbix already provides this monitoring natively and is the authoritative source
 - The 2 dead Zabbix datasources (Zabbix Nonprod old, Zabbix Prod Old) can be retired immediately — dead targets, no active dashboards
-- Confirm with tashvir/rayhaan whether anyone still uses these 4 dashboards before retiring them
+- Confirm with DBA Team whether anyone still uses these 4 dashboards before retiring them
 - Credentials must be rotated regardless of the decommission outcome — this is a live security risk today
 
 ---
@@ -480,7 +480,7 @@ Three separate silent failures are causing dashboards to show stale or wrong dat
 **Recommendation:**
 - Dashboards with dead data pipelines and no confirmed consumer are candidates for retirement — not worth preserving
 - AWS Cost Report and AWS Cost Report Monthly: AWS Cost Explorer already provides this natively — these dashboards are redundant
-- BNY IIS Log Streams and Encore dashboards: data frozen Sept 2024 — confirm with tashvir/rayhaan if BNY Mellon still needs this before any decision
+- BNY IIS Log Streams and Encore dashboards: data frozen Sept 2024 — confirm with DBA Team if BNY Mellon still needs this before any decision
 - The silent failure pattern (no alert fired, no one noticed for months) is evidence that these dashboards have no active consumer — this supports retirement
 
 ---
@@ -575,7 +575,7 @@ Two WPv2 Month End Reporting dashboards exist — one in Month End Reporting fol
 | Classification | Count | Dashboards | Reason |
 |---|---|---|---|
 | ✅ Keep — still needed, nothing else covers it | 9 | Nifi API Reporting, Database Engineering Costs, Database Engineering Sprint Reporting, Cluster View (current), Historical Workload Monitoring (current), Query History, Detailed KAPP Workflow Stats, Release Doc Gen Run Metrics, Development Doc Gen Run Metrics | Live data confirmed. No equivalent in Zabbix or CloudWatch |
-| ⚠️ Keep — pending stakeholder confirmation | 2 | KAPP Client Utilisation and Growth Report, BNY IIS Log Streams | Possible client-facing. Cannot retire without tashvir/rayhaan confirmation |
+| ⚠️ Keep — pending stakeholder confirmation | 2 | KAPP Client Utilisation and Growth Report, BNY IIS Log Streams | Possible client-facing. Cannot retire without DBA Team confirmation |
 | 🔁 Replace — AWS already has this | 4 | AWS Cost Report, AWS Cost Report Monthly, AWS EC2 Report, AWS RDS Report | AWS Cost Explorer and CloudWatch already provide this natively. No need to maintain a custom dashboard on a separate server |
 | 🔁 Replace — Zabbix already has this | 4 | Dashboard Servers Windows, SQL SERVER, Microsoft SQL Server, Zabbix Server Dashboard | Zabbix already monitors this infrastructure directly. These dashboards are a duplicate view through a middleman |
 | 🗑️ Retire — data source dead, no recovery path | 7 | Prod EU/UK/US Doc Gen Run Metrics, NTAM Workflow by workflowRunId, KAPP Client Config, KAPP Client Application Auth Config | SingleStore Prod EU/UK/US confirmed dead (100% packet loss). Data frozen 2026-05-08. No live target to restore |
@@ -608,10 +608,10 @@ Two WPv2 Month End Reporting dashboards exist — one in Month End Reporting fol
 - 4 Zabbix dashboards are a middleman view — Zabbix already has this data, these dashboards add no value
 - 9 dashboards have confirmed live data and no equivalent elsewhere — these are the ones that need a home if this server is decommissioned
 - 2 dashboards are potentially client-facing — these are the highest risk and must be confirmed before any decision
-- The KAPP Month End Reporting snapshot (permanent public URL, expires 2074) is the strongest evidence of external access on this server — must be confirmed with tashvir/rayhaan before anything is retired
+- The KAPP Month End Reporting snapshot (permanent public URL, expires 2074) is the strongest evidence of external access on this server — must be confirmed with DBA Team before anything is retired
 
 **The server cannot be decommissioned until:**
-1. tashvir.babulal / rayhaan.suleyman confirm whether KAPP Client Utilisation and Growth Report and BNY IIS Log Streams are client-facing
+1. DBA Team confirm whether KAPP Client Utilisation and Growth Report and BNY IIS Log Streams are client-facing
 2. The KAPP Month End Reporting snapshot URL is confirmed — who was it shared with and is it still in use
-3. yogeshwar.phull / tashvir.babulal confirm why MemSQL jobs were disabled and whether SingleStore itself was decommissioned
+3. DBA Team confirm why MemSQL jobs were disabled and whether SingleStore itself was decommissioned
 4. A decision is made on the 9 dashboards with live data — does another platform (Zabbix, CloudWatch, or a replacement Grafana) take them, or are they retired too
