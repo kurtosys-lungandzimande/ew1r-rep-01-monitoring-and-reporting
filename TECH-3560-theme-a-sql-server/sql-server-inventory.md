@@ -282,6 +282,26 @@ Total across all user databases: ~600+ procedures. Counts per database:
 
 ---
 
+### 11. Zabbix — Dead Linked Servers and USP_ZAB_* Stored Procedures (Theme A)
+
+**What we found:**
+The Utilities database contains a set of `USP_ZAB_*` stored procedures built to integrate with Zabbix. Two of the Zabbix linked servers — ZabbixNonProd and ZabbixProdOld — are confirmed unreachable. Any stored procedure calling these linked servers will fail silently. The Zabbix agent is running on this server (port 10050, PID 5700) meaning Zabbix already watches this server directly — the custom integration layer is redundant.
+
+**Supporting evidence:**
+- `USP_ZAB_*` procedures confirmed in Utilities database
+- `USP_ZAB_KAPP_schema_compare` last modified 2024-05 — was being maintained
+- ZabbixNonProd linked server — confirmed unreachable from reachability testing
+- ZabbixProdOld linked server — confirmed unreachable from reachability testing
+- Zabbix agent confirmed running: zabbix_agentd.exe, port 10050, PID 5700
+
+**Proposed solution:**
+- Drop ZabbixNonProd and ZabbixProdOld linked servers — both dead, no risk
+- Confirm whether `USP_ZAB_*` procedures are still being called by any active job — if not, drop them
+- The Zabbix agent on this server already gives Zabbix direct visibility — no custom stored procedure layer needed
+- When this server is decommissioned, the Zabbix agent goes with it — no migration needed for this piece
+
+---
+
 ## Conclusion — Recommendations and Proposed Solutions
 
 This section summarises what we found for each area, why it matters, and what should be done about it. Written for a non-technical audience.
@@ -356,11 +376,10 @@ This database tracks usage counts for 280 real institutional clients — BlackRo
 - Collection job `DBA_VCC_COST_Entity_Count_Collection` running weekly on Mondays — confirmed active
 - Data sitting on a Developer Edition non-production server — not appropriate for client-facing data
 
-**Proposed solution:**
-- Immediately confirm with tashvir.babulal / rayhaan.suleyman whether the KAPP Client Utilisation dashboard is shown to clients
-- If client-facing: migrate this database to a proper licensed production RDS instance before any decommission work begins. This is non-negotiable.
-- If internal only: migrate to RDS or integrate with AWS Cost Explorer for cost tracking
-- Either way — this data should not remain on a Developer Edition non-prod server
+**Recommendation:**
+- Highest risk item on the server — 280 real institutional clients, FULL recovery model, possible client-facing dashboard.
+- Cannot retire or make any decision until DBA Team confirms whether KAPP Client Utilisation and Growth Report is shown to clients.
+- Data sitting on a Developer Edition non-prod server is not appropriate regardless of the decommission outcome — this needs a decision independent of the decommission timeline.
 
 ---
 
@@ -376,11 +395,11 @@ All 7 jobs feeding this database were disabled in May 2026. Nobody knows why. Th
 - `INFO_Client_FP_Detail` (556K rows), `INFO_KAPP_Workflow_Run_Detail` (268K rows) — last write May 2026
 - June 2026 month-end reporting impacted — no data pipeline
 
-**Proposed solution:**
-- Get an answer from yogeshwar.phull / tashvir.babulal on why the jobs were disabled
-- If SingleStore is decommissioned: drop all 7 jobs, archive the database, update all 14 dashboards to show "data no longer available" rather than stale numbers
-- If SingleStore migrated: update linked server connections and re-enable jobs
-- Regardless of outcome: notify dashboard consumers that data has been stale since May 2026
+**Recommendation:**
+- Blocked on DBA Team confirming why jobs were disabled in May 2026.
+- If SingleStore is decommissioned: retire all 7 jobs, archive or drop the database, retire all 14 dependent dashboards.
+- If SingleStore is still active: confirm new connection details — but that is a follow-on epic, not this investigation.
+- Dashboard consumers must be notified that data has been stale since May 2026 regardless of outcome.
 
 ---
 
@@ -395,10 +414,10 @@ This database monitors MySQL and DXM. The DXM side is working fine. The WPv2 sid
 - `xp_cmdshell` commented out in `SP_MON_PING_STATS` — all servers show as reachable regardless of actual status
 - WPv2 legacy tables still present: `INFO_WPv2_Client_Sizes` (810 rows), `ARC_INFO_WPv2_Client_Sizes` (66K rows)
 
-**Proposed solution:**
-- Fix immediately — remove WPv2 steps from both failing jobs, drop `SP_AUDIT_WPv2_CLIENTS_DETAILED`
-- For DXM monitoring: confirm if DXM monitoring is still needed. If yes, migrate the DXM collection jobs to a new host. If no, retire the database.
-- Clean up all WPv2 legacy tables and linked servers
+**Recommendation:**
+- WPv2 side: retire — WPv2 is decommissioned, the stored proc is from 2022, the linked servers are dead. Nothing to preserve.
+- DXM side: confirm with DBA Team whether DXM monitoring is still needed. If yes, keep and plan for it in the follow-on epic. If no, retire the database.
+- 4 dead WPv2 linked servers are safe to drop immediately.
 
 ---
 
@@ -414,10 +433,10 @@ This database captures performance baselines — connection counts and table siz
 - No confirmed Grafana datasource reading from this database
 - No confirmed consumer identified in any investigation query
 
-**Proposed solution:**
-- Ask the DBA team directly: does anyone use this data? Is it used for capacity planning, incident investigation, or reporting?
-- If no consumer confirmed: retire the database. 50 GB of baselines for systems that no longer exist has no value.
-- If a consumer exists: migrate only the relevant baseline tables (MSSQL side) to a new host
+**Recommendation:**
+- No confirmed consumer identified. Significant portion of what it baselines (MemSQL, WPv2) no longer exists.
+- Retire candidate — pending DBA Team confirming whether anyone reads this data.
+- If no consumer confirmed: retire. 50 GB of baselines for dead systems has no value.
 
 ---
 
@@ -432,8 +451,9 @@ This database has only 2 tables and no stored procedures. The last data written 
 - 0 stored procedures confirmed
 - Only 2 tables: `Jira_Project_Issue_Field_Types` (181,714 rows) and `Jira_Project_Leads` (657 rows)
 
-**Proposed solution:**
-Archive and retire. Export the 2 tables to S3 as a cold archive in case anyone ever needs the historical Jira data, then drop the database. No migration needed — nothing is writing to it and nothing is reading from it.
+**Recommendation:**
+- Retire — nothing is writing to it, nothing is confirmed reading from it, data frozen since Dec 2023.
+- Export 2 tables to S3 as cold archive before dropping — low effort, low risk.
 
 ---
 
@@ -449,12 +469,10 @@ Archive and retire. Export the 2 tables to S3 as a cold archive in case anyone e
 - 2 inactive admin credentials flagged (donovan.vangraan — ex-employee, still used in 4 Zabbix datasources)
 - Default admin account still active
 
-**Proposed solution:**
-- Audit all 74 dashboards — identify which ones are actually being viewed
-- Retire the 14 stale MemSQL dashboards immediately
-- Migrate the dashboards that matter to **Amazon Managed Grafana** — AWS manages the infrastructure, no self-hosted server needed
-- Rotate or remove ex-employee credentials before any migration
-- Fix or remove the broken email alert contact point
+**Recommendation:**
+- Full dashboard classification done in Theme B — retire/replace/keep per dashboard confirmed.
+- 35+ dashboards are retire candidates. 8 are replaceable by Zabbix or CloudWatch natively. 9 have confirmed live data with no equivalent elsewhere.
+- Ex-employee credentials are a live security risk independent of the decommission decision — must be rotated now.
 
 ---
 
@@ -469,40 +487,39 @@ Archive and retire. Export the 2 tables to S3 as a cold archive in case anyone e
 - 30 safe to drop immediately confirmed in linked-server-inventory.md
 - 2 daily job failures directly caused by dead linked servers
 
-**Proposed solution:**
-- Drop the 30 safe linked servers immediately — no risk, no investigation needed
-- Investigate and drop the remaining 33 dead linked servers after confirming no dependency
-- Clean up WPv2 linked servers as part of fixing the 2 failing jobs
+**Recommendation:**
+- 30 dead linked servers are safe to retire immediately — gen-rel, gen-prd, WPv2, dead Zabbix instances.
+- Remaining 33 dead linked servers need DBA Team confirmation before dropping.
+- WPv2 linked server cleanup is the same action as fixing the 2 failing jobs — one action resolves both.
 
 ---
 
-### Overall Recommendation
+### Overall Recommendation — Retire / Replace / Keep
 
-**This server should be decommissioned. The question is not whether — it is when and in what order.**
+**The core question:** For each function this server performs, does it still need to exist — and does something already in the platform cover it?
 
-The platform has moved to AWS. The tools this server was built to provide in 2017 now exist natively in AWS. Running a custom monitoring framework on a Developer Edition non-production server watching production systems is a risk — licensing, reliability, and compliance.
-
-**The proposed replacement stack:**
-
-| What EW1R-REP-01 does today | Replace with |
-|---|---|
-| SQL Server monitoring (VCC framework) | AWS CloudWatch + CloudWatch Agent |
-| KAPP API query tracking | CloudWatch Logs + CloudWatch Insights |
-| AWS cost tracking | AWS Cost Explorer |
-| EC2/RDS inventory | AWS Config / Systems Manager |
-| Grafana dashboards | Amazon Managed Grafana |
-| Client billing data (DBA_VCC_COST) | Dedicated licensed RDS instance |
-| DXM monitoring | Migrate to new host or retire |
-
-**Before decommission can start, 6 questions must be answered:**
-
-| # | Question | Who |
+| Function | Classification | Reason |
 |---|---|---|
-| 1 | Is the KAPP Client Utilisation dashboard shown to clients? | tashvir.babulal / rayhaan.suleyman |
-| 2 | Who consumes DBA_VCC_COST data? | tashvir.babulal / rayhaan.suleyman |
-| 3 | Why were MemSQL jobs disabled in May 2026? | yogeshwar.phull / tashvir.babulal |
-| 4 | Who consumes VCC monitoring data for EW2P-MSSQL-01/02? | DBA team |
-| 5 | What is the migration plan for VCC monitoring post-decommission? | DBA team |
-| 6 | Who consumes DBA_VCC_AWS data? | tashvir.babulal / rayhaan.suleyman |
+| SQL Server monitoring — EW2P-MSSQL-01/02 | Replace | CloudWatch provides this natively for RDS. If EC2-hosted, CloudWatch Agent covers the same surface |
+| KAPP API query tracking | Replace | Data originates in CloudWatch Logs — CloudWatch Insights queries it directly. No need for a custom SQL copy |
+| AWS cost tracking | Replace | AWS Cost Explorer already tracks costs per account/tag natively |
+| EC2/RDS inventory | Replace | AWS Config and Systems Manager Inventory cover this natively |
+| NiFi pipeline logs | Replace | Data originates in CloudWatch Logs |
+| DBA_VCC_COST — client billing data | Confirm | 280 institutional clients, FULL recovery, possible client-facing dashboard. Cannot classify until DBA Team confirms consumer |
+| DBA_VCC_MEMSQL — MemSQL monitoring | Retire | All jobs disabled May 2026, SingleStore Prod EU/UK/US confirmed dead. Pending confirmation of why jobs were disabled |
+| DBA_VCC_MYSQL — DXM monitoring | Keep (DXM) / Retire (WPv2) | DXM side active. WPv2 side dead — linked servers gone, stored proc from 2022 |
+| DBA_VCC_ATLASSIAN — Jira data | Retire | No writer, no confirmed consumer, data frozen Dec 2023 |
+| KURTOSYS_BASELINE | Retire (pending) | No confirmed consumer. Baselines dead systems |
+| 63 dead linked servers | Retire | 30 safe to drop immediately. 33 need DBA Team confirmation |
+| Grafana dashboards | See Theme B | Full retire/replace/keep classification in grafana-inventory.md |
 
-**Realistic timeline: 10–12 weeks from stakeholder sign-off.**
+**Blockers — server cannot be decommissioned until DBA Team answers:**
+
+| # | Question | Blocks |
+|---|---|---|
+| 1 | Is the KAPP Client Utilisation dashboard shown to clients? | DBA_VCC_COST decision |
+| 2 | Who consumes DBA_VCC_COST data? | DBA_VCC_COST decision |
+| 3 | Why were MemSQL jobs disabled in May 2026 — was SingleStore decommissioned? | DBA_VCC_MEMSQL decision |
+| 4 | Who consumes VCC monitoring data for EW2P-MSSQL-01/02? | DBA_VCC decommission |
+| 5 | Who consumes DBA_VCC_AWS data? | DBA_VCC_AWS decision |
+| 6 | Is DXM monitoring still needed? | DBA_VCC_MYSQL decision |

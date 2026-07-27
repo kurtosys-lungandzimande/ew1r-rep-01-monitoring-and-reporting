@@ -91,7 +91,7 @@ EW1R-REP-01 hosts 8 databases totalling 378 GB. Of these:
 | Identify which specific step in DBA_VCC_AWS_DAILY_CHECKS is silently failing — CATCH blocks mask individual step errors | DBA team | High |
 | Add explicit error handling so step failures surface as job failures | DBA team | High |
 | Assess partitioning strategy for INFO_AWS_KAPP_Query_API_Detail before it causes a production incident | DBA team | Medium |
-| Confirm who consumes AWS cost data from this database before decommission | tashvir.babulal / rayhaan.suleyman | Critical — blocks decommission |
+| Confirm who consumes AWS cost data from this database before decommission | DBA Team | Critical — blocks decommission |
 
 ---
 
@@ -158,10 +158,10 @@ It is not confirmed whether the jobs were disabled because SingleStore was decom
 **Proposed resolution:**
 | Action | Owner | Priority |
 |---|---|---|
-| Confirm why jobs were disabled — decommission, migration, or pause? | yogeshwar.phull / tashvir.babulal | Critical — determines everything below |
+| Confirm why jobs were disabled — decommission, migration, or pause? | DBA Team | Critical — determines everything below |
 | If SingleStore decommissioned: mark database as stale, archive or drop, update all 14 dashboards | DBA team | High |
 | If SingleStore migrated: update linked server connections and re-enable jobs | DBA team | High |
-| Disclose to dashboard consumers that data has been stale since May 2026 | tashvir.babulal / rayhaan.suleyman | High |
+| Disclose to dashboard consumers that data has been stale since May 2026 | DBA Team | High |
 | Do not decommission this server until month-end dashboard consumers are identified and notified | TBD | Critical — blocks decommission |
 
 ---
@@ -404,8 +404,8 @@ This is the same root cause as the 14 stale Grafana dashboards — everything tr
 **Proposed resolution:**
 | Action | Owner | Priority |
 |---|---|---|
-| Confirm whether KAPP Client Utilisation and Growth Report is client-facing | tashvir.babulal / rayhaan.suleyman | **Critical — blocks decommission** |
-| Notify tashvir.babulal / rayhaan.suleyman that DBA_VCC_COST data has been frozen since May 2026 — dashboard consumers may not know | tashvir.babulal / rayhaan.suleyman | **High — immediate** |
+| Confirm whether KAPP Client Utilisation and Growth Report is client-facing | DBA Team | **Critical — blocks decommission** |
+| Notify DBA Team that DBA_VCC_COST data has been frozen since May 2026 — dashboard consumers may not know | DBA Team | **High — immediate** |
 | Weekly Monday schedule confirmed — no action needed on schedule | DBA team | Closed |
 | Resolving MemSQL jobs (Q-DB1) will also fix DBA_VCC_COST collection — they share the same root cause | DBA team | Linked to Q-DB1 |
 | Identify migration target for DBA_VCC_COST before any decommission date is set | DBA team / Platform team | **Critical — blocks decommission** |
@@ -492,9 +492,9 @@ DBA_VCC_ATLASSIAN has 0 stored procedures. It is a data store only. `MAX(DateChe
 
 | # | Question | Who to Ask | Blocks |
 |---|---|---|---|
-| Q-DB1 | Why were all 7 DBA_VCC_MEMSQL jobs disabled in May 2026 — decommission, migration, or pause? | yogeshwar.phull / tashvir.babulal | DBA_VCC_MEMSQL resolution |
-| Q-DB2 | Is KAPP Client Utilisation and Growth Report client-facing? | tashvir.babulal / rayhaan.suleyman | DBA_VCC_COST decommission |
-| Q-DB3 | Who consumes DBA_VCC_COST data — internal only or external? | tashvir.babulal / rayhaan.suleyman | DBA_VCC_COST decommission |
+| Q-DB1 | Why were all 7 DBA_VCC_MEMSQL jobs disabled in May 2026 — decommission, migration, or pause? | DBA Team | DBA_VCC_MEMSQL resolution |
+| Q-DB2 | Is KAPP Client Utilisation and Growth Report client-facing? | DBA Team | DBA_VCC_COST decommission |
+| Q-DB3 | Who consumes DBA_VCC_COST data — internal only or external? | DBA Team | DBA_VCC_COST decommission |
 | Q-DB4 | Who consumes the VCC monitoring data for EW2P-MSSQL-01/02 — what breaks if this server goes away? | DBA team | DBA_VCC decommission |
 | Q-DB5 | Who reads from DBA_VCC_ATLASSIAN? Data confirmed frozen since 2023-12-12, no active writer identified | DBA team | DBA_VCC_ATLASSIAN archival |
 | Q-DB6 | Identify which specific step in DBA_VCC_AWS_DAILY_CHECKS is silently failing — CATCH blocks mask individual step errors | DBA team | DBA_VCC_AWS data integrity |

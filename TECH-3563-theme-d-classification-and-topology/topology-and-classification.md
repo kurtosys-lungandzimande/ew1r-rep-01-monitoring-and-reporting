@@ -220,3 +220,47 @@ This server is **not safe to decommission** based on current evidence. It is:
 | Q23 | Is the VCC framework replicated anywhere else or is this the only instance? | DBA team | ⚠️ Open |
 | Q35 | Who disabled the DBA_VCC_MEMSQL jobs in May 2026 and why? Was the DAILY_CHECKS failure on 8 May 2026 ever investigated? Jobs must not be re-enabled without understanding the root cause. | yogeshwar.phull / tashvir.babulal | ⚠️ Open |
 | Q36 | Has anyone noticed that DBA_VCC_COST client entity counts have been stale since 4 May 2026? The KAPP Client Utilisation and Growth Report dashboard is showing 2.5-month-old billing data. The job runs every Sunday and reports Succeeded but writes zero rows — 11+ consecutive silent failures confirmed 2026-07-20. Whoever uses that report for invoicing has been working with wrong figures since May with no warning. Must be disclosed immediately. | tashvir.babulal / rayhaan.suleyman | ⚠️ Open — must disclose now |}
+
+---
+
+## Overall Decommission Recommendation — Proposed AWS-Native Replacement Stack
+
+### The core argument
+This server was built in 2017 to solve a problem that AWS now solves natively. Every single thing this server does has a direct AWS equivalent. The platform has moved to AWS — the monitoring should follow.
+
+Additionally, Zabbix already monitors the infrastructure directly. This server is sitting in the middle between Zabbix and the people who need to see the data, adding complexity, a licensing risk (Developer Edition), and a security risk (ex-employee credentials). It can be cut out entirely.
+
+### Proposed replacement stack
+
+| What EW1R-REP-01 does today | Replace with | Why |
+|---|---|---|
+| SQL Server monitoring via VCC framework | AWS CloudWatch + CloudWatch Agent | CloudWatch natively monitors EC2 and RDS. No custom framework needed. |
+| KAPP API query tracking (297M rows) | CloudWatch Logs + CloudWatch Insights | Data already originates in CloudWatch. This server is just making a copy. |
+| AWS cost tracking per client | AWS Cost Explorer + Cost Allocation Tags | Native AWS tool. No SQL Server needed. |
+| EC2/RDS inventory | AWS Config + Systems Manager Inventory | Native AWS tools. Auto-updated. |
+| NiFi pipeline logs | CloudWatch Logs | Already flowing there. |
+| Grafana dashboards (74) | Amazon Managed Grafana | AWS-managed. No server to maintain. IAM-based access. |
+| Zabbix monitoring dashboards | Amazon Managed Grafana → direct to Zabbix MySQL | Cut out this server entirely. Connect Grafana directly to Zabbix. |
+| Client billing data (DBA_VCC_COST) | Dedicated licensed RDS instance | Cannot stay on Developer Edition non-prod server. |
+| DXM monitoring | Migrate to new host or CloudWatch | DXM is active — needs a home. |
+| Backup jobs | RDS native automated backups + AWS Backup | Replace xp_cmdshell S3 sync with proper AWS Backup policies. |
+
+### Why Zabbix changes everything
+Zabbix already monitors the infrastructure directly. The 4 Grafana dashboards reading from Zabbix on this server can connect to Zabbix MySQL directly from Amazon Managed Grafana — no middleman needed. This server adds zero value to the Zabbix monitoring chain. It only adds:
+- A licensing risk (Developer Edition)
+- A security risk (ex-employee credentials active in datasources)
+- A maintenance burden (self-hosted Grafana, SQL Agent jobs, 109 linked servers)
+
+Removing this server from the Zabbix chain is a simplification, not a loss.
+
+### Decommission phases
+
+| Phase | What happens | When |
+|---|---|---|
+| Phase 1 — Immediate | Rotate donovan.vangraan credentials. Disable default admin. Fix 2 failing WPv2 jobs. Drop 30 safe dead linked servers. Notify stakeholders about stale DBA_VCC_COST data. | Now — before any decommission planning |
+| Phase 2 — Confirm | Answer 6 blocking questions. Confirm EW2P-MSSQL-01/02 are RDS or EC2. Confirm DBA_VCC_COST is or is not client-facing. Confirm why MemSQL jobs were disabled. | Weeks 1–2 |
+| Phase 3 — Replace | Set up Amazon Managed Grafana. Configure CloudWatch monitoring for EW2P-MSSQL-01/02. Migrate DBA_VCC_COST to licensed RDS. | Weeks 3–6 |
+| Phase 4 — Migrate | Migrate active Grafana dashboards. Re-point datasources. Validate all alerts. Migrate DXM monitoring. | Weeks 6–10 |
+| Phase 5 — Decommission | Retire remaining databases. Drop all dead linked servers. Switch off EW1R-REP-01. | Weeks 10–12 |
+
+**Realistic timeline: 10–12 weeks from stakeholder sign-off.**

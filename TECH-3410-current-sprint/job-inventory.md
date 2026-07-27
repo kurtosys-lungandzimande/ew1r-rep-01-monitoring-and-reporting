@@ -85,10 +85,10 @@
 **Proposed resolution:**
 | Action | Owner | Priority |
 |---|---|---|
-| Confirm why jobs were disabled — decommission, migration, or pause? | yogeshwar.phull / tashvir.babulal | Critical |
+| Confirm why jobs were disabled — decommission, migration, or pause? | DBA Team | Critical |
 | If SingleStore decommissioned: drop all 7 jobs, archive DBA_VCC_MEMSQL, update 14 dashboards | DBA team | High |
 | If SingleStore migrated: update linked server connections and re-enable jobs | DBA team | High |
-| Notify dashboard consumers that data has been stale since May 2026 regardless of outcome | tashvir.babulal / rayhaan.suleyman | High |
+| Notify dashboard consumers that data has been stale since May 2026 regardless of outcome | DBA Team | High |
 
 ---
 
@@ -253,7 +253,7 @@ All 16 VCC Audit Collection jobs and 8 VCC Server Monitoring jobs monitor produc
 
 | # | Question | Who to Ask | Blocks |
 |---|---|---|---|
-| Q-J1 | Why were MemSQL jobs disabled in May 2026 — decommission, migration, or pause? | yogeshwar.phull / tashvir.babulal | MemSQL job resolution |
+| Q-J1 | Why were MemSQL jobs disabled in May 2026 — decommission, migration, or pause? | DBA Team | MemSQL job resolution |
 | Q-J2 | What is the migration plan for VCC monitoring of EW2P-MSSQL-01/02 post-decommission? | DBA team | Decommission date |
 | Q-J3 | What SSIS packages does DBA - SSISStatusCheck monitor — where do they run? | DBA team | SSISStatusCheck relevance |
 | Q-J4 | Is DBA - Maintenance - SQL Backup EW1P-OCT still needed — who owns that RDS instance? | DBA team | Backup job cleanup |
