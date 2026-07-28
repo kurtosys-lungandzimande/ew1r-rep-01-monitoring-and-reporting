@@ -1,7 +1,8 @@
 # Incident Report — Disk Space Alert ew1r-aggr-04
 **Date:** 2026-07-28
 **Investigated by:** Lunga Ndzimande
-**Status:** Closed — root cause confirmed, action required
+**Status:** Investigation complete — awaiting approval to remediate
+**Last Updated:** 2026-07-28
 
 ---
 
@@ -99,6 +100,120 @@ If nothing is done this alert will keep firing. If the disk fills completely the
 
 ---
 
+## Detailed OS Level Investigation
+
+Accessed `ew1r-aggr-04` via **EC2 Instance Connect** from AWS Console (instance `i-0d36d94a301b8ddbc`).
+
+### Disk usage confirmed
+
+```
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/root        78G   60G   18G  78% /
+```
+
+### Top level folders by size
+
+| Folder | Size | Notes |
+|---|---|---|
+| /var | 51 GB | Dominant — drill down needed |
+| /opt | 5.7 GB | Application files |
+| /usr | 3.0 GB | OS binaries |
+| /snap | 2.5 GB | Snap packages |
+| /boot | 219 MB | Boot files |
+
+### /var breakdown
+
+| Folder | Size | Notes |
+|---|---|---|
+| /var/lib | 44 GB | SingleStore data + other libs |
+| /var/log | 4.2 GB | ⚠️ Logs — too large |
+| /var/swapfile | 3.1 GB | Normal — swap file |
+| /var/cache | 221 MB | Normal |
+
+### /var/lib breakdown
+
+| Folder | Size | Notes |
+|---|---|---|
+| /var/lib/memsql | **42 GB** | SingleStore data files |
+| /var/lib/snapd | 1.1 GB | Snap daemon |
+| /var/lib/apt | 308 MB | Package manager cache |
+| /var/lib/clamav | 108 MB | Antivirus definitions |
+
+### /var/log breakdown
+
+| Folder | Size | Notes |
+|---|---|---|
+| /var/log/journal | **3.8 GB** | ⚠️ System journal logs — bloated, safe to clean |
+| /var/log/amazon | 238 MB | AWS agent logs — normal |
+| /var/log/clamav | 127 MB | Antivirus logs |
+| /var/log/auth.log.1 | 23 MB | Auth logs |
+| /var/log/zabbix | 360 KB | Zabbix agent logs |
+
+### Journal log size confirmed
+```
+Archived and active journals take up 3.7G in the file system.
+```
+
+---
+
+## Root Cause — Confirmed
+
+Two contributing factors:
+
+1. **Undersized disk** — `ew1r-aggr-04` has a 78 GB disk. Every other node in the cluster has 99–317 GB. This was a provisioning oversight when the node was launched (2025-10-07).
+
+2. **Bloated journal logs** — `/var/log/journal` has accumulated 3.8 GB of system logs with no size cap configured. This is preventable and fixable at zero cost.
+
+---
+
+## Access Investigation
+
+During investigation the following access paths were attempted:
+
+| Method | Result |
+|---|---|
+| SSH from jumpbox as CSE | Permission denied |
+| SSH from jumpbox as ubuntu | Permission denied |
+| SSH from master aggregator | Permission denied |
+| MySQL via FundPressDataReader | Connected but insufficient privileges |
+| MySQL via admin user | Connected — cluster data retrieved |
+| AWS SSM Session Manager | SSM plugin not installed on jumpbox |
+| EC2 Instance Connect (AWS Console) | ✅ Connected successfully |
+| SSH key (kappeurel.pem) on jumpbox | Not present — only authorized_keys exists |
+
+**Note:** The `kappeurel.pem` SSH key for the release environment is not stored on the jumpbox. Future SSH access to SingleStore nodes requires either EC2 Instance Connect or the key from a secrets manager.
+
+---
+
+## Recommendations — In Priority Order
+
+| # | Action | Cost | Effort | Impact |
+|---|---|---|---|---|
+| 1 | Clean journal logs older than 7 days — `journalctl --vacuum-time=7d` | Free | 1 minute | Frees 3.8 GB immediately |
+| 2 | Cap journal log size permanently — set `SystemMaxUse=500M` in `/etc/systemd/journald.conf` | Free | 5 minutes | Prevents recurrence |
+| 3 | Check `/var/lib/memsql` for old snapshots or backups that can be removed | Free | 30 minutes | May free additional space |
+| 4 | Clean apt cache — `apt clean` | Free | 1 minute | Frees ~308 MB |
+| 5 | Expand EBS volume from 78 GB to 150 GB | ~$6/month extra | DevOps — 30 min | Permanent fix |
+| 6 | Standardise disk sizes across all cluster nodes | ~$6/month extra | DevOps | Prevents same issue on other nodes |
+| 7 | Install SSM agent on all SingleStore nodes | Free | DevOps | Enables future remote access without EC2 Instance Connect |
+| 8 | Lower Zabbix disk alert threshold from 20% to 30% on this node | Free | 5 minutes | Earlier warning before disk fills |
+
+**Recommended immediate action (pending approval):**
+```bash
+# Step 1 — clean journal logs
+journalctl --vacuum-time=7d
+
+# Step 2 — cap journal size permanently
+echo 'SystemMaxUse=500M' >> /etc/systemd/journald.conf
+systemctl restart systemd-journald
+
+# Step 3 — verify
+df -h /
+```
+Expected result: disk drops from 78% to ~73% used (frees ~3.8 GB).
+
+---
+
 ## Queries Used
 
 ```sql
@@ -112,4 +227,26 @@ SELECT
     ROUND(DISK_USED_B / 1024 / 1024 / 1024, 2) AS disk_used_gb
 FROM information_schema.MV_DISK_USAGE
 ORDER BY NODE_ID, DISK_USED_B DESC;
+```
+
+## OS Commands Used
+
+```bash
+# Disk usage
+df -h /
+
+# Top level folder sizes
+du -sh /* 2>/dev/null | sort -rh | head -20
+
+# Drill into /var
+du -sh /var/* 2>/dev/null | sort -rh | head -20
+
+# Drill into /var/lib
+du -sh /var/lib/* 2>/dev/null | sort -rh | head -20
+
+# Drill into /var/log
+du -sh /var/log/* 2>/dev/null | sort -rh | head -20
+
+# Journal log size
+journalctl --disk-usage
 ```
