@@ -10,7 +10,7 @@
 | Consumer | What It Uses | Criticality | Status |
 |---|---|---|---|
 | Grafana dashboards (74 total) | SQL Server datasource — DBA_VCC_COST, DBA_VCC_MEMSQL, DBA_VCC_AWS, DBA_VCC, Utilities | Critical | Active — 3 admins: tashvir.babulal, yogeshwar.phull, rayhaan.suleyman |
-| KAPP Client Utilisation and Growth Report | DBA_VCC_COST — LU_KAPP_ClientList (280 clients) | Critical — client billing data | ⚠️ Data stale since 4 May 2026 — silent failure |
+| KAPP Client Utilisation and Growth Report | DBA_VCC_COST — LU_KAPP_ClientList (280 clients) | Internal | ✅ Confirmed internal use only — not client-facing. ⚠️ Data stale since 4 May 2026 — silent failure |
 | Database Engineering Costs dashboard | DBA_VCC_COST | Internal | Active — last updated Oct 2024 |
 | Database Engineering Sprint Reporting | DBA_VCC_COST | Internal | Active — last updated Mar 2024 |
 | AWS Cost Report Monthly | DBA_VCC_COST — INFO_AWS_DE_Entity_Cost | Internal | ⚠️ Stale since Nov 2024 |
