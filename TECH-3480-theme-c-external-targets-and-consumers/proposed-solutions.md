@@ -88,7 +88,7 @@ This is billing data for 200+ institutional clients. The KAPP Client Utilisation
 **Proposed actions:**
 - Disclose to stakeholders that DBA_VCC_COST data has been stale since 4 May 2026 — 11+ weeks of silent zero-row runs
 - KAPP Client Utilisation and Growth Report confirmed internal use only — not client-facing. No disclosure risk to clients.
-- REP_MONTHEND_* procedures confirmed called by Grafana dashboards only — active admins tashvir.babulal, yogeshwar.phull, rayhaan.suleyman are aware
+- REP_MONTHEND_* procedures confirmed called by Grafana dashboards only. Internal use only.
 - Root cause fix: SingleStore is being decommissioned — DBA_VCC_MEMSQL jobs will not be re-enabled. DBA_VCC_COST collection pipeline depends on MEMSQL ping stats and will remain stale until a replacement data source is confirmed
 - Long-term: this data should not live on a Developer Edition non-production server. It needs a production-grade home with proper monitoring and alerting as part of the decommission migration plan
 
@@ -113,13 +113,13 @@ The downstream casualty is DBA_VCC_COST — the SP_INFO procedures that collect 
 ## 6. Month-End Procedures — Who Calls Them?
 
 **What we found:**
-33 REP_MONTHEND stored procedures exist across DBA_VCC_COST (19) and DBA_VCC_MEMSQL (14). 6 Grafana dashboards call them. No SQL Agent job calls these procedures on a schedule — confirmed via job history and job step queries. Caller is whoever opens these dashboards in Grafana. Confirmed internal use only — not client-facing. Active admins: tashvir.babulal, yogeshwar.phull, rayhaan.suleyman.
+33 REP_MONTHEND stored procedures exist across DBA_VCC_COST (19) and DBA_VCC_MEMSQL (14). 6 Grafana dashboards call them. No SQL Agent job calls these procedures on a schedule — confirmed via job history and job step queries. Caller is whoever opens these dashboards in Grafana. Confirmed internal use only — not client-facing.
 
 **Why it matters:**
 The procedures are called by Grafana dashboards only — no automated pipeline. The data they report on has been stale since May 2026. Any month-end report run since then has been using stale data. Admins need to be notified before decommission.
 
 **Proposed actions:**
-- Notify tashvir.babulal, yogeshwar.phull, rayhaan.suleyman that REP_MONTHEND data has been stale since May 2026 and that the dashboards will be retired on decommission
+- Notify the DBA team that REP_MONTHEND data has been stale since May 2026 and that the dashboards will be retired on decommission
 - Include month-end dashboard retirement in the decommission handover — no replacement pipeline needed (internal use only, no client impact)
 - Note: 7 procedures in DBA_VCC_MEMSQL use the `CLINT` typo (vs `CLIENT`) — clean up regardless of decommission outcome
 
@@ -214,7 +214,7 @@ ZabbixProdOld linked server points to 10.120.8.120:3306 — TCP connection refus
 
 | # | Blocker | Status |
 |---|---|---|
-| B1 | Who calls REP_MONTHEND_* each month end — manual or automated? | ✅ CLOSED — called by Grafana dashboards only. No SQL Agent job or external scheduler found. 6 dashboards reference REP_MONTHEND: KAPP, InvestorPress, Encore, DXM, WPv2, Other Services Month End Reporting. Caller is whoever opens these dashboards in Grafana — confirmed active admins: tashvir.babulal, yogeshwar.phull, rayhaan.suleyman. |
+| B1 | Who calls REP_MONTHEND_* each month end — manual or automated? | ✅ CLOSED — called by Grafana dashboards only. No SQL Agent job or external scheduler found. 6 dashboards reference REP_MONTHEND: KAPP, InvestorPress, Encore, DXM, WPv2, Other Services Month End Reporting. Caller is whoever opens these dashboards in Grafana. Internal use only. |
 | B2 | Is KAPP Client Utilisation and Growth Report shown to clients? | ✅ CLOSED — confirmed internal use only, not client-facing |
 | B3 | Why were DBA_VCC_MEMSQL jobs disabled in May 2026 — is SingleStore decommissioned? | ✅ CLOSED — SingleStore is being decommissioned. All 7 MEMSQL jobs, DBA_VCC_MEMSQL, and 14 dependent dashboards are retire candidates |
 | B4 | What is the migration plan for EW2P-MSSQL-01/02 monitoring post-decommission? | ✅ CLOSED — EW2P-MSSQL-01 and EW2P-MSSQL-02 confirmed as SQLNCLI linked servers on this server only. No other monitoring path exists. Migration must be planned before decommission date is set |

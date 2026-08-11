@@ -52,14 +52,14 @@ TECH-3562 completed the full targets and consumers discovery — 109 linked serv
 
 | # | Question | Who to Ask | Status |
 |---|---|---|---|
-| Q3 (C) | Who calls REP_MONTHEND_* procedures each month end? | tashvir.babulal / rayhaan.suleyman | ✅ CLOSED — called by Grafana dashboards only. No SQL Agent job found. Active admins: tashvir.babulal, yogeshwar.phull, rayhaan.suleyman. Internal use only. |
+| Q3 (C) | Who calls REP_MONTHEND_* procedures each month end? | DBA team | ✅ CLOSED — called by Grafana dashboards only. No SQL Agent job found. Internal use only. |
 | Q4 (C) | Who receives the Slack alerts from alerts-data-operations and alert-app-allow2fa-disabled? | DBA team / ops team | ✅ CLOSED — no Slack contact points in Grafana alert_configuration. Placeholder email only. No active consumer. |
 | Q5 (C) | What IAM role/key does the Python AWS API caller use? | DevOps / cloud team | ✅ CLOSED — EC2 instance uses IAM instance profile `KurtosysEC2InstanceProfileRoleRep`. STS temporary credentials confirmed active (Code: Success, Type: AWS-HMAC, LastUpdated: 2026-08-11T08:25:43Z). No static access key on disk. No remediation required. |
 | Q6 (C) | What S3 bucket do backups go to — bucket name, ARN, retention policy? | DevOps / cloud team | ✅ Closed — ksys-ew1r-db-backups (local) + ksys-ew1p-oct-dbbackup (EW1P-OCT RDS). ⚠️ Retention TBC. ⚠️ Both unencrypted. |
 | Q7 (C) | Is ZabbixProdOld still active or can it be removed? | Infrastructure team | ✅ CLOSED — ping confirmed dead 2026-08-06. 10.120.8.120 all requests timed out. Pending infrastructure sign-off to drop. |
 | Q18 | What firewall rules allow inbound/outbound connections to this server? | Infrastructure / DevOps | ⚠️ Open — queries in investigation-log.md |
-| Q21 | If this server went offline today, what would break immediately? | yogeshwar.phull / tashvir.babulal | ✅ CLOSED — 74 Grafana dashboards, EW2P-MSSQL-01/02 monitoring, KAPP billing dashboard, S3 backups, CloudWatch collection. |
-| Q22 | Is any alerting dependent solely on this server — would anyone lose visibility? | yogeshwar.phull / tashvir.babulal | ✅ CLOSED — no active Slack consumer. SQL Server severity alerts all silent. Zabbix is primary alert path but no Slack contact points configured. |
+| Q21 | If this server went offline today, what would break immediately? | DBA team | ✅ CLOSED — 74 Grafana dashboards, EW2P-MSSQL-01/02 monitoring, KAPP billing dashboard, S3 backups, CloudWatch collection. |
+| Q22 | Is any alerting dependent solely on this server — would anyone lose visibility? | DBA team | ✅ CLOSED — no active Slack consumer. SQL Server severity alerts all silent. Zabbix is primary alert path but no Slack contact points configured. |
 | Q23 | Is the VCC framework replicated anywhere else or is this the only instance? | DBA team | ✅ CLOSED — EW2P-MSSQL-01 and EW2P-MSSQL-02 confirmed SQLNCLI linked servers on this server only. VCC framework unique to EW1R-REP-01. |
 
 ---

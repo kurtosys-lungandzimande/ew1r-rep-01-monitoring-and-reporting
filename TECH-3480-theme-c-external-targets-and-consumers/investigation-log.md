@@ -69,7 +69,7 @@ WHERE is_folder = 0
 ORDER BY updated DESC;
 ```
 
-**Expected finding:** Either a job step calls the procedures on a schedule, or a person runs them manually via SSMS each month end. If no job is found, escalate to tashvir.babulal / rayhaan.suleyman with evidence.
+**Expected finding:** Either a job step calls the procedures on a schedule, or a person runs them manually via SSMS each month end. If no job is found, escalate to the DBA team with evidence.
 
 ---
 
@@ -416,7 +416,7 @@ WHERE name LIKE '%VCC%' OR name LIKE '%DBA_%';
 
 | Question | Status | Finding |
 |---|---|---|
-| Q3(C) — Who calls REP_MONTHEND? | ✅ CLOSED | Called by Grafana dashboards only — no SQL Agent job or external scheduler found. 6 dashboards reference REP_MONTHEND (KAPP, InvestorPress, Encore, DXM, WPv2, Other Services). Caller is whoever opens these dashboards in Grafana — active admins: tashvir.babulal, yogeshwar.phull, rayhaan.suleyman. Confirmed internal use only. |
+| Q3(C) — Who calls REP_MONTHEND? | ✅ CLOSED | Called by Grafana dashboards only — no SQL Agent job or external scheduler found. 6 dashboards reference REP_MONTHEND (KAPP, InvestorPress, Encore, DXM, WPv2, Other Services). Caller is whoever opens these dashboards in Grafana. Confirmed internal use only. |
 | Q4(C) — Who receives Slack alerts? | ✅ CLOSED | Grafana alert_configuration has placeholder email only (grafana-default-email, <example@email.com>). No Slack contact points in database. No provisioning files. No stored procedures reference the channels. No active consumer. |
 | Q5(C) — IAM role/key for Python caller? | ✅ CLOSED | EC2 instance uses IAM instance profile `KurtosysEC2InstanceProfileRoleRep`. STS temporary credentials confirmed active (Code: Success, Type: AWS-HMAC, LastUpdated: 2026-08-11T08:25:43Z). No static access key on disk. No remediation required. |
 | Q7(C) — ZabbixProdOld status? | ✅ CLOSED — Confirmed dead | Ping from EW1R-REP-01 — 10.120.8.120 all requests timed out (2026-08-06). Safe to drop linked server pending infrastructure team sign-off. |
