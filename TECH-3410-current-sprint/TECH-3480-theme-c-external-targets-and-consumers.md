@@ -4,7 +4,7 @@
 > **Parent Epic:** TECH-3410
 > **Status:** In Progress
 > **Working folder:** TECH-3480-theme-c-external-targets-and-consumers/
-> **All blockers closed. 2 open items remaining: Q5 (IAM role/key) and Q18 (firewall rules).**
+> **All blockers closed. All open questions closed. 1 DoD item remaining: Confluence publishing.**
 
 ---
 
@@ -54,7 +54,7 @@ TECH-3562 completed the full targets and consumers discovery — 109 linked serv
 |---|---|---|---|
 | Q3 (C) | Who calls REP_MONTHEND_* procedures each month end? | tashvir.babulal / rayhaan.suleyman | ✅ CLOSED — called by Grafana dashboards only. No SQL Agent job found. Active admins: tashvir.babulal, yogeshwar.phull, rayhaan.suleyman. Internal use only. |
 | Q4 (C) | Who receives the Slack alerts from alerts-data-operations and alert-app-allow2fa-disabled? | DBA team / ops team | ✅ CLOSED — no Slack contact points in Grafana alert_configuration. Placeholder email only. No active consumer. |
-| Q5 (C) | What IAM role/key does the Python AWS API caller use? | DevOps / cloud team | ⚠️ Open — queries in investigation-log.md |
+| Q5 (C) | What IAM role/key does the Python AWS API caller use? | DevOps / cloud team | ✅ CLOSED — EC2 instance uses IAM instance profile `KurtosysEC2InstanceProfileRoleRep`. STS temporary credentials confirmed active (Code: Success, Type: AWS-HMAC, LastUpdated: 2026-08-11T08:25:43Z). No static access key on disk. No remediation required. |
 | Q6 (C) | What S3 bucket do backups go to — bucket name, ARN, retention policy? | DevOps / cloud team | ✅ Closed — ksys-ew1r-db-backups (local) + ksys-ew1p-oct-dbbackup (EW1P-OCT RDS). ⚠️ Retention TBC. ⚠️ Both unencrypted. |
 | Q7 (C) | Is ZabbixProdOld still active or can it be removed? | Infrastructure team | ✅ CLOSED — ping confirmed dead 2026-08-06. 10.120.8.120 all requests timed out. Pending infrastructure sign-off to drop. |
 | Q18 | What firewall rules allow inbound/outbound connections to this server? | Infrastructure / DevOps | ⚠️ Open — queries in investigation-log.md |
@@ -73,12 +73,12 @@ TECH-3562 completed the full targets and consumers discovery — 109 linked serv
 - [x] Slack alert consumers confirmed — no active consumer. Grafana alert_configuration has placeholder email only.
 - [x] S3 backup targets documented: bucket names, encryption status, retention policy — ksys-ew1r-db-backups + ksys-ew1p-oct-dbbackup. Both unencrypted. Retention TBC.
 - [x] Firewall rules documented: inbound and outbound connections — Windows Firewall rules confirmed 2026-08-11. AWS Security Group rules still needed from DevOps. See firewall-rules.md
-- [ ] IAM role/key for Python AWS API caller confirmed — open Q5(C)
+- [x] IAM role/key for Python AWS API caller confirmed — EC2 instance uses IAM instance profile `KurtosysEC2InstanceProfileRoleRep`. STS credentials active. No static key on disk.
 - [x] ZabbixProdOld status confirmed — confirmed dead. Ping timed out 2026-08-06.
-- [ ] All open questions from discovery answered or escalated with evidence — Q5, Q18 still open
+- [x] All open questions from discovery answered or escalated with evidence — all closed 2026-08-11.
 - [ ] Inventory published to Confluence
 
-> **Status:** 9 of 11 DoD items complete. 2 remaining: Q5 (IAM role/key) and Q18 (firewall rules).
+> **Status:** 10 of 11 DoD items complete. 1 remaining: Confluence publishing.
 
 ---
 

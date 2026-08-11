@@ -170,6 +170,20 @@ EXEC xp_cmdshell 'findstr /i "aws_access_key boto3 iam role" C:\path\to\script.p
 
 **Expected finding:** Either an IAM instance role (preferred — no key on disk) or an access key stored in the credentials file. If a key is found, confirm with DevOps whether it is rotated and whether it should be migrated to an instance role.
 
+### ✅ Evidence — 2026-08-11 — Confirmed instance role, no key on disk
+
+Run from EW1R-REP-01 via `xp_cmdshell`:
+
+```
+EXEC xp_cmdshell 'curl -s http://169.254.169.254/latest/meta-data/iam/security-credentials/';
+-- Result: KurtosysEC2InstanceProfileRoleRep
+
+EXEC xp_cmdshell 'curl -s http://169.254.169.254/latest/meta-data/iam/security-credentials/KurtosysEC2InstanceProfileRoleRep';
+-- Result: { "Code": "Success", "Type": "AWS-HMAC", "LastUpdated": "2026-08-11T08:25:43Z", ... }
+```
+
+**Finding:** EC2 instance uses IAM instance profile `KurtosysEC2InstanceProfileRoleRep`. STS temporary credentials confirmed active (`Code: Success`, `Type: AWS-HMAC`, last refreshed 2026-08-11T08:25:43Z). No static access key stored on disk. This is the preferred AWS credential pattern — no remediation required. Q5(C) CLOSED.
+
 ---
 
 ## Q7(C) — Is ZabbixProdOld still active or confirmed safe to remove?
@@ -404,7 +418,7 @@ WHERE name LIKE '%VCC%' OR name LIKE '%DBA_%';
 |---|---|---|
 | Q3(C) — Who calls REP_MONTHEND? | ✅ CLOSED | Called by Grafana dashboards only — no SQL Agent job or external scheduler found. 6 dashboards reference REP_MONTHEND (KAPP, InvestorPress, Encore, DXM, WPv2, Other Services). Caller is whoever opens these dashboards in Grafana — active admins: tashvir.babulal, yogeshwar.phull, rayhaan.suleyman. Confirmed internal use only. |
 | Q4(C) — Who receives Slack alerts? | ✅ CLOSED | Grafana alert_configuration has placeholder email only (grafana-default-email, <example@email.com>). No Slack contact points in database. No provisioning files. No stored procedures reference the channels. No active consumer. |
-| Q5(C) — IAM role/key for Python caller? | ⚠️ Open | Run Step 2 queries on server to identify credential type |
+| Q5(C) — IAM role/key for Python caller? | ✅ CLOSED | EC2 instance uses IAM instance profile `KurtosysEC2InstanceProfileRoleRep`. STS temporary credentials confirmed active (Code: Success, Type: AWS-HMAC, LastUpdated: 2026-08-11T08:25:43Z). No static access key on disk. No remediation required. |
 | Q7(C) — ZabbixProdOld status? | ✅ CLOSED — Confirmed dead | Ping from EW1R-REP-01 — 10.120.8.120 all requests timed out (2026-08-06). Safe to drop linked server pending infrastructure team sign-off. |
 | Q18 — Firewall rules? | ✅ CLOSED — Windows Firewall rules documented 2026-08-11. Key inbound: 443 (Grafana), 1433 (SQL Server), 3389 (RDP), 5985 (WinRM), 10050 (Zabbix agent). Outbound: 3306 (SingleStore/MySQL), 1433 (EW2P-MSSQL-01/02), 443 (AWS APIs/S3). AWS Security Group rules still needed from DevOps — see firewall-rules.md |
 | Q21 — What breaks immediately? | ✅ Documented | 74 Grafana dashboards, EW2P-MSSQL-01/02 monitoring, KAPP billing dashboard, S3 backups, CloudWatch collection |

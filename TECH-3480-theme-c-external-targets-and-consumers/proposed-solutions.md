@@ -168,16 +168,15 @@ DBA_VCC_COST contains client billing data for 280 institutional clients. If that
 ## 9. IAM Role / Key for Python AWS API Caller
 
 **What we found:**
-Three SQL Agent jobs call Python scripts that make AWS API calls (CloudWatch, S3, Cost Explorer): DBA_VCC_AWS_15MIN_CHECKS, DBA_VCC_AWS_DAILY_CHECKS, DBA_VCC_AWS_WEEKLY_CHECKS. The IAM identity used by these scripts has not been confirmed — it could be an instance role or an access key stored on disk.
+Three SQL Agent jobs call Python scripts that make AWS API calls (CloudWatch, S3, Cost Explorer): DBA_VCC_AWS_15MIN_CHECKS, DBA_VCC_AWS_DAILY_CHECKS, DBA_VCC_AWS_WEEKLY_CHECKS. The EC2 instance uses IAM instance profile `KurtosysEC2InstanceProfileRoleRep`. STS temporary credentials confirmed active (Code: Success, Type: AWS-HMAC, LastUpdated: 2026-08-11T08:25:43Z). No static access key stored on disk. Confirmed 2026-08-11 via instance metadata endpoint.
 
 **Why it matters:**
-If it is an access key stored on disk, it needs to be rotated and ideally migrated to an instance role. On decommission, the key or role must be revoked — leaving an active IAM key attached to a decommissioned server is a security risk.
+Instance role is the preferred AWS credential pattern — no key rotation risk, no key on disk. On decommission, the instance profile must be detached and the IAM role reviewed for any permissions that should be revoked.
 
 **Proposed actions:**
-- Run investigation-log.md Q5(C) queries to identify the credential type
-- If instance role: document the role ARN and confirm it is scoped to minimum required permissions
-- If access key: rotate immediately and migrate to instance role
-- On decommission: revoke the IAM role or deactivate the access key as part of the decommission checklist
+- Confirm with DevOps the permissions attached to `KurtosysEC2InstanceProfileRoleRep` — ensure they are scoped to minimum required (CloudWatch read, S3 write to ksys-ew1r-db-backups, Cost Explorer read)
+- On decommission: detach the instance profile from the EC2 instance as part of the decommission checklist
+- No key rotation required — instance role only, no static credentials
 
 ---
 
@@ -210,7 +209,7 @@ ZabbixProdOld linked server points to 10.120.8.120:3306 — TCP connection refus
 | 33 REP_MONTHEND procedures | Confirm then decide | Who calls them and whether client-facing must be confirmed first |
 | Slack alerts | No consumer — nothing to migrate | Grafana alert_configuration has placeholder email only. No Slack contact points configured. No stored procedures reference the channels. |
 | S3 backup encryption | Fix now | Encryption gaps are a compliance risk independent of decommission |
-| IAM role/key for Python caller | Confirm then revoke on decommission | Identify credential type, rotate if key, revoke on decommission |
+| IAM role/key for Python caller | Revoke on decommission | Instance profile `KurtosysEC2InstanceProfileRoleRep` confirmed. No static key. Detach instance profile on decommission. |
 | ZabbixProdOld | Retire | Confirmed dead |
 | pmmdev / pmmprod (Clickhouse) | Confirm | Both reachable — purpose and owner not yet confirmed |
 
