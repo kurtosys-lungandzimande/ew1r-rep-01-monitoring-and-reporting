@@ -402,7 +402,7 @@ WHERE name LIKE '%VCC%' OR name LIKE '%DBA_%';
 
 | Question | Status | Finding |
 |---|---|---|
-| Q3(C) — Who calls REP_MONTHEND? | ⚠️ Partially closed | Confirmed internal use only — not client-facing. Who calls them each month end still open — needs tashvir.babulal / rayhaan.suleyman confirmation |
+| Q3(C) — Who calls REP_MONTHEND? | ✅ CLOSED | Called by Grafana dashboards only — no SQL Agent job or external scheduler found. 6 dashboards reference REP_MONTHEND (KAPP, InvestorPress, Encore, DXM, WPv2, Other Services). Caller is whoever opens these dashboards in Grafana — active admins: tashvir.babulal, yogeshwar.phull, rayhaan.suleyman. Confirmed internal use only. |
 | Q4(C) — Who receives Slack alerts? | ✅ CLOSED | Grafana alert_configuration has placeholder email only (grafana-default-email, <example@email.com>). No Slack contact points in database. No provisioning files. No stored procedures reference the channels. No active consumer. |
 | Q5(C) — IAM role/key for Python caller? | ⚠️ Open | Run Step 2 queries on server to identify credential type |
 | Q7(C) — ZabbixProdOld status? | ✅ CLOSED — Confirmed dead | Ping from EW1R-REP-01 — 10.120.8.120 all requests timed out (2026-08-06). Safe to drop linked server pending infrastructure team sign-off. |

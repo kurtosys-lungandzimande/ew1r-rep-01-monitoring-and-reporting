@@ -220,7 +220,7 @@ ZabbixProdOld linked server points to 10.120.8.120:3306 — TCP connection refus
 
 | # | Blocker | Status |
 |---|---|---|
-| B1 | Who calls REP_MONTHEND_* each month end — manual or automated? | ⚠️ Partially closed — confirmed internal use only, not client-facing. Caller still open — needs tashvir.babulal / rayhaan.suleyman |
+| B1 | Who calls REP_MONTHEND_* each month end — manual or automated? | ✅ CLOSED — called by Grafana dashboards only. No SQL Agent job or external scheduler found. 6 dashboards reference REP_MONTHEND: KAPP, InvestorPress, Encore, DXM, WPv2, Other Services Month End Reporting. Caller is whoever opens these dashboards in Grafana — confirmed active admins: tashvir.babulal, yogeshwar.phull, rayhaan.suleyman. |
 | B2 | Is KAPP Client Utilisation and Growth Report shown to clients? | ✅ CLOSED — confirmed internal use only, not client-facing |
 | B3 | Why were DBA_VCC_MEMSQL jobs disabled in May 2026 — is SingleStore decommissioned? | ✅ CLOSED — SingleStore is being decommissioned. All 7 MEMSQL jobs, DBA_VCC_MEMSQL, and 14 dependent dashboards are retire candidates |
 | B4 | What is the migration plan for EW2P-MSSQL-01/02 monitoring post-decommission? | ✅ CLOSED — EW2P-MSSQL-01 and EW2P-MSSQL-02 confirmed as SQLNCLI linked servers on this server only. No other monitoring path exists. Migration must be planned before decommission date is set |
