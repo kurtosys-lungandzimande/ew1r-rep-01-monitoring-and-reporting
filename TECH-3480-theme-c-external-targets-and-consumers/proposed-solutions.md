@@ -125,19 +125,26 @@ The procedures are called by Grafana dashboards only — no automated pipeline. 
 
 ---
 
-## 7. Slack Alerts — Zabbix Is the Only Path
+## 7. Slack Alerts — Active Grafana Alerts, Not Zabbix
 
 **What we found:**
-EW1R-REP-01 does not post directly to Slack. All SlackChatPostMessage calls in stored procedures are commented out. Grafana alert_configuration has a placeholder email only (`grafana-default-email`, `<example@email.com>`). No Slack contact points configured in the database. No provisioning files with Slack config found. No stored procedures reference the alert channels. No active consumer confirmed — Q4(C) closed.
+Two Slack channels are actively triggered by Grafana alerts on this server — not Zabbix webhooks as originally assumed. The alerting pipeline is:
+- Data collected daily at 06:00 UTC by DBA_VCC_MEMSQL_DAILY_CHECKS (steps SP_AUDIT_FP_Client_Sizes_DETAILED and SP_AUDIT_FP_Client_ApplicationConfiguration_Auth_DETAILED) from SingleStore into SQL Server
+- Grafana alerts evaluate every 10 minutes calling stored procedures that compare current vs 2-days-ago data
+- alerts-data-operations: triggered by REP_CLIENT_CONFIG_CHANGES_REPORT — fires when client config fields change (enableDocumentEntitlement, enabledEntityTypeEntitlements, enabledCaseSensitive)
+- alert-app-allow2fa-disabled: triggered by REP_CLIENT_APP_AUTH_CONFIG_CHANGES_REPORT — fires when application 2FA config changes
+
+Since DBA_VCC_MEMSQL jobs were disabled in May 2026, both alerts have been evaluating on stale data.
 
 **Why it matters:**
-No active Slack consumer means nothing to migrate on decommission. Zabbix is the primary alert path but reads from this server via linked server — that dependency ends on decommission.
+These are active alerts that will be silenced on decommission. The Grafana alerts, their stored procedures, and the underlying data collection jobs must all be retired as part of the decommission plan. This is a decommission dependency that was not previously captured.
 
 **Proposed actions:**
-- No Slack migration required — no active consumer confirmed
-- SPSlackCheckSyncStatus is dormant (MemSQL jobs disabled) — drop as part of DBA_VCC_MEMSQL cleanup
-- 4 stored procedures reference dead linked servers (P23-P-AGGR-201, p23-p-aggr-301) — drop these regardless of decommission outcome
-- Confirm with Zabbix / monitoring team what triggers on EW1R-REP-01 would be lost on decommission — Zabbix deadlock and sync check data stops
+- Confirm with the DBA team who currently receives alerts-data-operations and alert-app-allow2fa-disabled
+- Retire REP_CLIENT_CONFIG_CHANGES_REPORT and REP_CLIENT_APP_AUTH_CONFIG_CHANGES_REPORT stored procedures on decommission
+- Retire DBA_VCC_MEMSQL_DAILY_CHECKS steps SP_AUDIT_FP_Client_Sizes_DETAILED and SP_AUDIT_FP_Client_ApplicationConfiguration_Auth_DETAILED on decommission
+- Retire both Grafana alerts and their dashboard panels on decommission
+- Note: alerts have been firing on stale data since May 2026 — notify the DBA team before decommission
 
 ---
 
@@ -202,7 +209,7 @@ ZabbixProdOld linked server points to 10.120.8.120:3306 — TCP connection refus
 | DBA_VCC_COST collection pipeline | Fix then decide | Re-enable MEMSQL jobs to restore collection, then assess decommission path |
 | DBA_VCC_MEMSQL (7 jobs, 14 dashboards) | Confirm then retire | Confirm why disabled — if SingleStore decommissioned, retire all |
 | 33 REP_MONTHEND procedures | Confirm then decide | Who calls them and whether client-facing must be confirmed first |
-| Slack alerts | No consumer — nothing to migrate | Grafana alert_configuration has placeholder email only. No Slack contact points configured. No stored procedures reference the channels. |
+| Slack alerts (Grafana) | Retire on decommission | alerts-data-operations and alert-app-allow2fa-disabled are active Grafana alerts. Both fed by DBA_VCC_MEMSQL_DAILY_CHECKS. Stale since May 2026. Retire alerts, stored procedures, and data collection steps on decommission. |
 | S3 backup encryption | Fix now | Encryption gaps are a compliance risk independent of decommission |
 | IAM role/key for Python caller | Revoke on decommission | Instance profile `KurtosysEC2InstanceProfileRoleRep` confirmed. No static key. Detach instance profile on decommission. |
 | ZabbixProdOld | Retire | Confirmed dead |
@@ -219,4 +226,4 @@ ZabbixProdOld linked server points to 10.120.8.120:3306 — TCP connection refus
 | B3 | Why were DBA_VCC_MEMSQL jobs disabled in May 2026 — is SingleStore decommissioned? | CLOSED — SingleStore is being decommissioned. All 7 MEMSQL jobs, DBA_VCC_MEMSQL, and 14 dependent dashboards are retire candidates |
 | B4 | What is the migration plan for EW2P-MSSQL-01/02 monitoring post-decommission? | CLOSED — EW2P-MSSQL-01 and EW2P-MSSQL-02 confirmed as SQLNCLI linked servers on this server only. No other monitoring path exists. Migration must be planned before decommission date is set |
 | B5 | Is the VCC framework replicated anywhere else or is this the only instance? | CLOSED — VCC framework is unique to this server. No VCC databases found on EW2P-MSSQL-01 or EW2P-MSSQL-02 |
-| B6 | Who receives alerts-data-operations and alert-app-allow2fa-disabled — would they lose visibility? | CLOSED — Slack contact points not found in alert_configuration. Only receiver is grafana-default-email with placeholder address. No provisioning files with Slack config. No stored procedures reference these channels. No active consumer — nothing to migrate on decommission |
+| B6 | Who receives alerts-data-operations and alert-app-allow2fa-disabled — would they lose visibility? | UPDATED — alerts-data-operations and alert-app-allow2fa-disabled are active Grafana alerts on this server. Triggered by REP_CLIENT_CONFIG_CHANGES_REPORT and REP_CLIENT_APP_AUTH_CONFIG_CHANGES_REPORT. Fed by DBA_VCC_MEMSQL_DAILY_CHECKS. Both will be silenced on decommission. Recipient confirmation still needed from DBA team. |
