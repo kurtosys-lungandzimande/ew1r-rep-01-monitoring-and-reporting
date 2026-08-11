@@ -140,11 +140,11 @@ Since DBA_VCC_MEMSQL jobs were disabled in May 2026, both alerts have been evalu
 These are active alerts that will be silenced on decommission. The Grafana alerts, their stored procedures, and the underlying data collection jobs must all be retired as part of the decommission plan. This is a decommission dependency that was not previously captured.
 
 **Proposed actions:**
-- Confirm with the DBA team who currently receives alerts-data-operations and alert-app-allow2fa-disabled
+- Slack contact points confirmed active in Grafana database — channel names encrypted. Confirm via Grafana UI (Alerting > Contact points) before decommission
 - Retire REP_CLIENT_CONFIG_CHANGES_REPORT and REP_CLIENT_APP_AUTH_CONFIG_CHANGES_REPORT stored procedures on decommission
 - Retire DBA_VCC_MEMSQL_DAILY_CHECKS steps SP_AUDIT_FP_Client_Sizes_DETAILED and SP_AUDIT_FP_Client_ApplicationConfiguration_Auth_DETAILED on decommission
-- Retire both Grafana alerts and their dashboard panels on decommission
-- Note: alerts have been firing on stale data since May 2026 — notify the DBA team before decommission
+- Retire both Grafana alert rules and their dashboard panels on decommission
+- Note: both alerts have been firing on stale data since May 2026 — notify recipients before decommission
 
 ---
 
