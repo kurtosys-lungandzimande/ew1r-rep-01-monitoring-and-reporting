@@ -213,6 +213,22 @@ WHERE o.type = 'V'
 
 **Expected finding:** No active references in jobs or procs + infrastructure team confirms decommission = safe to drop.
 
+### ✅ Evidence — 2026-08-06 — Confirmed dead
+
+Ping run from EW1R-REP-01 via PowerShell (SSM Session Manager):
+
+```
+PS C:\Windows\system32> ping 10.120.8.120
+
+Pinging 10.120.8.120 with 32 bytes of data:
+Request timed out.
+Request timed out.
+Request timed out.
+Request timed out.
+```
+
+**Finding:** 10.120.8.120 is unreachable — all 4 ping requests timed out. ZabbixProdOld confirmed dead. Safe to drop linked server pending infrastructure team sign-off. Q7(C) CLOSED.
+
 ---
 
 ## Q18 — What firewall rules allow inbound/outbound connections?
@@ -389,7 +405,7 @@ WHERE name LIKE '%VCC%' OR name LIKE '%DBA_%';
 | Q3(C) — Who calls REP_MONTHEND? | ⚠️ Open | No job found calling REP_MONTHEND — likely manual. Needs tashvir.babulal / rayhaan.suleyman confirmation |
 | Q4(C) — Who receives Slack alerts? | ⚠️ Open | Alerts flow via Zabbix webhook. Channel membership needs DBA / ops team confirmation |
 | Q5(C) — IAM role/key for Python caller? | ⚠️ Open | Run Step 2 queries on server to identify credential type |
-| Q7(C) — ZabbixProdOld status? | ✅ Confirmed dead | TCP 10060 — 10.120.8.120:3306 unreachable. Safe to drop pending infrastructure team sign-off |
+| Q7(C) — ZabbixProdOld status? | ✅ CLOSED — Confirmed dead | Ping from EW1R-REP-01 — 10.120.8.120 all requests timed out (2026-08-06). Safe to drop linked server pending infrastructure team sign-off. |
 | Q18 — Firewall rules? | ⚠️ Open | Windows Firewall rules need to be pulled from server + AWS Security Group rules from DevOps |
 | Q21 — What breaks immediately? | ✅ Documented | 74 Grafana dashboards, EW2P-MSSQL-01/02 monitoring, KAPP billing dashboard, S3 backups, CloudWatch collection |
 | Q22 — Alerting solely dependent? | ⚠️ Open | Zabbix deadlock + sync check data stops. SQL Server severity alerts already silent. Run Step 1 query to confirm full Zabbix dependency |
