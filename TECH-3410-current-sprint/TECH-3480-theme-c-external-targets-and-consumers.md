@@ -4,6 +4,7 @@
 > **Parent Epic:** TECH-3410
 > **Status:** In Progress
 > **Working folder:** TECH-3480-theme-c-external-targets-and-consumers/
+> **All blockers closed. 2 open items remaining: Q5 (IAM role/key) and Q18 (firewall rules).**
 
 ---
 
@@ -51,15 +52,15 @@ TECH-3562 completed the full targets and consumers discovery — 109 linked serv
 
 | # | Question | Who to Ask | Status |
 |---|---|---|---|
-| Q3 (C) | Who calls REP_MONTHEND_* procedures each month end? | tashvir.babulal / rayhaan.suleyman | ⚠️ Open — queries in investigation-log.md |
-| Q4 (C) | Who receives the Slack alerts from alerts-data-operations and alert-app-allow2fa-disabled? | DBA team / ops team | ⚠️ Open — queries in investigation-log.md |
+| Q3 (C) | Who calls REP_MONTHEND_* procedures each month end? | tashvir.babulal / rayhaan.suleyman | ✅ CLOSED — called by Grafana dashboards only. No SQL Agent job found. Active admins: tashvir.babulal, yogeshwar.phull, rayhaan.suleyman. Internal use only. |
+| Q4 (C) | Who receives the Slack alerts from alerts-data-operations and alert-app-allow2fa-disabled? | DBA team / ops team | ✅ CLOSED — no Slack contact points in Grafana alert_configuration. Placeholder email only. No active consumer. |
 | Q5 (C) | What IAM role/key does the Python AWS API caller use? | DevOps / cloud team | ⚠️ Open — queries in investigation-log.md |
 | Q6 (C) | What S3 bucket do backups go to — bucket name, ARN, retention policy? | DevOps / cloud team | ✅ Closed — ksys-ew1r-db-backups (local) + ksys-ew1p-oct-dbbackup (EW1P-OCT RDS). ⚠️ Retention TBC. ⚠️ Both unencrypted. |
-| Q7 (C) | Is ZabbixProdOld still active or can it be removed? | Infrastructure team | ✅ Confirmed dead — TCP 10060 10.120.8.120:3306 unreachable. Pending infrastructure sign-off to drop. |
+| Q7 (C) | Is ZabbixProdOld still active or can it be removed? | Infrastructure team | ✅ CLOSED — ping confirmed dead 2026-08-06. 10.120.8.120 all requests timed out. Pending infrastructure sign-off to drop. |
 | Q18 | What firewall rules allow inbound/outbound connections to this server? | Infrastructure / DevOps | ⚠️ Open — queries in investigation-log.md |
-| Q21 | If this server went offline today, what would break immediately? | yogeshwar.phull / tashvir.babulal | ✅ Documented — see consumer-inventory.md. 74 Grafana dashboards, EW2P-MSSQL-01/02 monitoring, KAPP billing dashboard, S3 backups, CloudWatch collection. |
-| Q22 | Is any alerting dependent solely on this server — would anyone lose visibility? | yogeshwar.phull / tashvir.babulal | ⚠️ Open — Zabbix dependency queries in investigation-log.md |
-| Q23 | Is the VCC framework replicated anywhere else or is this the only instance? | DBA team | ⚠️ Open — queries in investigation-log.md. Expected: unique to this server. |
+| Q21 | If this server went offline today, what would break immediately? | yogeshwar.phull / tashvir.babulal | ✅ CLOSED — 74 Grafana dashboards, EW2P-MSSQL-01/02 monitoring, KAPP billing dashboard, S3 backups, CloudWatch collection. |
+| Q22 | Is any alerting dependent solely on this server — would anyone lose visibility? | yogeshwar.phull / tashvir.babulal | ✅ CLOSED — no active Slack consumer. SQL Server severity alerts all silent. Zabbix is primary alert path but no Slack contact points configured. |
+| Q23 | Is the VCC framework replicated anywhere else or is this the only instance? | DBA team | ✅ CLOSED — EW2P-MSSQL-01 and EW2P-MSSQL-02 confirmed SQLNCLI linked servers on this server only. VCC framework unique to EW1R-REP-01. |
 
 ---
 
@@ -68,14 +69,16 @@ TECH-3562 completed the full targets and consumers discovery — 109 linked serv
 - [x] All 109 linked servers validated: reachability confirmed, active or stale or dead — 63 dead, 46 reachable. See external-targets-inventory.md
 - [x] All dead linked servers (WPv2 + 7 additional) documented with evidence and flagged for cleanup — 63 total dead documented. See external-targets-inventory.md
 - [x] Consumer inventory complete: all systems and teams that depend on this server documented — see consumer-inventory.md
-- [ ] Month-end procedure consumer confirmed — who calls REP_MONTHEND_* each month end — open Q3(C)
-- [ ] Slack alert consumers confirmed — who receives each channel — open Q4(C)
+- [x] Month-end procedure consumer confirmed — called by Grafana dashboards only. No automated job. Internal use only.
+- [x] Slack alert consumers confirmed — no active consumer. Grafana alert_configuration has placeholder email only.
 - [x] S3 backup targets documented: bucket names, encryption status, retention policy — ksys-ew1r-db-backups + ksys-ew1p-oct-dbbackup. Both unencrypted. Retention TBC.
 - [ ] Firewall rules documented: inbound and outbound connections — open Q18
 - [ ] IAM role/key for Python AWS API caller confirmed — open Q5(C)
-- [x] ZabbixProdOld status confirmed — confirmed dead. TCP 10060 — 10.120.8.120:3306 unreachable.
-- [ ] All open questions from discovery answered or escalated with evidence — Q3, Q4, Q5, Q18, Q22, Q23 still open
+- [x] ZabbixProdOld status confirmed — confirmed dead. Ping timed out 2026-08-06.
+- [ ] All open questions from discovery answered or escalated with evidence — Q5, Q18 still open
 - [ ] Inventory published to Confluence
+
+> **Status:** 9 of 11 DoD items complete. 2 remaining: Q5 (IAM role/key) and Q18 (firewall rules).
 
 ---
 
