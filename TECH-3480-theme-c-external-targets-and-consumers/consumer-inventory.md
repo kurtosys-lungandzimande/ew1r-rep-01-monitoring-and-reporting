@@ -14,12 +14,12 @@
 | Database Engineering Costs dashboard | DBA_VCC_COST | Internal | Active — last updated Oct 2024 |
 | Database Engineering Sprint Reporting | DBA_VCC_COST | Internal | Active — last updated Mar 2024 |
 | AWS Cost Report Monthly | DBA_VCC_COST — INFO_AWS_DE_Entity_Cost | Internal | ⚠️ Stale since Nov 2024 |
-| 6 Month-End Reporting dashboards | DBA_VCC_COST + DBA_VCC_MEMSQL — REP_MONTHEND_* procedures | Critical — client reporting | ⚠️ All stale since May 2026. Who calls them each month end — open |
+| 6 Month-End Reporting dashboards | DBA_VCC_COST + DBA_VCC_MEMSQL — REP_MONTHEND_* procedures | Internal | ⚠️ All stale since May 2026. Called by Grafana dashboards only — no automated job. Internal use only. Admins: tashvir.babulal, yogeshwar.phull, rayhaan.suleyman |
 | 14 DBA_VCC_MEMSQL dashboards | DBA_VCC_MEMSQL | Internal | ⚠️ All stale since May 2026 — jobs disabled |
 | EW2P-MSSQL-01 monitoring | 16 VCC Audit Collection jobs + 8 VCC Server Monitoring jobs | Critical — production server | Active — no secondary monitoring path |
 | EW2P-MSSQL-02 monitoring | 16 VCC Audit Collection jobs + 8 VCC Server Monitoring jobs | Critical — production server | Active — no secondary monitoring path |
 | Zabbix (via ZabbixProdNew linked server) | Utilities.dbo.Zab_* tables — deadlock, sync check, AG lag | High | Active — Zabbix reads via linked server |
-| Slack alerts (via Zabbix) | Zabbix webhook — alerts-data-operations, alert-app-allow2fa-disabled | High | Active — who receives each channel is open |
+| Slack alerts (via Zabbix) | Zabbix webhook — alerts-data-operations, alert-app-allow2fa-disabled | High | ✅ No active consumer — Grafana alert_configuration has placeholder email only. No Slack contact points configured. Nothing to migrate on decommission. |
 | AWS CloudWatch / S3 | Python API — DBA_VCC_AWS_15MIN_CHECKS, DBA_VCC_AWS_DAILY_CHECKS | High | Active — 30-min and daily jobs running |
 | Encore IIS / BNY IIS logs | DBA_VCC_HOURLY_CHECKS — CloudWatch ingestion | Medium | Active — hourly collection |
 | DXM client sizes | DBA_VCC_MYSQL — DXM audit jobs | Medium | Active — daily collection |
@@ -75,7 +75,7 @@
 | REP_MONTHEND_KAPP_SNAPSHOTS_TOP5_REPORT | KAPP top 5 snapshots | 2023-08-10 | |
 | REP_MONTHEND_MAXDB_SERVER_STATUS_REPORT | MaxDB server status | 2017-12-13 | ⚠️ Predates VCC framework — leftover |
 
-> ⚠️ All 14 procedures depend on DBA_VCC_MEMSQL which has been stale since May 2026 — jobs disabled. Who calls these each month end is still open.
+> ⚠️ All 14 procedures depend on DBA_VCC_MEMSQL which has been stale since May 2026 — jobs disabled. Called by Grafana dashboards only. SingleStore being decommissioned — all 14 procedures are retire candidates.
 
 ### Grafana Dashboards Calling REP_MONTHEND
 
@@ -88,7 +88,7 @@
 | KAPP Month End Reporting | 2023-08-10 |
 | Other Services Month End Reporting (Draft) | 2023-07-21 |
 
-> Who calls these dashboards each month end — open question Q3(C). Must be confirmed with tashvir.babulal / rayhaan.suleyman before month-end procedures can be retired or migrated.
+> ✅ Q3(C) CLOSED — caller confirmed as whoever opens these dashboards in Grafana. No automated job or external scheduler. Internal use only. Active admins: tashvir.babulal, yogeshwar.phull, rayhaan.suleyman. Dashboards are retire candidates on decommission.
 
 ---
 
@@ -96,10 +96,10 @@
 
 | Channel | Source | Trigger | Who Receives |
 |---|---|---|---|
-| alerts-data-operations | Zabbix webhook (via ZabbixProdNew) | KAPP config/read failures | ⚠️ Open — needs confirmation |
-| alert-app-allow2fa-disabled | Zabbix webhook (via ZabbixProdNew) | Client auth alerts — 2FA disabled | ⚠️ Open — needs confirmation |
+| alerts-data-operations | Zabbix webhook (via ZabbixProdNew) | KAPP config/read failures | ✅ No active consumer — no Slack contact points in Grafana alert_configuration |
+| alert-app-allow2fa-disabled | Zabbix webhook (via ZabbixProdNew) | Client auth alerts — 2FA disabled | ✅ No active consumer — no Slack contact points in Grafana alert_configuration |
 
-> EW1R-REP-01 does not post directly to Slack. All SlackChatPostMessage calls in stored procedures are commented out. Slack notifications flow exclusively through Zabbix. If this server is decommissioned, Zabbix must be reconfigured to maintain these alerts independently.
+> ✅ Q4(C) CLOSED — EW1R-REP-01 does not post directly to Slack. All SlackChatPostMessage calls in stored procedures are commented out. Grafana alert_configuration has placeholder email only (`grafana-default-email`, `<example@email.com>`). No Slack contact points configured. No provisioning files with Slack config. No active consumer — nothing to migrate on decommission.
 
 ---
 
@@ -113,9 +113,9 @@
 | SQL Server Agent | SHNONPRD\sqlagent | Confirmed — runs DBA_VCC_COST_Entity_Count_Collection |
 | SQL Server Launchpad | NT Service account | |
 | Linked server credentials | Unknown | Check vault |
-| AWS API access (Python) | Unknown — IAM role or key on server | ⚠️ Open — Q5(C) |
+| AWS API access (Python) | IAM instance profile `KurtosysEC2InstanceProfileRoleRep` | ✅ Confirmed — STS temporary credentials active. No static key on disk. Detach instance profile on decommission. |
 
-### Firewall Rules (needs network team confirmation — Q18)
+### Firewall Rules (Windows Firewall confirmed 2026-08-11 — AWS Security Group rules still needed from DevOps)
 
 | Direction | Source / Destination | Port | Purpose |
 |---|---|---|---|
@@ -135,13 +135,13 @@
 
 ## Open Questions
 
-| # | Question | Who to Ask | Blocks |
+| # | Question | Who to Ask | Status |
 |---|---|---|---|
-| Q3(C) | Who calls REP_MONTHEND_* procedures each month end — manually or automated? | tashvir.babulal / rayhaan.suleyman | Month-end procedures cannot be retired or migrated until answered |
-| Q4(C) | Who receives alerts-data-operations and alert-app-allow2fa-disabled Slack channels? | DBA team / ops team | Slack alert continuity on decommission |
-| Q5(C) | What IAM role/key does the Python AWS API caller use? | DevOps / cloud team | IAM cleanup on decommission |
-| Q7(C) | Is ZabbixProdOld still active or confirmed safe to remove? | Infrastructure team | Linked server cleanup |
-| Q18 | What firewall rules allow inbound/outbound connections to this server? | Infrastructure / DevOps | Firewall cleanup on decommission |
-| Q21 | If this server went offline today, what would break immediately? | yogeshwar.phull / tashvir.babulal | Decommission date cannot be set |
-| Q22 | Is any alerting dependent solely on this server — would anyone lose visibility? | yogeshwar.phull / tashvir.babulal | Decommission date cannot be set |
-| Q23 | Is the VCC framework replicated anywhere else or is this the only instance? | DBA team | Decommission date cannot be set |
+| Q3(C) | Who calls REP_MONTHEND_* procedures each month end — manually or automated? | tashvir.babulal / rayhaan.suleyman | ✅ CLOSED — called by Grafana dashboards only. No SQL Agent job. Internal use only. |
+| Q4(C) | Who receives alerts-data-operations and alert-app-allow2fa-disabled Slack channels? | DBA team / ops team | ✅ CLOSED — no active consumer. Grafana alert_configuration has placeholder email only. |
+| Q5(C) | What IAM role/key does the Python AWS API caller use? | DevOps / cloud team | ✅ CLOSED — IAM instance profile `KurtosysEC2InstanceProfileRoleRep`. No static key on disk. |
+| Q7(C) | Is ZabbixProdOld still active or confirmed safe to remove? | Infrastructure team | ✅ CLOSED — confirmed dead. Ping timed out 2026-08-06. Pending infrastructure sign-off to drop. |
+| Q18 | What firewall rules allow inbound/outbound connections to this server? | Infrastructure / DevOps | ✅ CLOSED — Windows Firewall rules documented 2026-08-11. AWS Security Group rules still needed from DevOps. See firewall-rules.md |
+| Q21 | If this server went offline today, what would break immediately? | yogeshwar.phull / tashvir.babulal | ✅ CLOSED — 74 Grafana dashboards, EW2P-MSSQL-01/02 monitoring, KAPP billing dashboard, S3 backups, CloudWatch collection. |
+| Q22 | Is any alerting dependent solely on this server — would anyone lose visibility? | yogeshwar.phull / tashvir.babulal | ✅ CLOSED — no active Slack consumer. SQL Server severity alerts all silent. Zabbix is primary alert path. |
+| Q23 | Is the VCC framework replicated anywhere else or is this the only instance? | DBA team | ✅ CLOSED — VCC framework unique to EW1R-REP-01. No VCC databases on EW2P-MSSQL-01 or EW2P-MSSQL-02. |
