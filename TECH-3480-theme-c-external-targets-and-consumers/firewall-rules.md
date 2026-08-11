@@ -22,7 +22,7 @@
 | 139 | TCP | 4 | System | NetBIOS Session — Windows standard |
 | 1434 | TCP | 3096 | sqlservr.exe | SQL Server Browser — loopback only |
 | 47001 | TCP | 4 | System | WinRM — Windows standard |
-| 59563 | TCP | 9148 | Unknown | ⚠️ Purpose unknown — not previously documented |
+| 59563 | TCP | 9148 | Unknown | Purpose unknown — not previously documented |
 
 ---
 

@@ -29,7 +29,7 @@
 
 ## Dead Linked Servers — Full List (63)
 
-### WPv2 Group — 4 dead ⚠️ Flagged for cleanup
+### WPv2 Group — 4 dead Flagged for cleanup
 
 | Linked Server | Provider | Error | Action |
 |---|---|---|---|
@@ -40,7 +40,7 @@
 
 > Root cause: WPv2 platform decommissioned. Jobs DBA_VCC_MYSQL_DAILY_CHECKS and DBA_VCC_MYSQL_AUDIT_DXM_CLIENT_DETAILED fail daily because SP_AUDIT_WPv2_CLIENTS_DETAILED still calls OPENQUERY against these servers. No alert fires — silent failures since decommission.
 
-### gen-rel Group — 5 dead ⚠️ Flagged for cleanup
+### gen-rel Group — 5 dead Flagged for cleanup
 
 | Linked Server | Provider | Error |
 |---|---|---|
@@ -50,7 +50,7 @@
 | ew1r-leaf-12.gen-rel | MSDASQL | TCP 10060 — 10.79.19.153:3306 unreachable |
 | ew1r-leaf-14.gen-rel | MSDASQL | TCP 10060 — 10.79.30.243:3306 unreachable |
 
-### gen-prd Group — 21 dead ⚠️ Flagged for cleanup
+### gen-prd Group — 21 dead Flagged for cleanup
 
 | Linked Server | Provider | Error |
 |---|---|---|
@@ -128,7 +128,7 @@
 | ue1p-aggr-01 | MSDASQL | TCP 10060 — 10.128.31.10:3306 unreachable |
 | ue1p-aggr-02 | MSDASQL | TCP 10060 — 10.128.47.148:3306 unreachable |
 
-### Zabbix Group — 2 dead ⚠️ Flagged for cleanup
+### Zabbix Group — 2 dead Flagged for cleanup
 
 | Linked Server | Provider | Error | Notes |
 |---|---|---|---|
@@ -213,8 +213,8 @@
 
 | Bucket | Path | Used By | Encryption | Retention |
 |---|---|---|---|---|
-| ksys-ew1r-db-backups | Backups/Reporting/EW1R-REP-01/ | DBA - Maintenance - SQL Backups FULL/DIFF/LOG | ⚠️ None — no --sse flag in AWS CLI sync command | TBC — check S3 lifecycle rule |
-| ksys-ew1p-oct-dbbackup | backup/octopus_db_<date>.bak | DBA - Maintenance - SQL Backup EW1P-OCT | ⚠️ KMS key NULL — unencrypted at rest | TBC — check S3 lifecycle rule |
+| ksys-ew1r-db-backups | Backups/Reporting/EW1R-REP-01/ | DBA - Maintenance - SQL Backups FULL/DIFF/LOG | None — no --sse flag in AWS CLI sync command | TBC — check S3 lifecycle rule |
+| ksys-ew1p-oct-dbbackup | backup/octopus_db_<date>.bak | DBA - Maintenance - SQL Backup EW1P-OCT | KMS key NULL — unencrypted at rest | TBC — check S3 lifecycle rule |
 
 ---
 
