@@ -96,10 +96,10 @@
 
 | Channel | Source | Trigger | Status |
 |---|---|---|---|
-| alerts-data-operations | Grafana alert — REP_CLIENT_CONFIG_CHANGES_REPORT | Client config changes (enableDocumentEntitlement, enabledEntityTypeEntitlements, enabledCaseSensitive) — current vs 2 days ago | Active — alert evaluates every 10 minutes. Data fed by DBA_VCC_MEMSQL_DAILY_CHECKS (06:00 UTC daily). Stale since May 2026. |
-| alert-app-allow2fa-disabled | Grafana alert — REP_CLIENT_APP_AUTH_CONFIG_CHANGES_REPORT | Application 2FA config changes — current vs 2 days ago | Active — alert evaluates every 10 minutes. Data fed by DBA_VCC_MEMSQL_DAILY_CHECKS (06:00 UTC daily). Stale since May 2026. |
+| alerts-data-operations | Grafana alert — REP_CLIENT_CONFIG_CHANGES_REPORT | Client config changes (enableDocumentEntitlement, enabledEntityTypeEntitlements, enabledCaseSensitive) — current vs 2 days ago | Active — Slack contact point confirmed in Grafana database (type: slack, encrypted token and webhook URL present). Channel name to confirm via Grafana UI (Alerting > Contact points). Data stale since May 2026. |
+| alert-app-allow2fa-disabled | Grafana alert — REP_CLIENT_APP_AUTH_CONFIG_CHANGES_REPORT | Application 2FA config changes — current vs 2 days ago | Active — Slack contact point confirmed in Grafana database (type: slack, encrypted token and webhook URL present). Channel name to confirm via Grafana UI (Alerting > Contact points). Data stale since May 2026. |
 
-> Q4(C) UPDATED — alerts-data-operations and alert-app-allow2fa-disabled are active Grafana alerts, not Zabbix webhooks. Data is collected by DBA_VCC_MEMSQL_DAILY_CHECKS job steps SP_AUDIT_FP_Client_Sizes_DETAILED and SP_AUDIT_FP_Client_ApplicationConfiguration_Auth_DETAILED. Since DBA_VCC_MEMSQL jobs were disabled in May 2026, both alerts have been evaluating on stale data. On decommission: both Grafana alerts and their underlying stored procedures must be retired. See Confluence: Client and Application 2FA configuration changes alerting.
+> Q4(C) — Both Slack contact points confirmed active in Grafana database. Alert pipeline confirmed: DBA_VCC_MEMSQL_DAILY_CHECKS collects data daily at 06:00 UTC via SP_AUDIT_FP_Client_Sizes_DETAILED and SP_AUDIT_FP_Client_ApplicationConfiguration_Auth_DETAILED. Grafana alerts evaluate every 10 minutes calling REP_CLIENT_CONFIG_CHANGES_REPORT and REP_CLIENT_APP_AUTH_CONFIG_CHANGES_REPORT. Both stale since May 2026. Slack channel names encrypted in database — confirm via Grafana UI (Alerting > Contact points). Both alerts must be retired on decommission.
 
 ---
 
@@ -138,10 +138,10 @@
 | # | Question | Who to Ask | Status |
 |---|---|---|---|
 | Q3(C) | Who calls REP_MONTHEND_* procedures each month end — manually or automated? | DBA team | CLOSED — called by Grafana dashboards only. No SQL Agent job. Internal use only. |
-| Q4(C) | Who receives alerts-data-operations and alert-app-allow2fa-disabled Slack channels? | DBA team / ops team | UPDATED — active Grafana alerts confirmed. alerts-data-operations triggered by REP_CLIENT_CONFIG_CHANGES_REPORT, alert-app-allow2fa-disabled triggered by REP_CLIENT_APP_AUTH_CONFIG_CHANGES_REPORT. Both fed by DBA_VCC_MEMSQL_DAILY_CHECKS. Stale since May 2026. Must be retired on decommission. |
+| Q4(C) | Who receives alerts-data-operations and alert-app-allow2fa-disabled Slack channels? | DBA team / ops team | Slack contact points confirmed active in Grafana database — type: slack, encrypted token and webhook URL present for both. Channel names encrypted — confirm via Grafana UI (Alerting > Contact points). Alert pipeline fully documented. Must be retired on decommission. |
 | Q5(C) | What IAM role/key does the Python AWS API caller use? | DevOps / cloud team | CLOSED — IAM instance profile `KurtosysEC2InstanceProfileRoleRep`. No static key on disk. |
 | Q7(C) | Is ZabbixProdOld still active or confirmed safe to remove? | Infrastructure team | CLOSED — confirmed dead. Ping timed out 2026-08-06. Pending infrastructure sign-off to drop. |
 | Q18 | What firewall rules allow inbound/outbound connections to this server? | Infrastructure / DevOps | CLOSED — Windows Firewall rules documented 2026-08-11. AWS Security Group rules still needed from DevOps. See firewall-rules.md |
 | Q21 | If this server went offline today, what would break immediately? | DBA team | CLOSED — 74 Grafana dashboards, EW2P-MSSQL-01/02 monitoring, KAPP billing dashboard, S3 backups, CloudWatch collection. |
-| Q22 | Is any alerting dependent solely on this server — would anyone lose visibility? | DBA team | UPDATED — alerts-data-operations and alert-app-allow2fa-disabled are active Grafana alerts on this server. Both will be silenced on decommission. SQL Server severity alerts all silent. Zabbix deadlock and sync check data also stops. |
+| Q22 | Is any alerting dependent solely on this server — would anyone lose visibility? | DBA team | Both Slack alerts confirmed active and will be silenced on decommission. Channel names to confirm via Grafana UI. SQL Server severity alerts all silent. Zabbix deadlock and sync check data also stops on decommission. |
 | Q23 | Is the VCC framework replicated anywhere else or is this the only instance? | DBA team | CLOSED — VCC framework unique to EW1R-REP-01. No VCC databases on EW2P-MSSQL-01 or EW2P-MSSQL-02. |
