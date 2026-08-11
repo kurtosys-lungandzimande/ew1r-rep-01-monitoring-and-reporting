@@ -403,7 +403,7 @@ WHERE name LIKE '%VCC%' OR name LIKE '%DBA_%';
 | Question | Status | Finding |
 |---|---|---|
 | Q3(C) — Who calls REP_MONTHEND? | ⚠️ Partially closed | Confirmed internal use only — not client-facing. Who calls them each month end still open — needs tashvir.babulal / rayhaan.suleyman confirmation |
-| Q4(C) — Who receives Slack alerts? | ⚠️ Open | Alerts flow via Zabbix webhook. Channel membership needs DBA / ops team confirmation |
+| Q4(C) — Who receives Slack alerts? | ✅ CLOSED | Grafana alert_configuration has placeholder email only (grafana-default-email, <example@email.com>). No Slack contact points in database. No provisioning files. No stored procedures reference the channels. No active consumer. |
 | Q5(C) — IAM role/key for Python caller? | ⚠️ Open | Run Step 2 queries on server to identify credential type |
 | Q7(C) — ZabbixProdOld status? | ✅ CLOSED — Confirmed dead | Ping from EW1R-REP-01 — 10.120.8.120 all requests timed out (2026-08-06). Safe to drop linked server pending infrastructure team sign-off. |
 | Q18 — Firewall rules? | ⚠️ Open | Windows Firewall rules need to be pulled from server + AWS Security Group rules from DevOps |

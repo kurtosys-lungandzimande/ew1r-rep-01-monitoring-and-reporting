@@ -208,7 +208,7 @@ ZabbixProdOld linked server points to 10.120.8.120:3306 — TCP connection refus
 | DBA_VCC_COST collection pipeline | Fix then decide | Re-enable MEMSQL jobs to restore collection, then assess decommission path |
 | DBA_VCC_MEMSQL (7 jobs, 14 dashboards) | Confirm then retire | Confirm why disabled — if SingleStore decommissioned, retire all |
 | 33 REP_MONTHEND procedures | Confirm then decide | Who calls them and whether client-facing must be confirmed first |
-| Slack alerts (via Zabbix) | Keep — confirm consumers | Alerts active, consumers unconfirmed — must be confirmed before decommission |
+| Slack alerts | No consumer — nothing to migrate | Grafana alert_configuration has placeholder email only. No Slack contact points configured. No stored procedures reference the channels. |
 | S3 backup encryption | Fix now | Encryption gaps are a compliance risk independent of decommission |
 | IAM role/key for Python caller | Confirm then revoke on decommission | Identify credential type, rotate if key, revoke on decommission |
 | ZabbixProdOld | Retire | Confirmed dead |
@@ -216,15 +216,13 @@ ZabbixProdOld linked server points to 10.120.8.120:3306 — TCP connection refus
 
 ---
 
-## Decommission Blockers — Cannot Set a Date Until These Are Answered
+## Decommission Blockers — Status
 
-| # | Blocker | Who to Ask |
+| # | Blocker | Status |
 |---|---|---|
-| B1 | Who calls REP_MONTHEND_* each month end — manual or automated? | tashvir.babulal / rayhaan.suleyman | ⚠️ Partially closed — confirmed internal use only, not client-facing. Who calls them each month end still open. |
-| B2 | Is KAPP Client Utilisation and Growth Report shown to clients? | — | ✅ CLOSED — confirmed internal use only. Not client-facing. |
-| B3 | Why were DBA_VCC_MEMSQL jobs disabled in May 2026 — is SingleStore decommissioned? | — | ✅ CLOSED — SingleStore is being decommissioned. All 7 MEMSQL jobs, DBA_VCC_MEMSQL database, and 14 dependent dashboards are retire candidates. |
-| B4 | What is the migration plan for EW2P-MSSQL-01/02 monitoring post-decommission? | DBA team | ✅ CLOSED — confirmed EW2P-MSSQL-01 and EW2P-MSSQL-02 only exist as linked servers (SQLNCLI) on this server. No other monitoring path exists. Migration must be planned before decommission date is set. |
-| B3 | Why were DBA_VCC_MEMSQL jobs disabled in May 2026 — is SingleStore decommissioned? | DBA team / yogeshwar.phull |
-| B4 | What is the migration plan for EW2P-MSSQL-01/02 monitoring post-decommission? | DBA team |
-| B5 | Is the VCC framework replicated anywhere else or is this the only instance? | DBA team |
-| B6 | Who receives alerts-data-operations and alert-app-allow2fa-disabled — would they lose visibility? | DBA team / ops team |
+| B1 | Who calls REP_MONTHEND_* each month end — manual or automated? | ⚠️ Partially closed — confirmed internal use only, not client-facing. Caller still open — needs tashvir.babulal / rayhaan.suleyman |
+| B2 | Is KAPP Client Utilisation and Growth Report shown to clients? | ✅ CLOSED — confirmed internal use only, not client-facing |
+| B3 | Why were DBA_VCC_MEMSQL jobs disabled in May 2026 — is SingleStore decommissioned? | ✅ CLOSED — SingleStore is being decommissioned. All 7 MEMSQL jobs, DBA_VCC_MEMSQL, and 14 dependent dashboards are retire candidates |
+| B4 | What is the migration plan for EW2P-MSSQL-01/02 monitoring post-decommission? | ✅ CLOSED — EW2P-MSSQL-01 and EW2P-MSSQL-02 confirmed as SQLNCLI linked servers on this server only. No other monitoring path exists. Migration must be planned before decommission date is set |
+| B5 | Is the VCC framework replicated anywhere else or is this the only instance? | ✅ CLOSED — VCC framework is unique to this server. No VCC databases found on EW2P-MSSQL-01 or EW2P-MSSQL-02 |
+| B6 | Who receives alerts-data-operations and alert-app-allow2fa-disabled — would they lose visibility? | ✅ CLOSED — Slack contact points not found in alert_configuration. Only receiver is grafana-default-email with placeholder address. No provisioning files with Slack config. No stored procedures reference these channels. No active consumer — nothing to migrate on decommission |
