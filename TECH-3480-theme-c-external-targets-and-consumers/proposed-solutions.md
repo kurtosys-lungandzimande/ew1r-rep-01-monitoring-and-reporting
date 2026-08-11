@@ -87,10 +87,10 @@ This is billing data for 200+ institutional clients. The KAPP Client Utilisation
 
 **Proposed actions:**
 - Disclose to stakeholders that DBA_VCC_COST data has been stale since 4 May 2026 — 11+ weeks of silent zero-row runs
-- Confirm with tashvir.babulal / rayhaan.suleyman whether KAPP Client Utilisation and Growth Report is shown to clients
-- Confirm who calls REP_MONTHEND_* procedures each month end and whether they are aware the data is stale
-- Root cause fix: re-enable DBA_VCC_MEMSQL jobs (or confirm SingleStore is decommissioned) — the SP_INFO procedures will resume collecting once BAS_Ping_Stat has fresh data
-- Long-term: this data should not live on a Developer Edition non-production server. If it is client billing data, it needs a production-grade home with proper monitoring and alerting
+- KAPP Client Utilisation and Growth Report confirmed internal use only — not client-facing. No disclosure risk to clients.
+- REP_MONTHEND_* procedures confirmed called by Grafana dashboards only — active admins tashvir.babulal, yogeshwar.phull, rayhaan.suleyman are aware
+- Root cause fix: SingleStore is being decommissioned — DBA_VCC_MEMSQL jobs will not be re-enabled. DBA_VCC_COST collection pipeline depends on MEMSQL ping stats and will remain stale until a replacement data source is confirmed
+- Long-term: this data should not live on a Developer Edition non-production server. It needs a production-grade home with proper monitoring and alerting as part of the decommission migration plan
 
 ---
 
@@ -103,46 +103,41 @@ All 7 DBA_VCC_MEMSQL jobs were disabled on 2026-05-08 within 90 seconds of each 
 The downstream casualty is DBA_VCC_COST — the SP_INFO procedures that collect client billing data depend on DBA_VCC_MEMSQL ping stats being fresh. When the MEMSQL jobs were disabled, the entire DBA_VCC_COST collection pipeline silently stopped with them. Both databases stopped collecting on the same day for the same root cause.
 
 **Proposed actions:**
-- Confirm with DBA team why jobs were disabled — decommission, migration, or pause
-- If SingleStore is decommissioned: retire all 7 jobs, archive DBA_VCC_MEMSQL, update or retire all 14 dependent dashboards
-- If SingleStore is still active: update linked server connections and re-enable jobs — but investigate why DBA_VCC_MEMSQL_DAILY_CHECKS failed on its last run before being disabled
-- Notify dashboard consumers that data has been stale since May 2026 regardless of outcome
-- Do not re-enable jobs without understanding the root cause of the DAILY_CHECKS failure on 8 May 2026
+- SingleStore is being decommissioned — confirmed B3 closed. All 7 DBA_VCC_MEMSQL jobs are retire candidates
+- Retire all 7 DBA_VCC_MEMSQL jobs, archive DBA_VCC_MEMSQL database, update or retire all 14 dependent dashboards
+- Notify dashboard consumers that data has been stale since May 2026
+- Do not re-enable jobs — SingleStore decommission is confirmed
 
 ---
 
 ## 6. Month-End Procedures — Who Calls Them?
 
 **What we found:**
-33 REP_MONTHEND stored procedures exist across DBA_VCC_COST (19) and DBA_VCC_MEMSQL (14). 6 Grafana dashboards call them. No SQL Agent job has been found that calls these procedures on a schedule — they are likely called manually each month end. Who calls them and whether the output is client-facing is still open.
+33 REP_MONTHEND stored procedures exist across DBA_VCC_COST (19) and DBA_VCC_MEMSQL (14). 6 Grafana dashboards call them. No SQL Agent job calls these procedures on a schedule — confirmed via job history and job step queries. Caller is whoever opens these dashboards in Grafana. Confirmed internal use only — not client-facing. Active admins: tashvir.babulal, yogeshwar.phull, rayhaan.suleyman.
 
 **Why it matters:**
-If these procedures are called manually by a person each month end, that person needs to be identified before decommission. If the output is client-facing, the procedures cannot be retired without a replacement. The data they report on has been stale since May 2026 — any month-end report run since then has been using stale data.
+The procedures are called by Grafana dashboards only — no automated pipeline. The data they report on has been stale since May 2026. Any month-end report run since then has been using stale data. Admins need to be notified before decommission.
 
 **Proposed actions:**
-- Confirm with tashvir.babulal / rayhaan.suleyman who calls REP_MONTHEND_* each month end
-- Confirm whether the output is sent to clients or used internally only
-- Run investigation-log.md Q3(C) queries to check for any automated caller
-- If manual: document the process and include it in the decommission handover
-- If client-facing: this is a decommission blocker — a replacement pipeline must be confirmed before these procedures can be retired
-- Note: 7 procedures in DBA_VCC_MEMSQL use the `CLINT` typo (vs `CLIENT`) — both old and new versions exist. The old typo versions should be cleaned up regardless of the decommission outcome
+- Notify tashvir.babulal, yogeshwar.phull, rayhaan.suleyman that REP_MONTHEND data has been stale since May 2026 and that the dashboards will be retired on decommission
+- Include month-end dashboard retirement in the decommission handover — no replacement pipeline needed (internal use only, no client impact)
+- Note: 7 procedures in DBA_VCC_MEMSQL use the `CLINT` typo (vs `CLIENT`) — clean up regardless of decommission outcome
 
 ---
 
 ## 7. Slack Alerts — Zabbix Is the Only Path
 
 **What we found:**
-EW1R-REP-01 does not post directly to Slack. All SlackChatPostMessage calls in stored procedures are commented out. Slack notifications flow exclusively through Zabbix via ZabbixProdNew. Two active channels: `alerts-data-operations` (KAPP config/read failures) and `alert-app-allow2fa-disabled` (client auth alerts). Who receives these channels is still open.
+EW1R-REP-01 does not post directly to Slack. All SlackChatPostMessage calls in stored procedures are commented out. Grafana alert_configuration has a placeholder email only (`grafana-default-email`, `<example@email.com>`). No Slack contact points configured in the database. No provisioning files with Slack config found. No stored procedures reference the alert channels. No active consumer confirmed — Q4(C) closed.
 
 **Why it matters:**
-If this server is decommissioned, Zabbix loses its linked server connection to EW1R-REP-01. The deadlock detection and MemSQL sync check data that Zabbix reads from this server stops. The Slack alerts that depend on that data stop with it. This needs to be confirmed before decommission.
+No active Slack consumer means nothing to migrate on decommission. Zabbix is the primary alert path but reads from this server via linked server — that dependency ends on decommission.
 
 **Proposed actions:**
-- Confirm with DBA / ops team who receives alerts-data-operations and alert-app-allow2fa-disabled
-- Run investigation-log.md Q4(C) queries to confirm Zabbix webhook config
-- Confirm with Zabbix / monitoring team what triggers on EW1R-REP-01 would be lost on decommission
-- SPSlackCheckSyncStatus is currently dormant (MemSQL jobs disabled) — confirm whether it should be disabled or dropped
+- No Slack migration required — no active consumer confirmed
+- SPSlackCheckSyncStatus is dormant (MemSQL jobs disabled) — drop as part of DBA_VCC_MEMSQL cleanup
 - 4 stored procedures reference dead linked servers (P23-P-AGGR-201, p23-p-aggr-301) — drop these regardless of decommission outcome
+- Confirm with Zabbix / monitoring team what triggers on EW1R-REP-01 would be lost on decommission — Zabbix deadlock and sync check data stops
 
 ---
 
