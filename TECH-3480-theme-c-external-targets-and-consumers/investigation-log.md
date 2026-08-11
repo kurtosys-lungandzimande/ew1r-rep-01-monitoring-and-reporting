@@ -409,4 +409,5 @@ WHERE name LIKE '%VCC%' OR name LIKE '%DBA_%';
 | Q18 — Firewall rules? | ⚠️ Open | Windows Firewall rules need to be pulled from server + AWS Security Group rules from DevOps |
 | Q21 — What breaks immediately? | ✅ Documented | 74 Grafana dashboards, EW2P-MSSQL-01/02 monitoring, KAPP billing dashboard, S3 backups, CloudWatch collection |
 | Q22 — Alerting solely dependent? | ⚠️ Open | Zabbix deadlock + sync check data stops. SQL Server severity alerts already silent. Run Step 1 query to confirm full Zabbix dependency |
-| Q23 — VCC replicated elsewhere? | ⚠️ Open | Run Step 1-2 queries. Expected: unique to this server — decommission blocker |
+| Q23 — VCC replicated elsewhere? | ✅ CLOSED | EW2P-MSSQL-01 and EW2P-MSSQL-02 confirmed as SQLNCLI linked servers on this server only — no VCC databases found on either. VCC framework is unique to EW1R-REP-01. |
+| B3 — SingleStore decommissioned? | ✅ CLOSED | SingleStore is being decommissioned. All 7 DBA_VCC_MEMSQL jobs, DBA_VCC_MEMSQL database, and 14 dependent dashboards are retire candidates. |

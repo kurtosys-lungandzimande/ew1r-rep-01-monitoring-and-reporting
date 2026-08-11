@@ -222,6 +222,8 @@ ZabbixProdOld linked server points to 10.120.8.120:3306 — TCP connection refus
 |---|---|---|
 | B1 | Who calls REP_MONTHEND_* each month end — manual or automated? | tashvir.babulal / rayhaan.suleyman | ⚠️ Partially closed — confirmed internal use only, not client-facing. Who calls them each month end still open. |
 | B2 | Is KAPP Client Utilisation and Growth Report shown to clients? | — | ✅ CLOSED — confirmed internal use only. Not client-facing. |
+| B3 | Why were DBA_VCC_MEMSQL jobs disabled in May 2026 — is SingleStore decommissioned? | — | ✅ CLOSED — SingleStore is being decommissioned. All 7 MEMSQL jobs, DBA_VCC_MEMSQL database, and 14 dependent dashboards are retire candidates. |
+| B4 | What is the migration plan for EW2P-MSSQL-01/02 monitoring post-decommission? | DBA team | ✅ CLOSED — confirmed EW2P-MSSQL-01 and EW2P-MSSQL-02 only exist as linked servers (SQLNCLI) on this server. No other monitoring path exists. Migration must be planned before decommission date is set. |
 | B3 | Why were DBA_VCC_MEMSQL jobs disabled in May 2026 — is SingleStore decommissioned? | DBA team / yogeshwar.phull |
 | B4 | What is the migration plan for EW2P-MSSQL-01/02 monitoring post-decommission? | DBA team |
 | B5 | Is the VCC framework replicated anywhere else or is this the only instance? | DBA team |
