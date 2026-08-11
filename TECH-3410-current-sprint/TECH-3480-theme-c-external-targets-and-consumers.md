@@ -72,7 +72,7 @@ TECH-3562 completed the full targets and consumers discovery — 109 linked serv
 - [x] Month-end procedure consumer confirmed — called by Grafana dashboards only. No automated job. Internal use only.
 - [x] Slack alert consumers confirmed — no active consumer. Grafana alert_configuration has placeholder email only.
 - [x] S3 backup targets documented: bucket names, encryption status, retention policy — ksys-ew1r-db-backups + ksys-ew1p-oct-dbbackup. Both unencrypted. Retention TBC.
-- [ ] Firewall rules documented: inbound and outbound connections — open Q18
+- [x] Firewall rules documented: inbound and outbound connections — Windows Firewall rules confirmed 2026-08-11. AWS Security Group rules still needed from DevOps. See firewall-rules.md
 - [ ] IAM role/key for Python AWS API caller confirmed — open Q5(C)
 - [x] ZabbixProdOld status confirmed — confirmed dead. Ping timed out 2026-08-06.
 - [ ] All open questions from discovery answered or escalated with evidence — Q5, Q18 still open
