@@ -1,0 +1,147 @@
+# Consumer Inventory — EW1R-REP-01
+**Ticket:** TECH-3480 — Theme C: External Targets and Consumer Identification
+**Source:** TECH-3562 discovery + TECH-3560 SQL Server inventory
+**Date:** 2026-08-06
+
+---
+
+## What Depends on This Server
+
+| Consumer | What It Uses | Criticality | Status |
+|---|---|---|---|
+| Grafana dashboards (74 total) | SQL Server datasource — DBA_VCC_COST, DBA_VCC_MEMSQL, DBA_VCC_AWS, DBA_VCC, Utilities | Critical | Active — 3 admins: tashvir.babulal, yogeshwar.phull, rayhaan.suleyman |
+| KAPP Client Utilisation and Growth Report | DBA_VCC_COST — LU_KAPP_ClientList (280 clients) | Critical — client billing data | ⚠️ Data stale since 4 May 2026 — silent failure |
+| Database Engineering Costs dashboard | DBA_VCC_COST | Internal | Active — last updated Oct 2024 |
+| Database Engineering Sprint Reporting | DBA_VCC_COST | Internal | Active — last updated Mar 2024 |
+| AWS Cost Report Monthly | DBA_VCC_COST — INFO_AWS_DE_Entity_Cost | Internal | ⚠️ Stale since Nov 2024 |
+| 6 Month-End Reporting dashboards | DBA_VCC_COST + DBA_VCC_MEMSQL — REP_MONTHEND_* procedures | Critical — client reporting | ⚠️ All stale since May 2026. Who calls them each month end — open |
+| 14 DBA_VCC_MEMSQL dashboards | DBA_VCC_MEMSQL | Internal | ⚠️ All stale since May 2026 — jobs disabled |
+| EW2P-MSSQL-01 monitoring | 16 VCC Audit Collection jobs + 8 VCC Server Monitoring jobs | Critical — production server | Active — no secondary monitoring path |
+| EW2P-MSSQL-02 monitoring | 16 VCC Audit Collection jobs + 8 VCC Server Monitoring jobs | Critical — production server | Active — no secondary monitoring path |
+| Zabbix (via ZabbixProdNew linked server) | Utilities.dbo.Zab_* tables — deadlock, sync check, AG lag | High | Active — Zabbix reads via linked server |
+| Slack alerts (via Zabbix) | Zabbix webhook — alerts-data-operations, alert-app-allow2fa-disabled | High | Active — who receives each channel is open |
+| AWS CloudWatch / S3 | Python API — DBA_VCC_AWS_15MIN_CHECKS, DBA_VCC_AWS_DAILY_CHECKS | High | Active — 30-min and daily jobs running |
+| Encore IIS / BNY IIS logs | DBA_VCC_HOURLY_CHECKS — CloudWatch ingestion | Medium | Active — hourly collection |
+| DXM client sizes | DBA_VCC_MYSQL — DXM audit jobs | Medium | Active — daily collection |
+| Jira sprint data | DBA_VCC_ATLASSIAN — DBA_VCC_JIRA_MONTHEND_CHECKS | Medium | Active — monthly |
+| EW1P-OCT RDS backup | DBA - Maintenance - SQL Backup EW1P-OCT | Medium | Active — daily. ⚠️ KMS key NULL — unencrypted |
+
+---
+
+## Month-End Procedure Consumers
+
+### DBA_VCC_COST — 19 REP_MONTHEND procedures
+
+| Procedure | Covers | Last Modified |
+|---|---|---|
+| REP_MONTHEND_CLIENT_ALLOCATIONS_REPORT | All clients — allocations summary | 2023-01-06 |
+| REP_MONTHEND_CLIENT_ALLOCATIONS_CLIENT_REPORT | Per-client — allocations | 2023-01-06 |
+| REP_MONTHEND_CLIENT_DISCLAIMERS_COMMENTARIES_REPORT | All clients — disclaimers | 2022-11-23 |
+| REP_MONTHEND_CLIENT_DISCLAIMERS_COMMENTARIES_CLIENT_REPORT | Per-client — disclaimers | 2023-01-06 |
+| REP_MONTHEND_CLIENT_DOCUMENTS_REPORT | All clients — documents | 2022-11-23 |
+| REP_MONTHEND_CLIENT_DOCUMENTS_CLIENT_REPORT | Per-client — documents | 2023-01-06 |
+| REP_MONTHEND_CLIENT_ENTITY_REPORT | All clients — entities | 2022-11-23 |
+| REP_MONTHEND_CLIENT_HISTORICALDATASETS_REPORT | All clients — historical datasets | 2022-11-23 |
+| REP_MONTHEND_CLIENT_HISTORICALDATASETS_CLIENT_REPORT | Per-client — historical datasets | 2023-01-06 |
+| REP_MONTHEND_CLIENT_SNAPSHOTS_REPORT | All clients — snapshots | 2022-11-23 |
+| REP_MONTHEND_CLIENT_SNAPSHOTS_CLIENT_REPORT | Per-client — snapshots | 2023-01-06 |
+| REP_MONTHEND_CLIENT_STATSTICS_REPORT | All clients — statistics | 2022-11-23 |
+| REP_MONTHEND_CLIENT_STATSTICS_CLIENT_REPORT | Per-client — statistics | 2023-01-06 |
+| REP_MONTHEND_CLIENT_TIMESERIES_REPORT | All clients — time series | 2022-11-23 |
+| REP_MONTHEND_CLIENT_TIMESERIES_CLIENT_REPORT | Per-client — time series | 2023-01-06 |
+| REP_MONTHEND_CLIENT_TOP5_ALLOCATIONS_REPORT | Top 5 clients — allocations | 2023-01-06 |
+| REP_MONTHEND_CLIENT_USER_COUNTS_REPORT | All clients — user counts | 2022-10-12 |
+| REP_MONTHEND_CLIENT_USER_REPORT | All clients — users | 2022-11-23 |
+| REP_MONTHEND_TOP5_CLIENTS_DATA_FOOTPRINT_REPORT | Top 5 clients — data footprint | 2023-01-06 |
+
+> ⚠️ All 19 procedures depend on DBA_VCC_COST collection tables which have been stale since 4 May 2026. Any month-end report run since May 2026 has been using stale data. Built by donovan.vangraan — never modified since Jan 2023.
+
+### DBA_VCC_MEMSQL — 14 REP_MONTHEND procedures
+
+| Procedure | Covers | Last Modified | Notes |
+|---|---|---|---|
+| REP_MONTHEND_CLIENT_NUMBER_REPORT | Client count | 2024-01-22 | Most recently modified |
+| REP_MONTHEND_CLIENTGROWTH_COST_ENV_FOOTPRINT_REPORT | Client growth by env | 2023-10-13 | |
+| REP_MONTHEND_CLIENTGROWTH_COST_REPORT | Client growth cost | 2023-07-05 | |
+| REP_MONTHEND_CLIENTGROWTH_COST_TOP5_REPORT | Top 5 client growth | 2024-01-22 | Most recently modified |
+| REP_MONTHEND_CLINTGROWTH_COST_ENV_FOOTPRINT_REPORT | Client growth by env | 2023-08-10 | ⚠️ CLINT typo — old version |
+| REP_MONTHEND_CLINTGROWTH_COST_REPORT | Client growth cost | 2022-06-21 | ⚠️ CLINT typo — old version |
+| REP_MONTHEND_CLINTGROWTH_COST_TOP5_REPORT | Top 5 client growth | 2023-08-10 | ⚠️ CLINT typo — old version |
+| REP_MONTHEND_IP_BACKUP_REPORT | InvestorPress backups | 2023-08-10 | |
+| REP_MONTHEND_IP_CLINTGROWTH_COST_REPORT | IP client growth | 2023-01-05 | ⚠️ CLINT typo — old version |
+| REP_MONTHEND_KAPP_BACKUP_REPORT | KAPP backups | 2023-08-10 | |
+| REP_MONTHEND_KAPP_CLINTGROWTH_COST_REPORT | KAPP client growth | 2022-06-21 | ⚠️ CLINT typo — old version |
+| REP_MONTHEND_KAPP_LOADER_REPORT | KAPP loaders | 2023-08-10 | |
+| REP_MONTHEND_KAPP_SNAPSHOTS_TOP5_REPORT | KAPP top 5 snapshots | 2023-08-10 | |
+| REP_MONTHEND_MAXDB_SERVER_STATUS_REPORT | MaxDB server status | 2017-12-13 | ⚠️ Predates VCC framework — leftover |
+
+> ⚠️ All 14 procedures depend on DBA_VCC_MEMSQL which has been stale since May 2026 — jobs disabled. Who calls these each month end is still open.
+
+### Grafana Dashboards Calling REP_MONTHEND
+
+| Dashboard | Last Updated |
+|---|---|
+| WPv2 Month End Reporting | 2024-06-20 |
+| Encore Month End Reporting | 2023-08-10 |
+| DXM Month End Reporting | 2023-08-10 |
+| InvestorPress Month End Reporting | 2023-08-10 |
+| KAPP Month End Reporting | 2023-08-10 |
+| Other Services Month End Reporting (Draft) | 2023-07-21 |
+
+> Who calls these dashboards each month end — open question Q3(C). Must be confirmed with tashvir.babulal / rayhaan.suleyman before month-end procedures can be retired or migrated.
+
+---
+
+## Slack Alert Consumers
+
+| Channel | Source | Trigger | Who Receives |
+|---|---|---|---|
+| alerts-data-operations | Zabbix webhook (via ZabbixProdNew) | KAPP config/read failures | ⚠️ Open — needs confirmation |
+| alert-app-allow2fa-disabled | Zabbix webhook (via ZabbixProdNew) | Client auth alerts — 2FA disabled | ⚠️ Open — needs confirmation |
+
+> EW1R-REP-01 does not post directly to Slack. All SlackChatPostMessage calls in stored procedures are commented out. Slack notifications flow exclusively through Zabbix. If this server is decommissioned, Zabbix must be reconfigured to maintain these alerts independently.
+
+---
+
+## Infrastructure Dependencies
+
+### Service Accounts
+
+| Service | Account | Notes |
+|---|---|---|
+| SQL Server Engine | AD domain account | Contact DBA team |
+| SQL Server Agent | SHNONPRD\sqlagent | Confirmed — runs DBA_VCC_COST_Entity_Count_Collection |
+| SQL Server Launchpad | NT Service account | |
+| Linked server credentials | Unknown | Check vault |
+| AWS API access (Python) | Unknown — IAM role or key on server | ⚠️ Open — Q5(C) |
+
+### Firewall Rules (needs network team confirmation — Q18)
+
+| Direction | Source / Destination | Port | Purpose |
+|---|---|---|---|
+| Outbound | SingleStore nodes (46 reachable) | 3306 (ODBC) | MemSQL cluster queries |
+| Outbound | MySQL / DXM / WPv2 nodes | 3306 | MySQL monitoring |
+| Outbound | EW2P-MSSQL-01/02 | 1433 | SQL Server monitoring |
+| Outbound | AWS APIs (CloudWatch, S3) | 443 | Python API calls |
+| Outbound | Jira | 443 | Sprint data collection |
+| Outbound | S3 (ksys-ew1r-db-backups, ksys-ew1p-oct-dbbackup) | 443 | Backup uploads |
+| Inbound | Grafana clients | 443 | Dashboard access |
+| Inbound | DBA team | 1433 | SQL Server management |
+| Inbound | Zabbix (ZabbixProdNew) | 10050 | Zabbix agent |
+| Inbound | RDP | 3389 | Remote management |
+| Inbound | WinRM | 5985 | Remote management |
+
+---
+
+## Open Questions
+
+| # | Question | Who to Ask | Blocks |
+|---|---|---|---|
+| Q3(C) | Who calls REP_MONTHEND_* procedures each month end — manually or automated? | tashvir.babulal / rayhaan.suleyman | Month-end procedures cannot be retired or migrated until answered |
+| Q4(C) | Who receives alerts-data-operations and alert-app-allow2fa-disabled Slack channels? | DBA team / ops team | Slack alert continuity on decommission |
+| Q5(C) | What IAM role/key does the Python AWS API caller use? | DevOps / cloud team | IAM cleanup on decommission |
+| Q7(C) | Is ZabbixProdOld still active or confirmed safe to remove? | Infrastructure team | Linked server cleanup |
+| Q18 | What firewall rules allow inbound/outbound connections to this server? | Infrastructure / DevOps | Firewall cleanup on decommission |
+| Q21 | If this server went offline today, what would break immediately? | yogeshwar.phull / tashvir.babulal | Decommission date cannot be set |
+| Q22 | Is any alerting dependent solely on this server — would anyone lose visibility? | yogeshwar.phull / tashvir.babulal | Decommission date cannot be set |
+| Q23 | Is the VCC framework replicated anywhere else or is this the only instance? | DBA team | Decommission date cannot be set |

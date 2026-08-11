@@ -2,7 +2,8 @@
 # [TECH-3480](https://kurtosys-prod-eng.atlassian.net/jira/software/c/projects/TECH/boards/795?selectedIssue=TECH-3480)
 
 > **Parent Epic:** TECH-3410
-> **Status:** To Do
+> **Status:** In Progress
+> **Working folder:** TECH-3480-theme-c-external-targets-and-consumers/
 
 ---
 
@@ -48,32 +49,32 @@ TECH-3562 completed the full targets and consumers discovery — 109 linked serv
 
 ## Open Questions to Resolve in This Ticket
 
-| # | Question | Who to Ask |
-|---|---|---|
-| Q3 (C) | Who calls REP_MONTHEND_* procedures each month end? | tashvir.babulal / rayhaan.suleyman |
-| Q4 (C) | Who receives the Slack alerts from alerts-data-operations and alert-app-allow2fa-disabled? | DBA team / ops team |
-| Q5 (C) | What IAM role/key does the Python AWS API caller use? | DevOps / cloud team |
-| Q6 (C) | What S3 bucket do backups go to — bucket name, ARN, retention policy? | DevOps / cloud team |
-| Q7 (C) | Is ZabbixProdOld still active or can it be removed? | Infrastructure team |
-| Q18 | What firewall rules allow inbound/outbound connections to this server? | Infrastructure / DevOps |
-| Q21 | If this server went offline today, what would break immediately? | yogeshwar.phull / tashvir.babulal |
-| Q22 | Is any alerting dependent solely on this server — would anyone lose visibility? | yogeshwar.phull / tashvir.babulal |
-| Q23 | Is the VCC framework replicated anywhere else or is this the only instance? | DBA team |
+| # | Question | Who to Ask | Status |
+|---|---|---|---|
+| Q3 (C) | Who calls REP_MONTHEND_* procedures each month end? | tashvir.babulal / rayhaan.suleyman | ⚠️ Open — queries in investigation-log.md |
+| Q4 (C) | Who receives the Slack alerts from alerts-data-operations and alert-app-allow2fa-disabled? | DBA team / ops team | ⚠️ Open — queries in investigation-log.md |
+| Q5 (C) | What IAM role/key does the Python AWS API caller use? | DevOps / cloud team | ⚠️ Open — queries in investigation-log.md |
+| Q6 (C) | What S3 bucket do backups go to — bucket name, ARN, retention policy? | DevOps / cloud team | ✅ Closed — ksys-ew1r-db-backups (local) + ksys-ew1p-oct-dbbackup (EW1P-OCT RDS). ⚠️ Retention TBC. ⚠️ Both unencrypted. |
+| Q7 (C) | Is ZabbixProdOld still active or can it be removed? | Infrastructure team | ✅ Confirmed dead — TCP 10060 10.120.8.120:3306 unreachable. Pending infrastructure sign-off to drop. |
+| Q18 | What firewall rules allow inbound/outbound connections to this server? | Infrastructure / DevOps | ⚠️ Open — queries in investigation-log.md |
+| Q21 | If this server went offline today, what would break immediately? | yogeshwar.phull / tashvir.babulal | ✅ Documented — see consumer-inventory.md. 74 Grafana dashboards, EW2P-MSSQL-01/02 monitoring, KAPP billing dashboard, S3 backups, CloudWatch collection. |
+| Q22 | Is any alerting dependent solely on this server — would anyone lose visibility? | yogeshwar.phull / tashvir.babulal | ⚠️ Open — Zabbix dependency queries in investigation-log.md |
+| Q23 | Is the VCC framework replicated anywhere else or is this the only instance? | DBA team | ⚠️ Open — queries in investigation-log.md. Expected: unique to this server. |
 
 ---
 
 ## Definition of Done
 
-- [ ] All 109 linked servers validated: reachability confirmed, active or stale or dead
-- [ ] All dead linked servers (WPv2 + 7 additional) documented with evidence and flagged for cleanup
-- [ ] Consumer inventory complete: all systems and teams that depend on this server documented
-- [ ] Month-end procedure consumer confirmed — who calls REP_MONTHEND_* each month end
-- [ ] Slack alert consumers confirmed — who receives each channel
-- [ ] S3 backup targets documented: bucket names, encryption status, retention policy
-- [ ] Firewall rules documented: inbound and outbound connections
-- [ ] IAM role/key for Python AWS API caller confirmed
-- [ ] ZabbixProdOld status confirmed — active or safe to remove
-- [ ] All open questions from discovery answered or escalated with evidence
+- [x] All 109 linked servers validated: reachability confirmed, active or stale or dead — 63 dead, 46 reachable. See external-targets-inventory.md
+- [x] All dead linked servers (WPv2 + 7 additional) documented with evidence and flagged for cleanup — 63 total dead documented. See external-targets-inventory.md
+- [x] Consumer inventory complete: all systems and teams that depend on this server documented — see consumer-inventory.md
+- [ ] Month-end procedure consumer confirmed — who calls REP_MONTHEND_* each month end — open Q3(C)
+- [ ] Slack alert consumers confirmed — who receives each channel — open Q4(C)
+- [x] S3 backup targets documented: bucket names, encryption status, retention policy — ksys-ew1r-db-backups + ksys-ew1p-oct-dbbackup. Both unencrypted. Retention TBC.
+- [ ] Firewall rules documented: inbound and outbound connections — open Q18
+- [ ] IAM role/key for Python AWS API caller confirmed — open Q5(C)
+- [x] ZabbixProdOld status confirmed — confirmed dead. TCP 10060 — 10.120.8.120:3306 unreachable.
+- [ ] All open questions from discovery answered or escalated with evidence — Q3, Q4, Q5, Q18, Q22, Q23 still open
 - [ ] Inventory published to Confluence
 
 ---
