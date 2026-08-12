@@ -139,9 +139,9 @@ No active alert consumer exists. No one loses visibility on decommission. The co
 
 **Proposed actions:**
 - No Slack migration required — neither alerts-data-operations nor alert-app-allow2fa-disabled has ever fired
-- Retire REP_CLIENT_CONFIG_CHANGES_REPORT and REP_CLIENT_APP_AUTH_CONFIG_CHANGES_REPORT stored procedures on decommission
-- Retire DBA_VCC_MEMSQL_DAILY_CHECKS steps SP_AUDIT_FP_Client_Sizes_DETAILED and SP_AUDIT_FP_Client_ApplicationConfiguration_Auth_DETAILED on decommission
-- Retire all 3 Grafana contact points and any associated alert rules on decommission
+- Confirm with DBA team whether REP_CLIENT_CONFIG_CHANGES_REPORT and REP_CLIENT_APP_AUTH_CONFIG_CHANGES_REPORT stored procedures are still needed before dropping
+- Confirm with DBA team whether DBA_VCC_MEMSQL_DAILY_CHECKS steps SP_AUDIT_FP_Client_Sizes_DETAILED and SP_AUDIT_FP_Client_ApplicationConfiguration_Auth_DETAILED are still needed
+- Confirm with DBA team whether all 3 Grafana contact points and associated alert rules are still needed — retire only if DBA team confirms no longer needed
 
 ---
 

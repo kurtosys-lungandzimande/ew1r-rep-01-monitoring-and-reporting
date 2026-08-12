@@ -47,8 +47,8 @@ These are the items that will break immediately if the server is switched off wi
 | 9 active Grafana dashboards | DBA team loses visibility of KAPP, NiFi, SingleStore, and cost data | TBD — replacement approach to be agreed with team at start of execution sprint | Critical |
 | DBA_VCC_COST (280 client billing records) | Client billing data inaccessible — no replacement pipeline | TBD — DBA team to confirm if data is still needed. Migration destination to be agreed — separate production server migration project ongoing | Critical |
 | DXM monitoring jobs | DXM client size monitoring stops | New monitoring host (TBC) | High |
-| KAPP MySQL datasources (UK/EU/US Prod) | 9 dashboards reading production KAPP data break | Re-point in Amazon Managed Grafana | High |
-| NiFi JSON API datasource | NiFi API Reporting dashboard breaks | Re-point in Amazon Managed Grafana | Medium |
+| KAPP MySQL datasources (UK/EU/US Prod) | 9 dashboards reading production KAPP data break | Re-point in replacement Grafana (approach TBD) | High |
+| NiFi JSON API datasource | NiFi API Reporting dashboard breaks | Re-point in replacement Grafana (approach TBD) | Medium |
 | EW1P-OCT RDS backup job | EW1P-OCT RDS loses its backup | RDS native automated backups | Medium |
 | SQL Server backups (FULL/DIFF/LOG) | EW1R-REP-01 databases lose backup coverage | AWS Backup policies | Medium |
 | Zabbix agent (port 10050) | Zabbix loses visibility of EW1R-REP-01 | Notify monitoring team — agent goes with server | Low |
@@ -119,16 +119,16 @@ These items have no active consumer or have been superseded. They can be dropped
 | Procedure | Database | Reason |
 |---|---|---|
 | SP_AUDIT_WPv2_CLIENTS_DETAILED | DBA_VCC_MYSQL | Last modified 2022. References dead linked servers. Causing daily job failures |
-| REP_CLIENT_CONFIG_CHANGES_REPORT | DBA_VCC_MEMSQL | No active consumer — alerts-data-operations never fired |
-| REP_CLIENT_APP_AUTH_CONFIG_CHANGES_REPORT | DBA_VCC_MEMSQL | No active consumer — alert-app-allow2fa-disabled contact point confirmed in Grafana UI but has never fired |
+| REP_CLIENT_CONFIG_CHANGES_REPORT | DBA_VCC_MEMSQL | No active consumer — alerts-data-operations never fired. DBA team to confirm before dropping |
+| REP_CLIENT_APP_AUTH_CONFIG_CHANGES_REPORT | DBA_VCC_MEMSQL | No active consumer — alert-app-allow2fa-disabled contact point confirmed in Grafana UI but has never fired. DBA team to confirm before dropping |
 | All REP_MONTHEND_* procedures (33 total) | DBA_VCC_COST (19) + DBA_VCC_MEMSQL (14) | Called by Grafana dashboards only. Dashboards retiring on decommission |
 
 ### Infrastructure
 | Item | Action |
 |---|---|
 | IAM instance profile KurtosysEC2InstanceProfileRoleRep | Detach on decommission. Review permissions before detaching |
-| Grafana contact points (alerts-data-operations, alert-app-allow2fa-disabled, grafana-default-email) | Retire on decommission — all 3 confirmed via Grafana UI, none have ever fired |
-| Grafana alert rules (3) | Retire on decommission — no active consumer confirmed |
+| Grafana contact points (alerts-data-operations, alert-app-allow2fa-disabled, grafana-default-email) | Confirm with DBA team then retire — all 3 confirmed via Grafana UI, none have ever fired, but DBA team must approve before retiring |
+| Grafana alert rules (3) | Confirm with DBA team then retire — no active consumer confirmed |
 | Zabbix agent | Goes with the server on decommission — notify monitoring team |
 
 ---
@@ -157,7 +157,7 @@ These items have no active consumer or have been superseded. They can be dropped
 | Active Grafana admins (3) | DBA team | Grafana dashboards, DBA_VCC_COST consumer confirmation, snapshot confirmation |
 | SQL Agent service account | SHNONPRD\sqlagent | Runs all SQL Agent jobs |
 | AWS IAM | KurtosysEC2InstanceProfileRoleRep | EC2 instance profile — Python API calls |
-| Infrastructure | DevOps / cloud team | AWS Security Group rules, EW2P-MSSQL-01/02 hosting type, Amazon Managed Grafana provisioning |
+| Infrastructure | DevOps / cloud team | AWS Security Group rules, EW2P-MSSQL-01/02 confirmed EC2-hosted, replacement Grafana provisioning (approach TBD) |
 | Monitoring | Monitoring team | ZabbixProdOld sign-off, Zabbix agent deregistration |
 
 ---

@@ -147,7 +147,7 @@ SQL Server backups ────────────────────�
 
 | Action | Owner | Blocks |
 |---|---|---|
-| Confirmed EW2P-MSSQL-01/02 are EC2-hosted — install CloudWatch Agent on EW2P servers | DBA / DevOps | Replacement path confirmed: CloudWatch Agent, not native RDS monitoring |
+| EW2P-MSSQL-01/02 confirmed EC2-hosted — CloudWatch Agent is the replacement path | DevOps | Install CloudWatch Agent on EW2P-MSSQL-01/02 and configure SQL Server metric collection |
 | Get AWS Security Group rules for EW1R-REP-01 from DevOps | DevOps | Completes firewall documentation |
 | Confirm pmmdev and pmmprod (Clickhouse) purpose and owner | DBA / Platform team | Cannot drop linked servers without this |
 | Confirm ew1d-admin-01/02 permanently retired | DBA team | Cannot drop linked servers without this |
