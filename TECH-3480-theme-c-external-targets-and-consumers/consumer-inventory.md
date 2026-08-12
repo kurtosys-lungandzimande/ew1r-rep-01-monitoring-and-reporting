@@ -100,7 +100,7 @@
 | alert-app-allow2fa-disabled | Grafana alert — REP_CLIENT_APP_AUTH_CONFIG_CHANGES_REPORT | Application 2FA config changes — current vs 2 days ago | Slack contact point confirmed in Grafana UI — No attempts (never fired). Data stale since May 2026. |
 | grafana-default-email | N/A | N/A | Email contact point — No attempts. Placeholder address configured. Not routed to by any active alert rule. |
 
-> Q4(C) CLOSED — Confirmed via Grafana UI (2026-08-12). 3 contact points exist: alerts-data-operations (Slack, No attempts), alert-app-allow2fa-disabled (Slack, No attempts), grafana-default-email (Email, No attempts). None have ever fired. Alert pipeline documented via Confluence but no alerts have ever delivered. All 3 contact points must be retired on decommission.
+> Q4(C) CLOSED — Confirmed via Grafana UI (2026-08-12). 3 contact points exist: alerts-data-operations (Slack, No attempts), alert-app-allow2fa-disabled (Slack, No attempts), grafana-default-email (Email, No attempts). None have ever fired. DBA team to confirm whether contact points and stored procedures are still needed before retiring.
 
 ---
 
@@ -139,7 +139,7 @@
 | # | Question | Who to Ask | Status |
 |---|---|---|---|
 | Q3(C) | Who calls REP_MONTHEND_* procedures each month end — manually or automated? | DBA team | CLOSED — called by Grafana dashboards only. No SQL Agent job. Internal use only. |
-| Q4(C) | Who receives alerts-data-operations and alert-app-allow2fa-disabled Slack channels? | DBA team / ops team | CLOSED — confirmed via Grafana UI 2026-08-12. 3 contact points: alerts-data-operations (Slack, No attempts), alert-app-allow2fa-disabled (Slack, No attempts), grafana-default-email (Email, No attempts). None have ever fired. Retire all 3 on decommission. |
+| Q4(C) | Who receives alerts-data-operations and alert-app-allow2fa-disabled Slack channels? | DBA team / ops team | CLOSED — confirmed via Grafana UI 2026-08-12. 3 contact points: alerts-data-operations (Slack, No attempts), alert-app-allow2fa-disabled (Slack, No attempts), grafana-default-email (Email, No attempts). None have ever fired. DBA team to confirm whether contact points and stored procedures are still needed before retiring. |
 | Q5(C) | What IAM role/key does the Python AWS API caller use? | DevOps / cloud team | CLOSED — IAM instance profile `KurtosysEC2InstanceProfileRoleRep`. No static key on disk. |
 | Q7(C) | Is ZabbixProdOld still active or confirmed safe to remove? | Infrastructure team | CLOSED — confirmed dead. Ping timed out 2026-08-06. Pending infrastructure sign-off to drop. |
 | Q18 | What firewall rules allow inbound/outbound connections to this server? | Infrastructure / DevOps | CLOSED — Windows Firewall rules documented 2026-08-11. AWS Security Group rules still needed from DevOps. See firewall-rules.md |

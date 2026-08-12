@@ -44,8 +44,8 @@ These are the items that will break immediately if the server is switched off wi
 | Component | What Breaks | Migration Target | Priority |
 |---|---|---|---|
 | EW2P-MSSQL-01/02 monitoring (24 jobs) | Two production SQL Servers go completely dark — no monitoring, no alerting | CloudWatch Agent on EW2P servers | Critical |
-| 9 active Grafana dashboards | DBA team loses visibility of KAPP, NiFi, SingleStore, and cost data | Amazon Managed Grafana | Critical |
-| DBA_VCC_COST (280 client billing records) | Client billing data inaccessible — no replacement pipeline | Dedicated licensed RDS instance | Critical |
+| 9 active Grafana dashboards | DBA team loses visibility of KAPP, NiFi, SingleStore, and cost data | TBD — replacement approach to be agreed with team at start of execution sprint | Critical |
+| DBA_VCC_COST (280 client billing records) | Client billing data inaccessible — no replacement pipeline | TBD — DBA team to confirm if data is still needed. Migration destination to be agreed — separate production server migration project ongoing | Critical |
 | DXM monitoring jobs | DXM client size monitoring stops | New monitoring host (TBC) | High |
 | KAPP MySQL datasources (UK/EU/US Prod) | 9 dashboards reading production KAPP data break | Re-point in Amazon Managed Grafana | High |
 | NiFi JSON API datasource | NiFi API Reporting dashboard breaks | Re-point in Amazon Managed Grafana | Medium |

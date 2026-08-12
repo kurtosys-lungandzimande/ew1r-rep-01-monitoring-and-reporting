@@ -90,7 +90,7 @@ This is billing data for 200+ institutional clients. The KAPP Client Utilisation
 - KAPP Client Utilisation and Growth Report confirmed internal use only — not client-facing. No disclosure risk to clients.
 - REP_MONTHEND_* procedures confirmed called by Grafana dashboards only. Internal use only.
 - Root cause fix: SingleStore is being decommissioned — DBA_VCC_MEMSQL jobs will not be re-enabled. DBA_VCC_COST collection pipeline depends on MEMSQL ping stats and will remain stale until a replacement data source is confirmed
-- Long-term: this data should not live on a Developer Edition non-production server. It needs a production-grade home with proper monitoring and alerting as part of the decommission migration plan
+- Long-term: DBA team to confirm if this data is still needed. If yes, migration destination to be agreed — separate production server migration project is ongoing and may cover this. If no longer needed: archive to S3 cold storage and retire.
 
 ---
 
@@ -204,10 +204,10 @@ ZabbixProdOld linked server points to 10.120.8.120:3306 — TCP connection refus
 | 33 partial-cluster dead nodes (ec1p/ew1r/ew2p/ue1p) | Confirm then retire | Need platform team confirmation before dropping |
 | SP_AUDIT_WPv2_CLIENTS_DETAILED | Retire | Last modified 2022, references dead servers, causing daily job failures |
 | EW2P-MSSQL-01/02 monitoring (24 jobs) | Replace | Replace with CloudWatch native monitoring before decommission |
-| DBA_VCC_COST collection pipeline | Fix then decide | Re-enable MEMSQL jobs to restore collection, then assess decommission path |
+| DBA_VCC_COST collection pipeline | Confirm then decide | DBA team to confirm if data is still needed. If yes: migration destination TBD — separate production server migration project ongoing. If no: archive to S3 and retire |
 | DBA_VCC_MEMSQL (7 jobs, 14 dashboards) | Confirm then retire | Confirm why disabled — if SingleStore decommissioned, retire all |
 | 33 REP_MONTHEND procedures | Confirm then decide | Who calls them and whether client-facing must be confirmed first |
-| Slack alerts (Grafana) | Retire on decommission | 3 contact points confirmed via Grafana UI: alerts-data-operations (Slack, No attempts), alert-app-allow2fa-disabled (Slack, No attempts), grafana-default-email (Email, No attempts). None have ever fired. No active consumer. Retire all 3 contact points, stored procedures, and data collection steps on decommission. |
+| Slack alerts (Grafana) | Confirm then retire | 3 contact points confirmed via Grafana UI: alerts-data-operations (Slack, No attempts), alert-app-allow2fa-disabled (Slack, No attempts), grafana-default-email (Email, No attempts). None have ever fired. DBA team to confirm before retiring. |
 | S3 backup encryption | Fix now | Encryption gaps are a compliance risk independent of decommission |
 | IAM role/key for Python caller | Revoke on decommission | Instance profile `KurtosysEC2InstanceProfileRoleRep` confirmed. No static key. Detach instance profile on decommission. |
 | ZabbixProdOld | Retire | Confirmed dead |

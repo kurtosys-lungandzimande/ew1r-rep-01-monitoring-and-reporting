@@ -126,7 +126,7 @@ EW1R-REP-01 (Custom VCC Monitoring Hub)
 |---|---|---|---|
 | DBA_VCC (20 GB) | Replace | Core monitoring of EW2P-MSSQL-01/02 — cannot retire until replacement confirmed | CloudWatch Agent on EW2P servers |
 | DBA_VCC_AWS (182 GB) | Replace | Data originates in CloudWatch — this server is a copy. KAPP API, NiFi, AWS costs, EC2/RDS inventory | CloudWatch Logs + Insights + Cost Explorer + Config |
-| DBA_VCC_COST (5 GB) | Replace | 280 institutional client billing records, FULL recovery model — cannot retire without confirmed replacement and stakeholder sign-off | Dedicated licensed RDS instance |
+| DBA_VCC_COST (5 GB) | Confirm | 280 institutional client billing records, FULL recovery model — DBA team to confirm if data is still needed. Migration destination TBD — separate production server migration project ongoing | TBD |
 | DBA_VCC_MYSQL (25 GB) | Replace (DXM) / Retire (WPv2) | DXM side active and needed. WPv2 side dead — linked servers gone, stored proc from 2022 | New monitoring host for DXM |
 | DBA_VCC_MEMSQL (75 GB) | Retire | All 7 jobs disabled May 2026. SingleStore Prod EU/UK/US confirmed dead (100% packet loss). B3 closed — SingleStore being decommissioned | N/A |
 | DBA_VCC_ATLASSIAN (2 GB) | Retire | No writer, no confirmed consumer, data frozen Dec 2023. Export to S3 cold archive before dropping | N/A |
