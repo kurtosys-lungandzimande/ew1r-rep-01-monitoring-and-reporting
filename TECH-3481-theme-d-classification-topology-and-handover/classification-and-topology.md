@@ -243,8 +243,8 @@ These are not blockers to the decommission plan being written, but must be resol
 | # | Item | Who to Ask | Risk if Not Answered |
 |---|---|---|---|
 | C1 | AWS Security Group rules for EW1R-REP-01 (10.72.8.216) | DevOps / cloud team | Incomplete firewall picture — decommission checklist cannot be finalised |
-| C2 | Who was the KAPP Month End Reporting snapshot shared with (expires 2074)? | tashvir.babulal / rayhaan.suleyman | Permanent public URL may still be in use — cannot retire dashboard without confirming |
-| C3 | Who was the Database Engineering Sprint Reporting snapshot shared with (expires 2073)? | tashvir.babulal / rayhaan.suleyman | Same risk as C2 |
+| C2 | Who was the KAPP Month End Reporting snapshot shared with (expires 2074)? | DBA team | Permanent public URL may still be in use — cannot retire dashboard without confirming |
+| C3 | Who was the Database Engineering Sprint Reporting snapshot shared with (expires 2073)? | DBA team | Same risk as C2 |
 | C4 | Are pmmdev and pmmprod (Clickhouse) linked servers still needed? | DBA / Platform team | Cannot drop without confirming no active dependency |
 | C5 | Are ew1d-admin-01 and ew1d-admin-02 permanently retired? | DBA team | Cannot drop linked servers without confirmation |
 | C6 | What SSIS packages does DBA - SSISStatusCheck monitor? | DBA team | Cannot retire job without knowing what it watches |
