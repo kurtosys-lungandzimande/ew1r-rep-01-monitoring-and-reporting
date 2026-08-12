@@ -207,8 +207,8 @@ SQL Server backups ────────────────────�
 | Retire DBA_VCC_MYSQL database | DBA team | After DXM migration confirmed |
 | Retire DBA_VCC_COST from this server | DBA team | After migration to licensed RDS confirmed |
 | Detach IAM instance profile KurtosysEC2InstanceProfileRoleRep | DevOps | Confirm permissions reviewed before detaching |
-| Retire Grafana contact points and alert rules | DBA team | alerts-data-operations, grafana-default-email, alert rules |
-| Retire Grafana stored procedures (REP_CLIENT_CONFIG_CHANGES_REPORT, REP_CLIENT_APP_AUTH_CONFIG_CHANGES_REPORT) | DBA team | No active consumer confirmed |
+| Confirm with DBA team whether Grafana contact points and alert rules are still needed — retire if confirmed no longer needed | DBA team | alerts-data-operations, grafana-default-email, alert rules — no active consumer confirmed, but DBA team must approve before retiring |
+| Confirm with DBA team whether stored procedures REP_CLIENT_CONFIG_CHANGES_REPORT and REP_CLIENT_APP_AUTH_CONFIG_CHANGES_REPORT are still needed — retire if confirmed | DBA team | No active consumer confirmed — DBA team sign-off required before dropping |
 | Stop S3 backup jobs | DBA team | After AWS Backup policies confirmed active |
 | Confirm S3 retention policy on ksys-ew1r-db-backups before stopping | DevOps | Do not stop until retention confirmed |
 | Switch off EW1R-REP-01 EC2 instance | DevOps | Final step — after all above confirmed |
@@ -229,7 +229,7 @@ Each week has one focus. Shut it down, let it run for a week, confirm nothing br
 | Week 3 | Replacement infrastructure | Provision replacement Grafana workspace (approach agreed in Week 2). Configure CloudWatch Agent on EW2P-MSSQL-01/02. Provision dedicated licensed RDS for DBA_VCC_COST. Set up AWS Backup policies |
 | Week 4 | Validate replacement infrastructure | Confirm CloudWatch Agent collecting data on EW2P servers. Confirm DBA_VCC_COST data migrated and validated on new RDS. Confirm AWS Backup running. Do not retire anything yet |
 | Week 5 | Migrate Grafana dashboards | Migrate 9 active dashboards to replacement Grafana. Run old and new Grafana in parallel. Re-point KAPP, NiFi, Zabbix datasources. Validate each dashboard shows live data |
-| Week 6 | Confirm Grafana migration + retire old dashboards | Confirm all 3 admins using new Grafana. Retire 44 confirmed retire-candidate dashboards from old Grafana. Retire dead datasources (SingleStore dead, InfluxDB, duplicates). Retire Grafana alert contact points and stored procedures (no active consumer confirmed) |
+| Week 6 | Confirm Grafana migration + retire old dashboards | Confirm all 3 admins using new Grafana. Retire 44 confirmed retire-candidate dashboards from old Grafana. Retire dead datasources (SingleStore dead, InfluxDB, duplicates). Confirm with DBA team whether Grafana contact points, alert rules, and stored procedures (REP_CLIENT_CONFIG_CHANGES_REPORT, REP_CLIENT_APP_AUTH_CONFIG_CHANGES_REPORT) are still needed. Retire only if DBA team confirms no longer needed |
 | Week 7 | Migrate DXM monitoring + retire databases | Migrate DXM jobs and linked servers to new host. Confirm data flowing. Archive DBA_VCC_MEMSQL (75 GB), DBA_VCC_ATLASSIAN (2 GB), KURTOSYS_BASELINE (50 GB) to S3 cold storage. Retire those 3 databases after archive confirmed |
 | Week 8 | Decommission | Drop remaining 30 dead partial-cluster linked servers (after platform team confirmation). Retire DBA_VCC_AWS, DBA_VCC, DBA_VCC_MYSQL, DBA_VCC_COST from this server (after replacements confirmed). Detach IAM instance profile. Stop S3 backup jobs (after AWS Backup confirmed). Switch off EW1R-REP-01. Deregister Zabbix agent |
 
