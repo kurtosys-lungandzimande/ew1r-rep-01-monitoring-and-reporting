@@ -18,8 +18,8 @@
 | Active jobs | 52 of 63 enabled |
 | Linked servers | 109 total — 63 dead, 46 reachable |
 | Grafana dashboards | 74 total — 9 with live data and no equivalent elsewhere |
-| Active Grafana users | 3 admins (tashvir.babulal, yogeshwar.phull, rayhaan.suleyman) |
-| Decommission status | NOT SAFE — 10–12 week migration plan required |
+| Active Grafana users | 3 active admins |
+| Decommission status | NOT SAFE — 8-week execution plan required. Target: October 2026. Hard deadline: November 2026 |
 
 ---
 
@@ -33,7 +33,7 @@
 | F4 | donovan.vangraan credentials active in 4 Grafana Zabbix datasources | Nov 2024 (inactive) | Ex-employee has active database access to Zabbix MySQL | DBA team | Revoke Grafana admin. Create grafana_readonly service account. Replace credentials |
 | F5 | Default Grafana admin account active | — | Unnecessary admin account | DBA team | Disable immediately |
 | F6 | S3 backup encryption gaps | — | DBA_VCC_COST client data potentially backed up unencrypted | DBA team | Add --sse AES256 to USP_DatabaseBackupMoveToS3. Fix KMS key NULL on EW1P-OCT backup |
-| F7 | KAPP Month End Reporting snapshot — permanent public URL (expires 2074) | Jan 2024 | Anyone with URL can access dashboard data without login | tashvir.babulal | Confirm recipient. Delete snapshot if no longer needed |
+| F7 | KAPP Month End Reporting snapshot — permanent public URL (expires 2074) | Jan 2024 | Anyone with URL can access dashboard data without login | DBA team | Confirm recipient. Delete snapshot if no longer needed |
 
 ---
 
@@ -138,8 +138,8 @@ These items have no active consumer or have been superseded. They can be dropped
 | # | Item | Who to Ask | Risk if Not Answered |
 |---|---|---|---|
 | C1 | AWS Security Group rules for EW1R-REP-01 | DevOps | Incomplete firewall picture |
-| C2 | KAPP Month End Reporting snapshot recipient (expires 2074) | tashvir.babulal | Permanent public URL may still be in use |
-| C3 | Database Engineering Sprint Reporting snapshot recipient (expires 2073) | tashvir.babulal | Same risk as C2 |
+| C2 | KAPP Month End Reporting snapshot recipient (expires 2074) | DBA team | Permanent public URL may still be in use |
+| C3 | Database Engineering Sprint Reporting snapshot recipient (expires 2073) | DBA team | Same risk as C2 |
 | C4 | pmmdev and pmmprod (Clickhouse) purpose and owner | DBA / Platform team | Cannot drop linked servers without this |
 | C5 | ew1d-admin-01/02 permanently retired? | DBA team | Cannot drop linked servers without this |
 | C6 | What SSIS packages does DBA - SSISStatusCheck monitor? | DBA team | Cannot retire job without knowing what it watches |
@@ -154,9 +154,7 @@ These items have no active consumer or have been superseded. They can be dropped
 
 | Role | Person | What They Own |
 |---|---|---|
-| Active Grafana admin | tashvir.babulal | Grafana dashboards, DBA_VCC_COST consumer confirmation, snapshot confirmation |
-| Active Grafana admin | yogeshwar.phull | Grafana dashboards, MemSQL job disable confirmation |
-| Active Grafana admin | rayhaan.suleyman | Grafana dashboards, DBA_VCC_COST consumer confirmation |
+| Active Grafana admins (3) | DBA team | Grafana dashboards, DBA_VCC_COST consumer confirmation, snapshot confirmation |
 | SQL Agent service account | SHNONPRD\sqlagent | Runs all SQL Agent jobs |
 | AWS IAM | KurtosysEC2InstanceProfileRoleRep | EC2 instance profile — Python API calls |
 | Infrastructure | DevOps / cloud team | AWS Security Group rules, EW2P-MSSQL-01/02 hosting type, Amazon Managed Grafana provisioning |

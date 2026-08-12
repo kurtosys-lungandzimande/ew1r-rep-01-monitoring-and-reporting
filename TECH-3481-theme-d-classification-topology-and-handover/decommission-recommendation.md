@@ -18,7 +18,7 @@ The target is to have this server decommissioned by October 2026, with November 
 | Function | Active? | Criticality | Replacement Exists? |
 |---|---|---|---|
 | Monitors EW2P-MSSQL-01/02 (production SQL Servers) | Yes | Critical | Yes — CloudWatch Agent |
-| Serves 74 Grafana dashboards to 3 active admins | Yes | Critical | Yes — Amazon Managed Grafana |
+| Serves 74 Grafana dashboards to 3 active admins | Yes | Critical | TBD — replacement approach to be agreed with team |
 | Collects KAPP API query logs every 30 min (297M rows) | Yes | High | Yes — CloudWatch Logs + Insights |
 | Collects AWS costs per entity daily | Yes | High | Yes — AWS Cost Explorer |
 | Collects NiFi pipeline logs | Yes | Medium | Yes — CloudWatch Logs |
@@ -41,7 +41,7 @@ These must be addressed immediately, independent of the decommission timeline.
 | F1 | DBA_VCC_MYSQL_DAILY_CHECKS and DBA_VCC_MYSQL_AUDIT_DXM_CLIENT_DETAILED failing every day since 25 June 2026 | Silent daily failures — no alert fires | Remove WPv2 steps from both jobs. Drop SP_AUDIT_WPv2_CLIENTS_DETAILED. Drop 4 WPv2 linked servers |
 | F2 | DBA_VCC_COST data stale since 4 May 2026 — 11+ consecutive silent zero-row runs | 280 institutional client billing records frozen. KAPP Client Utilisation dashboard showing stale data | Root cause: DBA_VCC_MEMSQL jobs disabled. SingleStore decommissioned — collection pipeline will not recover. Stakeholders notified. Replacement pipeline needed |
 | F3 | AWS cost ETL silently broken since Sept 2024 — CATCH block swallows error | AWS Cost Report and AWS Cost Report Monthly dashboards showing data 22+ months stale | Identify failing step in DBA_VCC_AWS_DAILY_CHECKS. Fix or retire — AWS Cost Explorer replaces this natively |
-| F4 | donovan.vangraan credentials active in 4 Grafana Zabbix datasources — ex-employee inactive since Nov 2024 | Live security risk — ex-employee has active database access to Zabbix MySQL | Revoke Grafana admin access. Create grafana_readonly service account. Replace credentials in all 4 datasources |
+| F4 | Ex-employee credentials active in 4 Grafana Zabbix datasources — inactive since Nov 2024 | Live security risk — ex-employee has active database access to Zabbix MySQL | Revoke Grafana admin access. Create grafana_readonly service account. Replace credentials in all 4 datasources |
 | F5 | Default Grafana admin account active — last seen Nov 2024 | Unnecessary admin account — security risk | Disable immediately |
 | F6 | S3 backup encryption gaps — no --sse flag on ksys-ew1r-db-backups, KMS key NULL on ksys-ew1p-oct-dbbackup | DBA_VCC_COST client billing data potentially backed up unencrypted | Add --sse AES256 to USP_DatabaseBackupMoveToS3. Fix KMS key on EW1P-OCT backup job |
 | F7 | KAPP Month End Reporting snapshot with 50-year expiry (expires 2074) — permanent public URL | Anyone with the URL can access dashboard data without logging in | Confirm who it was shared with. Delete snapshot if no longer needed |
@@ -66,8 +66,8 @@ The proposed replacement stack eliminates this server entirely and replaces each
 | EC2/RDS/S3/IAM inventory | AWS Config + Systems Manager Inventory | Native AWS tools. Auto-updated. No custom collection jobs needed |
 | NiFi pipeline logs | CloudWatch Logs | Already flowing there. Query directly |
 | Encore/BNY IIS logs | CloudWatch Logs | Already flowing there. This server is making a copy |
-| Grafana dashboards (74 total, 9 with live data) | Amazon Managed Grafana | AWS-managed. No server to maintain. IAM-based access. Connects to CloudWatch, RDS, and other AWS datasources natively |
-| Zabbix monitoring dashboards (4 dashboards) | Amazon Managed Grafana → direct to Zabbix MySQL | Cut out this server entirely. Connect Grafana directly to Zabbix. No middleman |
+| Grafana dashboards (74 total, 9 with live data) | TBD — to be agreed with team at start of execution sprint | Options: Amazon Managed Grafana, Grafana Cloud, self-hosted on new host. Decision needed before Phase 2 |
+| Zabbix monitoring dashboards (4 dashboards) | TBD — same as above | Once Grafana replacement is agreed, connect directly to Zabbix MySQL. No middleman |
 | Client billing data (DBA_VCC_COST — 280 clients) | Dedicated licensed RDS instance (SQL Server Standard or Enterprise) | Cannot stay on Developer Edition non-prod server. Needs production-grade host with proper backup, monitoring, and access control |
 | DXM client size monitoring | New monitoring host or CloudWatch | DXM is active — needs a confirmed home before decommission |
 | SQL Server backups | AWS Backup | Replace xp_cmdshell S3 sync with proper AWS Backup policies. Encryption and retention managed natively |
@@ -95,7 +95,7 @@ EW2P-MSSQL-01/02 ─────────────────────
                                               DBA Team (3 active admins)
 
 
-AFTER (Target State)
+AFTER (Target State — Grafana replacement approach TBD, to be agreed with team)
 ─────────────────────────────────────────────────────────────────────
 CloudWatch Logs ──────────────────────────────────────────────────────┐
 CloudWatch Metrics ───────────────────────────────────────────────────┤
@@ -105,7 +105,7 @@ KAPP MySQL (UK/EU/US Prod) ─────────────────�
 Zabbix MySQL (direct) ────────────────────────────────────────────────┤
 NiFi API (direct) ────────────────────────────────────────────────────┤
                                                                       ▼
-                                              Amazon Managed Grafana (IAM-based access)
+                                              Replacement Grafana (approach TBD)
                                               ├── 9 migrated dashboards (live data)
                                               ├── CloudWatch native dashboards
                                               └── Zabbix dashboards (direct connection)
@@ -128,9 +128,9 @@ SQL Server backups ────────────────────�
 
 | Action | Owner | Risk |
 |---|---|---|
-| Revoke donovan.vangraan Grafana admin access | DBA team | Zero — ex-employee, inactive since Nov 2024 |
+| Revoke ex-employee Grafana admin access | DBA team | Zero — ex-employee, inactive since Nov 2024 |
 | Create grafana_readonly service account in Zabbix MySQL | DBA / Monitoring team | Low |
-| Replace donovan.vangraan credentials in all 4 Zabbix datasources | DBA team | Low — test each datasource after update |
+| Replace ex-employee credentials in all 4 Zabbix datasources | DBA team | Low — test each datasource after update |
 | Disable default Grafana admin account | DBA team | Zero |
 | Remove WPv2 steps from DBA_VCC_MYSQL_DAILY_CHECKS and DBA_VCC_MYSQL_AUDIT_DXM_CLIENT_DETAILED | DBA team | Zero — WPv2 confirmed decommissioned |
 | Drop SP_AUDIT_WPv2_CLIENTS_DETAILED | DBA team | Zero |
@@ -139,7 +139,7 @@ SQL Server backups ────────────────────�
 | Drop ZabbixNonProd and ZabbixProdOld linked servers | DBA team | Zero — both confirmed dead |
 | Add --sse AES256 to USP_DatabaseBackupMoveToS3 | DBA team | Low — test backup job after change |
 | Fix KMS key NULL on EW1P-OCT RDS backup job | DBA team | Low |
-| Confirm and delete KAPP Month End Reporting snapshot (expires 2074) | tashvir.babulal | Low — confirm recipient first |
+| Confirm and delete KAPP Month End Reporting snapshot (expires 2074) | DBA team | Low — confirm recipient first |
 | Notify stakeholders that DBA_VCC_COST data has been stale since 4 May 2026 | DBA team lead | Required — billing data impact |
 
 ### Phase 1 — Confirm Remaining Open Items
@@ -161,7 +161,7 @@ SQL Server backups ────────────────────�
 
 | Action | Owner | Notes |
 |---|---|---|
-| Provision Amazon Managed Grafana workspace | DevOps / DBA team | IAM-based access. Connect to CloudWatch, RDS, KAPP MySQL, NiFi API, Zabbix MySQL |
+| Provision replacement Grafana workspace (approach TBD — agree with team before this phase) | DevOps / DBA team | Options: Amazon Managed Grafana, Grafana Cloud, self-hosted. Connect to CloudWatch, RDS, KAPP MySQL, NiFi API, Zabbix MySQL |
 | Configure CloudWatch Agent on EW2P-MSSQL-01/02 | DevOps | Replaces 24 VCC monitoring jobs. Confirm RDS vs EC2 first |
 | Set up CloudWatch dashboards for EW2P-MSSQL-01/02 | DBA team | Replaces VCC monitoring dashboards |
 | Provision dedicated licensed RDS instance for DBA_VCC_COST | DevOps / DBA team | SQL Server Standard or Enterprise. FULL recovery. Proper backup and monitoring |
@@ -174,13 +174,13 @@ SQL Server backups ────────────────────�
 
 | Action | Owner | Notes |
 |---|---|---|
-| Migrate 9 confirmed active dashboards to Amazon Managed Grafana | DBA team | NiFi API Reporting, Database Engineering Costs, Cluster View, Historical Workload Monitoring, Query History, Detailed KAPP Workflow Stats, Release/Dev Doc Gen Run Metrics |
+| Migrate 9 confirmed active dashboards to replacement Grafana | DBA team | NiFi API Reporting, Database Engineering Costs, Cluster View, Historical Workload Monitoring, Query History, Detailed KAPP Workflow Stats, Release/Dev Doc Gen Run Metrics |
 | Re-point KAPP UK/EU/US Prod datasources in new Grafana | DBA team | Direct MySQL connections — same IPs, new Grafana host |
 | Re-point NiFi JSON API datasource in new Grafana | DBA team | 10.125.9.192:8443 — same endpoint |
 | Re-point Zabbix datasources in new Grafana (direct connection) | DBA / Monitoring team | Use new grafana_readonly service account |
 | Validate all migrated dashboards show live data | DBA team | Test each dashboard before retiring old Grafana |
-| Notify 3 active admins of new Grafana URL | DBA team | tashvir.babulal, yogeshwar.phull, rayhaan.suleyman |
-| Confirm 2 pending dashboards (KAPP Client Utilisation, BNY IIS Log Streams) | tashvir.babulal | Migrate or retire based on confirmation |
+| Notify 3 active admins of new Grafana URL | DBA team | Inform active admins once new URL is confirmed |
+| Confirm 2 pending dashboards (KAPP Client Utilisation, BNY IIS Log Streams) | DBA team | Migrate or retire based on confirmation |
 | Retire 35+ dashboards confirmed as retire candidates | DBA team | Dead datasources, duplicates, MemSQL-dependent |
 
 ### Phase 4 — Migrate DXM Monitoring
@@ -254,7 +254,7 @@ Each phase has a minimum 1-week confirmation window before moving to the next. N
 - [x] All 6 decommission blocker questions answered or formally escalated with evidence
 - [x] Component classification finalised — all components confirmed as Replace, Retire, Move, or Confirm
 - [x] Topology diagram updated — dead targets removed, confirmed consumers added, active data flows validated
-- [x] Decommission recommendation finalised — not safe to decommission today, 10–12 week plan defined
+- [x] Decommission recommendation finalised — not safe to decommission today, 8-week execution plan defined targeting October 2026
 - [x] Handover package complete — all active failures documented with owner and next action
 - [x] Migration input produced — ordered 5-phase plan with owners and dependencies
 - [ ] All Confluence pages updated to reflect final classification and topology
