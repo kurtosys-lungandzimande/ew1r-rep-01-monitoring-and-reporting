@@ -218,18 +218,20 @@ SQL Server backups ────────────────────�
 
 ## Realistic Timeline
 
-| Phase | What Happens | Duration | Cumulative |
-|---|---|---|---|
-| Phase 0 | Fix active failures — credentials, WPv2 jobs, encryption | Week 1 | Week 1 |
-| Phase 1 | Confirm remaining open items — let fixes run, confirm stable | Week 2 | Week 2 |
-| Phase 2 | Agree replacement approach + begin provisioning replacement infrastructure | Week 3–4 | Week 4 |
-| Phase 3 | Migrate active Grafana dashboards — run old and new in parallel, confirm each dashboard stable for 1 week before retiring old | Week 5–6 | Week 6 |
-| Phase 4 | Migrate DXM monitoring — confirm data flowing on new host for 1 week before retiring old jobs | Week 7 | Week 7 |
-| Phase 5 | Decommission — retire components one by one, 1 component per week, confirm nothing breaks before next step | Week 8 | Week 8 |
-
 **Target: October 2026. Hard deadline: November 2026.**
 
-Each phase has a minimum 1-week confirmation window before moving to the next. Nothing is retired until the replacement has been running and confirmed stable. The pace is deliberate — shut something down, let it run for a week, confirm nothing breaks, then move on.
+Each week has one focus. Shut it down, let it run for a week, confirm nothing breaks, then move to the next. Nothing is retired until confirmed stable.
+
+| Week | Focus | What Happens |
+|---|---|---|
+| Week 1 | Fix active failures | Fix ex-employee credentials in Grafana. Disable default admin. Remove WPv2 steps from failing jobs. Drop 4 WPv2 linked servers. Drop 26 gen-rel + gen-prd dead linked servers. Drop ZabbixNonProd + ZabbixProdOld. Fix S3 encryption gaps. Notify stakeholders about stale DBA_VCC_COST data |
+| Week 2 | Confirm + stabilise | Let Week 1 fixes run. Confirm no jobs broke. Answer remaining open items: EW2P-MSSQL-01/02 hosting type, pmmdev/pmmprod purpose, ew1d-admin-01/02 status, SSIS packages, EW1P-OCT backup need. Agree Grafana replacement approach with team |
+| Week 3 | Replacement infrastructure | Provision replacement Grafana workspace (approach agreed in Week 2). Configure CloudWatch Agent on EW2P-MSSQL-01/02. Provision dedicated licensed RDS for DBA_VCC_COST. Set up AWS Backup policies |
+| Week 4 | Validate replacement infrastructure | Confirm CloudWatch Agent collecting data on EW2P servers. Confirm DBA_VCC_COST data migrated and validated on new RDS. Confirm AWS Backup running. Do not retire anything yet |
+| Week 5 | Migrate Grafana dashboards | Migrate 9 active dashboards to replacement Grafana. Run old and new Grafana in parallel. Re-point KAPP, NiFi, Zabbix datasources. Validate each dashboard shows live data |
+| Week 6 | Confirm Grafana migration + retire old dashboards | Confirm all 3 admins using new Grafana. Retire 44 confirmed retire-candidate dashboards from old Grafana. Retire dead datasources (SingleStore dead, InfluxDB, duplicates). Retire Grafana alert contact points and stored procedures (no active consumer confirmed) |
+| Week 7 | Migrate DXM monitoring + retire databases | Migrate DXM jobs and linked servers to new host. Confirm data flowing. Archive DBA_VCC_MEMSQL (75 GB), DBA_VCC_ATLASSIAN (2 GB), KURTOSYS_BASELINE (50 GB) to S3 cold storage. Retire those 3 databases after archive confirmed |
+| Week 8 | Decommission | Drop remaining 30 dead partial-cluster linked servers (after platform team confirmation). Retire DBA_VCC_AWS, DBA_VCC, DBA_VCC_MYSQL, DBA_VCC_COST from this server (after replacements confirmed). Detach IAM instance profile. Stop S3 backup jobs (after AWS Backup confirmed). Switch off EW1R-REP-01. Deregister Zabbix agent |
 
 ---
 
