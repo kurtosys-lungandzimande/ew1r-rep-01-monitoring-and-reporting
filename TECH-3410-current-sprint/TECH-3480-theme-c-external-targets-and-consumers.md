@@ -53,13 +53,13 @@ TECH-3562 completed the full targets and consumers discovery — 109 linked serv
 | # | Question | Who to Ask | Status |
 |---|---|---|---|
 | Q3 (C) | Who calls REP_MONTHEND_* procedures each month end? | DBA team | CLOSED — called by Grafana dashboards only. No SQL Agent job found. Internal use only. |
-| Q4 (C) | Who receives the Slack alerts from alerts-data-operations and alert-app-allow2fa-disabled? | DBA team / ops team | Slack contact points confirmed active in Grafana database — type: slack, encrypted token and webhook URL present for both. Alert pipeline fully documented. Channel names encrypted — confirm via Grafana UI (Alerting > Contact points). Both alerts must be retired on decommission. |
+| Q4 (C) | Who receives the Slack alerts from alerts-data-operations and alert-app-allow2fa-disabled? | DBA team / ops team | CLOSED — confirmed via Grafana UI 2026-08-12. alerts-data-operations (Slack, No attempts — never fired). alert-app-allow2fa-disabled does not exist as a contact point. grafana-default-email erroring with placeholder. No active consumer. |
 | Q5 (C) | What IAM role/key does the Python AWS API caller use? | DevOps / cloud team | CLOSED — EC2 instance uses IAM instance profile `KurtosysEC2InstanceProfileRoleRep`. STS temporary credentials confirmed active (Code: Success, Type: AWS-HMAC, LastUpdated: 2026-08-11T08:25:43Z). No static access key on disk. No remediation required. |
 | Q6 (C) | What S3 bucket do backups go to — bucket name, ARN, retention policy? | DevOps / cloud team | Closed — ksys-ew1r-db-backups (local) + ksys-ew1p-oct-dbbackup (EW1P-OCT RDS). Retention TBC. Both unencrypted. |
 | Q7 (C) | Is ZabbixProdOld still active or can it be removed? | Infrastructure team | CLOSED — ping confirmed dead 2026-08-06. 10.120.8.120 all requests timed out. Pending infrastructure sign-off to drop. |
 | Q18 | What firewall rules allow inbound/outbound connections to this server? | Infrastructure / DevOps | Open — queries in investigation-log.md |
 | Q21 | If this server went offline today, what would break immediately? | DBA team | CLOSED — 74 Grafana dashboards, EW2P-MSSQL-01/02 monitoring, KAPP billing dashboard, S3 backups, CloudWatch collection. |
-| Q22 | Is any alerting dependent solely on this server — would anyone lose visibility? | DBA team | Both Slack alerts confirmed active and will be silenced on decommission. Channel names to confirm via Grafana UI (Alerting > Contact points). SQL Server severity alerts all silent. Zabbix deadlock and sync check data also stops on decommission. |
+| Q22 | Is any alerting dependent solely on this server — would anyone lose visibility? | DBA team | CLOSED — confirmed via Grafana UI 2026-08-12. alerts-data-operations never fired. alert-app-allow2fa-disabled does not exist. No active consumer. No one loses visibility on decommission. |
 | Q23 | Is the VCC framework replicated anywhere else or is this the only instance? | DBA team | CLOSED — EW2P-MSSQL-01 and EW2P-MSSQL-02 confirmed SQLNCLI linked servers on this server only. VCC framework unique to EW1R-REP-01. |
 
 ---
@@ -70,7 +70,7 @@ TECH-3562 completed the full targets and consumers discovery — 109 linked serv
 - [x] All dead linked servers (WPv2 + 7 additional) documented with evidence and flagged for cleanup — 63 total dead documented. See external-targets-inventory.md
 - [x] Consumer inventory complete: all systems and teams that depend on this server documented — see consumer-inventory.md
 - [x] Month-end procedure consumer confirmed — called by Grafana dashboards only. No automated job. Internal use only.
-- [x] Slack alert consumers confirmed — alerts-data-operations and alert-app-allow2fa-disabled are active Grafana alerts. Slack contact points confirmed in Grafana database. Channel names encrypted — confirm via Grafana UI (Alerting > Contact points). Both must be retired on decommission.
+- [x] Slack alert consumers confirmed — confirmed via Grafana UI 2026-08-12. alerts-data-operations (Slack, No attempts — never fired). alert-app-allow2fa-disabled does not exist as a contact point. No active consumer. Nothing to migrate on decommission.
 - [x] S3 backup targets documented: bucket names, encryption status, retention policy — ksys-ew1r-db-backups + ksys-ew1p-oct-dbbackup. Both unencrypted. Retention TBC.
 - [x] Firewall rules documented: inbound and outbound connections — Windows Firewall rules confirmed 2026-08-11. AWS Security Group rules still needed from DevOps. See firewall-rules.md
 - [x] IAM role/key for Python AWS API caller confirmed — EC2 instance uses IAM instance profile `KurtosysEC2InstanceProfileRoleRep`. STS credentials active. No static key on disk.
