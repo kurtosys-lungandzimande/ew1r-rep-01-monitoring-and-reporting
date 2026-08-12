@@ -249,4 +249,4 @@ These are not blockers to the decommission plan being written, but must be resol
 | C5 | Are ew1d-admin-01 and ew1d-admin-02 permanently retired? | DBA team | Cannot drop linked servers without confirmation |
 | C6 | What SSIS packages does DBA - SSISStatusCheck monitor? | DBA team | Cannot retire job without knowing what it watches |
 | C7 | Is EW1P-OCT RDS backup job still needed after decommission? | DBA team | If EW1P-OCT has native RDS backup, this job is redundant |
-| C8 | Confirm EW2P-MSSQL-01/02 are RDS or EC2-hosted | DBA / DevOps team | Determines whether CloudWatch Agent or native RDS monitoring is the replacement path |
+| C8 | Confirm EW2P-MSSQL-01/02 are RDS or EC2-hosted | CLOSED | Confirmed EC2-hosted. Replacement path: install CloudWatch Agent on EW2P-MSSQL-01/02 and configure SQL Server metric collection |

@@ -69,10 +69,9 @@ This is a zero-risk cleanup. WPv2 is confirmed decommissioned. Nothing depends o
 This is the single biggest decommission blocker for the VCC framework. The monitoring of production servers cannot simply stop — it must be migrated before this server is decommissioned.
 
 **Proposed actions:**
-- Confirm whether EW2P-MSSQL-01 and EW2P-MSSQL-02 are RDS or EC2-hosted
-- If RDS: replace with AWS CloudWatch native SQL Server monitoring — RDS exposes metrics natively, no custom framework needed
-- If EC2-hosted: install CloudWatch Agent on those servers and configure SQL Server metric collection
-- The 24 VCC jobs monitoring these servers can be retired once CloudWatch coverage is confirmed
+- EW2P-MSSQL-01 and EW2P-MSSQL-02 confirmed EC2-hosted
+- Install CloudWatch Agent on those servers and configure SQL Server metric collection
+- The 24 VCC jobs monitoring these servers can be retired once CloudWatch Agent coverage is confirmed
 - This migration must be complete before any decommission date is set
 
 ---

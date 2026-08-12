@@ -144,7 +144,7 @@ These items have no active consumer or have been superseded. They can be dropped
 | C5 | ew1d-admin-01/02 permanently retired? | DBA team | Cannot drop linked servers without this |
 | C6 | What SSIS packages does DBA - SSISStatusCheck monitor? | DBA team | Cannot retire job without knowing what it watches |
 | C7 | EW1P-OCT RDS backup job still needed post-decommission? | DBA team | Determines whether job migrates or retires |
-| C8 | EW2P-MSSQL-01/02 — RDS or EC2-hosted? | DBA / DevOps | Determines CloudWatch replacement path |
+| C8 | EW2P-MSSQL-01/02 — RDS or EC2-hosted? | CLOSED | Confirmed EC2-hosted. Replacement path: CloudWatch Agent on EW2P-MSSQL-01/02 |
 | C9 | KAPP Dev, KAPP Rel, MySQL generic datasource — which dashboards use them? | DBA team | Cannot retire datasources without this |
 | C10 | SingleStore-Release datasource — are dependent dashboards still needed? | DBA team | Target alive — confirm before retiring |
 

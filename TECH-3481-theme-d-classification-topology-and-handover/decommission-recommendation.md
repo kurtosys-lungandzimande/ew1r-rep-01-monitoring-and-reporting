@@ -147,7 +147,7 @@ SQL Server backups ────────────────────�
 
 | Action | Owner | Blocks |
 |---|---|---|
-| Confirm EW2P-MSSQL-01/02 are RDS or EC2-hosted | DBA / DevOps | Determines CloudWatch replacement path |
+| Confirmed EW2P-MSSQL-01/02 are EC2-hosted — install CloudWatch Agent on EW2P servers | DBA / DevOps | Replacement path confirmed: CloudWatch Agent, not native RDS monitoring |
 | Get AWS Security Group rules for EW1R-REP-01 from DevOps | DevOps | Completes firewall documentation |
 | Confirm pmmdev and pmmprod (Clickhouse) purpose and owner | DBA / Platform team | Cannot drop linked servers without this |
 | Confirm ew1d-admin-01/02 permanently retired | DBA team | Cannot drop linked servers without this |
@@ -162,7 +162,7 @@ SQL Server backups ────────────────────�
 | Action | Owner | Notes |
 |---|---|---|
 | Provision replacement Grafana workspace (approach TBD — agree with team before this phase) | DevOps / DBA team | Options: Amazon Managed Grafana, Grafana Cloud, self-hosted. Connect to CloudWatch, RDS, KAPP MySQL, NiFi API, Zabbix MySQL |
-| Configure CloudWatch Agent on EW2P-MSSQL-01/02 | DevOps | Replaces 24 VCC monitoring jobs. Confirm RDS vs EC2 first |
+| Configure CloudWatch Agent on EW2P-MSSQL-01/02 | DevOps | Replaces 24 VCC monitoring jobs. EC2-hosted confirmed — CloudWatch Agent is the path |
 | Set up CloudWatch dashboards for EW2P-MSSQL-01/02 | DBA team | Replaces VCC monitoring dashboards |
 | Confirm with DBA team whether DBA_VCC_COST data is still needed — migrate or retire based on answer | DBA team | Data stale since May 2026. If still needed: destination to be agreed with team — separate production server migration project is ongoing and may cover this. If no longer needed: archive to S3 cold storage and retire |
 | Configure AWS Backup policies for SQL Server backups | DevOps | Replace xp_cmdshell S3 sync. Encryption and retention managed natively |
