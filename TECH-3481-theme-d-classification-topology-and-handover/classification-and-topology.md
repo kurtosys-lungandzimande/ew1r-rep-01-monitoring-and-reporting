@@ -98,11 +98,9 @@ EW1R-REP-01 (Custom VCC Monitoring Hub)
     │   ├── 2 pending confirmation — KAPP Client Utilisation, BNY IIS Log Streams
     │   └── 11 confirm before deciding — month-end, SingleStore monitoring copies
     │
-    ├── ALERT RULES — 3
-    │   ├── Failed Read Queries per Second → alerts-data-operations (Slack, NEVER FIRED)
-    │   ├── KAPP Client Config Alert → alerts-data-operations (Slack, NEVER FIRED)
-    │   └── KAPP Client Application Auth Config Alert → alert-app-allow2fa-disabled
-    │       └── Contact point does NOT exist in current Grafana setup
+    ├── ALERT RULES — 1
+    │   └── Failed Read Queries per Second → alerts-data-operations (Slack, NEVER FIRED)
+    │       └── REP_CLIENT_CONFIG_CHANGES_REPORT and REP_CLIENT_APP_AUTH_CONFIG_CHANGES_REPORT alert rules were never created
     │
     └── USERS — 9
         ├── tashvir.babulal (admin, last seen 2026-06-09) ← ACTIVE
@@ -231,7 +229,7 @@ All 6 original blockers from TECH-3563 are now closed. Additional items confirme
 | B3 | Why were DBA_VCC_MEMSQL jobs disabled May 2026? | CLOSED | SingleStore being decommissioned. All 7 jobs, DBA_VCC_MEMSQL, and 14 dashboards are retire candidates |
 | B4 | Migration plan for EW2P-MSSQL-01/02 monitoring? | CLOSED — plan required | EW2P-MSSQL-01/02 confirmed SQLNCLI linked servers. No other monitoring path. Migration must be planned before decommission date |
 | B5 | Is VCC framework replicated anywhere else? | CLOSED | VCC framework unique to EW1R-REP-01. No VCC databases on EW2P-MSSQL-01/02 |
-| B6 | Who receives Slack alerts — would they lose visibility? | CLOSED | alerts-data-operations never fired (No attempts). alert-app-allow2fa-disabled does not exist as contact point. No active consumer |
+| B6 | Who receives Slack alerts — would they lose visibility? | CLOSED | Confirmed via Grafana UI 2026-08-12. 3 contact points: alerts-data-operations (Slack, No attempts), alert-app-allow2fa-disabled (Slack, No attempts), grafana-default-email (Email, No attempts). None have ever fired. No active consumer |
 | B7 | What IAM role/key does Python caller use? | CLOSED | EC2 instance profile KurtosysEC2InstanceProfileRoleRep. No static key on disk |
 | B8 | Is ZabbixProdOld safe to remove? | CLOSED | Confirmed dead — ping timed out 2026-08-06. Pending infrastructure sign-off |
 | B9 | Firewall rules documented? | CLOSED (partial) | Windows Firewall documented 2026-08-11. AWS Security Group rules still needed from DevOps |

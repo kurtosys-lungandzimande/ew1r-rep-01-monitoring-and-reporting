@@ -39,7 +39,7 @@ Using the classification and topology work completed in TECH-3563 during the TEC
 |---|---|---|
 | Q13 | Who owns DBA_VCC_AWS KAPP monitoring data? | CLOSED — internal DBA team use. Not SLA-reporting |
 | Q21 | If this server went offline today, what would break? | CLOSED — 74 Grafana dashboards, EW2P-MSSQL-01/02 monitoring, KAPP billing dashboard, S3 backups, CloudWatch collection |
-| Q22 | Is any alerting solely dependent on this server? | CLOSED — alerts-data-operations never fired. alert-app-allow2fa-disabled does not exist. No active consumer |
+| Q22 | Is any alerting solely dependent on this server? | CLOSED — confirmed via Grafana UI 2026-08-12. All 3 contact points (alerts-data-operations, alert-app-allow2fa-disabled, grafana-default-email) show No attempts — none have ever fired. No active consumer |
 | Q23 | Is VCC framework replicated anywhere else? | CLOSED — unique to EW1R-REP-01. No VCC databases on EW2P-MSSQL-01/02 |
 | Q35 | Who disabled DBA_VCC_MEMSQL jobs May 2026? | CLOSED — SingleStore decommissioned. Deliberate action confirmed from timestamps |
 | Q36 | Has anyone noticed DBA_VCC_COST stale since May 2026? | CLOSED — stakeholders notified. Internal use only. No client disclosure risk |

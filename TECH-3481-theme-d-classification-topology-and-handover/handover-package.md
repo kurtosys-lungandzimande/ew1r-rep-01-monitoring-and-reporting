@@ -120,14 +120,14 @@ These items have no active consumer or have been superseded. They can be dropped
 |---|---|---|
 | SP_AUDIT_WPv2_CLIENTS_DETAILED | DBA_VCC_MYSQL | Last modified 2022. References dead linked servers. Causing daily job failures |
 | REP_CLIENT_CONFIG_CHANGES_REPORT | DBA_VCC_MEMSQL | No active consumer — alerts-data-operations never fired |
-| REP_CLIENT_APP_AUTH_CONFIG_CHANGES_REPORT | DBA_VCC_MEMSQL | Contact point does not exist in current Grafana setup |
+| REP_CLIENT_APP_AUTH_CONFIG_CHANGES_REPORT | DBA_VCC_MEMSQL | No active consumer — alert-app-allow2fa-disabled contact point confirmed in Grafana UI but has never fired |
 | All REP_MONTHEND_* procedures (33 total) | DBA_VCC_COST (19) + DBA_VCC_MEMSQL (14) | Called by Grafana dashboards only. Dashboards retiring on decommission |
 
 ### Infrastructure
 | Item | Action |
 |---|---|
 | IAM instance profile KurtosysEC2InstanceProfileRoleRep | Detach on decommission. Review permissions before detaching |
-| Grafana contact points (alerts-data-operations, grafana-default-email) | Retire on decommission — alerts-data-operations never fired, email is placeholder |
+| Grafana contact points (alerts-data-operations, alert-app-allow2fa-disabled, grafana-default-email) | Retire on decommission — all 3 confirmed via Grafana UI, none have ever fired |
 | Grafana alert rules (3) | Retire on decommission — no active consumer confirmed |
 | Zabbix agent | Goes with the server on decommission — notify monitoring team |
 

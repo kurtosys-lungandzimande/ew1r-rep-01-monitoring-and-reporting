@@ -19,7 +19,7 @@ TECH-3563 was written during the discovery sprint with 6 open blocker questions.
 |---|---|---|---|
 | Q13 — Who owns DBA_VCC_AWS KAPP monitoring data? | Open | CLOSED — confirmed internal DBA team use. Not SLA-reporting. KAPP API data originates in CloudWatch — this server is a copy | Theme A + Theme C |
 | Q21 — What breaks if server goes offline? | Open | CLOSED — 74 Grafana dashboards, EW2P-MSSQL-01/02 monitoring, KAPP billing dashboard, S3 backups, CloudWatch collection | Theme C |
-| Q22 — Is any alerting solely dependent on this server? | Open | CLOSED — alerts-data-operations never fired (No attempts confirmed Grafana UI 2026-08-12). alert-app-allow2fa-disabled does not exist as contact point. No active consumer | Theme C |
+| Q22 — Is any alerting solely dependent on this server? | Open | CLOSED — confirmed via Grafana UI 2026-08-12. All 3 contact points (alerts-data-operations, alert-app-allow2fa-disabled, grafana-default-email) show No attempts — none have ever fired. No active consumer | Theme C |
 | Q23 — Is VCC framework replicated anywhere else? | Open | CLOSED — VCC framework unique to EW1R-REP-01. No VCC databases on EW2P-MSSQL-01/02 | Theme C |
 | Q35 — Who disabled DBA_VCC_MEMSQL jobs May 2026? | Open | CLOSED — SingleStore being decommissioned. Deliberate action confirmed from timestamps (all 7 jobs disabled within 90 seconds on 2026-05-08 12:00–12:01). B3 closed | Theme B |
 | Q36 — Has anyone noticed DBA_VCC_COST stale since May 2026? | Open — must disclose | CLOSED — stakeholders notified. Confirmed internal use only. Not client-facing. No disclosure risk to clients | Theme C |
@@ -35,7 +35,7 @@ TECH-3563 was written during the discovery sprint with 6 open blocker questions.
 | KURTOSYS_BASELINE | Investigate | Retire | No confirmed consumer — confirmed from Grafana datasource audit |
 | Jira month-end job | Investigate | Retire | DBA_VCC_ATLASSIAN frozen — job has no active consumer |
 | EW1P-OCT backup job | Investigate | Move (pending C7) | Job confirmed active. Confirm if RDS native backup replaces it |
-| Slack alerts | Active — 2 channels | Retire on decommission | alerts-data-operations never fired. alert-app-allow2fa-disabled does not exist as contact point |
+| Slack alerts | Active — 2 channels | Retire on decommission | Confirmed via Grafana UI 2026-08-12. 3 contact points: alerts-data-operations (Slack, No attempts), alert-app-allow2fa-disabled (Slack, No attempts), grafana-default-email (Email, No attempts). None have ever fired. No active consumer |
 | 63 dead linked servers | 11 confirmed dead | 63 confirmed dead | Full reachability audit completed in Theme C |
 | DBA_VCC_COST | Replace — consumer TBC | Replace — confirmed | Consumer confirmed internal. 280 clients confirmed. Needs licensed RDS |
 
@@ -51,7 +51,7 @@ TECH-3563 was written during the discovery sprint with 6 open blocker questions.
 | Slack alert consumers | 2 active channels | alerts-data-operations never fired. alert-app-allow2fa-disabled does not exist as contact point |
 | IAM credential type | Unknown | EC2 instance profile KurtosysEC2InstanceProfileRoleRep — no static key on disk |
 | ZabbixProdOld | Assumed dead | Confirmed dead — ping timed out 2026-08-06 |
-| Grafana alert contact points | 3 active | 2 Slack (1 never fired, 1 contact point missing), 1 email (placeholder, erroring) |
+| Grafana alert contact points | 3 active | alerts-data-operations (Slack, No attempts), alert-app-allow2fa-disabled (Slack, No attempts), grafana-default-email (Email, No attempts) — none have ever fired |
 | DBA_VCC_COST stale since | Unknown | 4 May 2026 — confirmed from INFO_KAPP_Client_* table MAX(DateChecked) |
 
 ---
