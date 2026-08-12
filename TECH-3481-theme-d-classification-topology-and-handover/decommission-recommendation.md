@@ -23,7 +23,7 @@ The target is to have this server decommissioned by October 2026, with November 
 | Collects AWS costs per entity daily | Yes | High | Yes — AWS Cost Explorer |
 | Collects NiFi pipeline logs | Yes | Medium | Yes — CloudWatch Logs |
 | Collects Encore/BNY IIS logs hourly | Yes | Medium | Yes — CloudWatch Logs (already there) |
-| Tracks client billing data for 280 institutional clients | Yes (stale since May 2026) | Critical | Needs dedicated licensed RDS |
+| Tracks client billing data for 280 institutional clients | Yes (stale since May 2026) | Critical | TBD — DBA team to confirm if data is still needed before deciding on migration or retirement |
 | Monitors DXM client sizes daily | Yes | Medium | Yes — new monitoring host |
 | Backs up EW1P-OCT RDS to S3 | Yes | Medium | Yes — RDS native backup |
 | Backs up local SQL Server databases to S3 | Yes | Medium | Yes — AWS Backup |
@@ -68,7 +68,7 @@ The proposed replacement stack eliminates this server entirely and replaces each
 | Encore/BNY IIS logs | CloudWatch Logs | Already flowing there. This server is making a copy |
 | Grafana dashboards (74 total, 9 with live data) | TBD — to be agreed with team at start of execution sprint | Options: Amazon Managed Grafana, Grafana Cloud, self-hosted on new host. Decision needed before Phase 2 |
 | Zabbix monitoring dashboards (4 dashboards) | TBD — same as above | Once Grafana replacement is agreed, connect directly to Zabbix MySQL. No middleman |
-| Client billing data (DBA_VCC_COST — 280 clients) | Dedicated licensed RDS instance (SQL Server Standard or Enterprise) | Cannot stay on Developer Edition non-prod server. Needs production-grade host with proper backup, monitoring, and access control |
+| Client billing data (DBA_VCC_COST — 280 clients) | TBD — DBA team to confirm if data is still needed | Data stale since May 2026. If still needed: migrate to dedicated licensed RDS (SQL Server Standard or Enterprise). If no longer needed: archive to S3 and retire |
 | DXM client size monitoring | New monitoring host or CloudWatch | DXM is active — needs a confirmed home before decommission |
 | SQL Server backups | AWS Backup | Replace xp_cmdshell S3 sync with proper AWS Backup policies. Encryption and retention managed natively |
 | EW1P-OCT RDS backup | RDS native automated backups | RDS already supports automated backups to S3 natively. Custom job is redundant |
@@ -113,7 +113,7 @@ NiFi API (direct) ────────────────────�
                                                              ▼
                                               DBA Team (3 active admins)
 
-DBA_VCC_COST ──────────────────────────────► Dedicated licensed RDS instance
+DBA_VCC_COST ──────────────────────────────► TBD (DBA team to confirm if still needed)
 EW2P-MSSQL-01/02 monitoring ───────────────► CloudWatch Agent (installed on EW2P servers)
 DXM monitoring ────────────────────────────► New monitoring host (TBC)
 SQL Server backups ────────────────────────► AWS Backup policies
@@ -164,8 +164,7 @@ SQL Server backups ────────────────────�
 | Provision replacement Grafana workspace (approach TBD — agree with team before this phase) | DevOps / DBA team | Options: Amazon Managed Grafana, Grafana Cloud, self-hosted. Connect to CloudWatch, RDS, KAPP MySQL, NiFi API, Zabbix MySQL |
 | Configure CloudWatch Agent on EW2P-MSSQL-01/02 | DevOps | Replaces 24 VCC monitoring jobs. Confirm RDS vs EC2 first |
 | Set up CloudWatch dashboards for EW2P-MSSQL-01/02 | DBA team | Replaces VCC monitoring dashboards |
-| Provision dedicated licensed RDS instance for DBA_VCC_COST | DevOps / DBA team | SQL Server Standard or Enterprise. FULL recovery. Proper backup and monitoring |
-| Migrate DBA_VCC_COST data to new RDS instance | DBA team | 5 GB — straightforward migration. Validate all 280 client records |
+| Confirm with DBA team whether DBA_VCC_COST data is still needed — migrate or retire based on answer | DBA team | Data stale since May 2026. If still needed: provision dedicated licensed RDS and migrate. If no longer needed: archive to S3 cold storage and retire |
 | Configure AWS Backup policies for SQL Server backups | DevOps | Replace xp_cmdshell S3 sync. Encryption and retention managed natively |
 | Enable RDS native automated backups for EW1P-OCT | DevOps | Replace custom backup job |
 
@@ -226,8 +225,8 @@ Each week has one focus. Shut it down, let it run for a week, confirm nothing br
 |---|---|---|
 | Week 1 | Fix active failures | Fix ex-employee credentials in Grafana. Disable default admin. Remove WPv2 steps from failing jobs. Drop 4 WPv2 linked servers. Drop 26 gen-rel + gen-prd dead linked servers. Drop ZabbixNonProd + ZabbixProdOld. Fix S3 encryption gaps. Notify stakeholders about stale DBA_VCC_COST data |
 | Week 2 | Confirm + stabilise | Let Week 1 fixes run. Confirm no jobs broke. Answer remaining open items: EW2P-MSSQL-01/02 hosting type, pmmdev/pmmprod purpose, ew1d-admin-01/02 status, SSIS packages, EW1P-OCT backup need. Agree Grafana replacement approach with team |
-| Week 3 | Replacement infrastructure | Provision replacement Grafana workspace (approach agreed in Week 2). Configure CloudWatch Agent on EW2P-MSSQL-01/02. Provision dedicated licensed RDS for DBA_VCC_COST. Set up AWS Backup policies |
-| Week 4 | Validate replacement infrastructure | Confirm CloudWatch Agent collecting data on EW2P servers. Confirm DBA_VCC_COST data migrated and validated on new RDS. Confirm AWS Backup running. Do not retire anything yet |
+| Week 3 | Replacement infrastructure | Provision replacement Grafana workspace (approach agreed in Week 2). Configure CloudWatch Agent on EW2P-MSSQL-01/02. Confirm DBA_VCC_COST decision with DBA team (migrate to licensed RDS or archive and retire). Set up AWS Backup policies |
+| Week 4 | Validate replacement infrastructure | Confirm CloudWatch Agent collecting data on EW2P servers. Confirm DBA_VCC_COST decision actioned (migration validated or archive confirmed). Confirm AWS Backup running. Do not retire anything yet |
 | Week 5 | Migrate Grafana dashboards | Migrate 9 active dashboards to replacement Grafana. Run old and new Grafana in parallel. Re-point KAPP, NiFi, Zabbix datasources. Validate each dashboard shows live data |
 | Week 6 | Confirm Grafana migration + retire old dashboards | Confirm all 3 admins using new Grafana. Retire 44 confirmed retire-candidate dashboards from old Grafana. Retire dead datasources (SingleStore dead, InfluxDB, duplicates). Confirm with DBA team whether Grafana contact points, alert rules, and stored procedures (REP_CLIENT_CONFIG_CHANGES_REPORT, REP_CLIENT_APP_AUTH_CONFIG_CHANGES_REPORT) are still needed. Retire only if DBA team confirms no longer needed |
 | Week 7 | Migrate DXM monitoring + retire databases | Migrate DXM jobs and linked servers to new host. Confirm data flowing. Archive DBA_VCC_MEMSQL (75 GB), DBA_VCC_ATLASSIAN (2 GB), KURTOSYS_BASELINE (50 GB) to S3 cold storage. Retire those 3 databases after archive confirmed |
@@ -240,7 +239,7 @@ Each week has one focus. Shut it down, let it run for a week, confirm nothing br
 | Risk | Severity | Mitigation |
 |---|---|---|
 | EW2P-MSSQL-01/02 go dark during migration | Critical | Do not decommission VCC monitoring jobs until CloudWatch Agent confirmed active and dashboards validated |
-| DBA_VCC_COST client billing data lost | Critical | Migrate to licensed RDS before retiring from this server. Validate all 280 client records after migration |
+| DBA_VCC_COST client billing data lost | Critical | DBA team to confirm if data is still needed before any action. If still needed: migrate to licensed RDS and validate all 280 client records before retiring from this server. If no longer needed: archive to S3 cold storage and retire |
 | Active Grafana dashboards break during migration | High | Run old and new Grafana in parallel during Phase 3. Only retire old Grafana after all 3 admins confirm new dashboards working |
 | DXM monitoring gap | High | Confirm new host before Phase 4. Do not retire DXM jobs until new host validated |
 | KAPP Month End Reporting snapshot still in use | Medium | Confirm recipient before deleting. If still in use, migrate to new Grafana first |
