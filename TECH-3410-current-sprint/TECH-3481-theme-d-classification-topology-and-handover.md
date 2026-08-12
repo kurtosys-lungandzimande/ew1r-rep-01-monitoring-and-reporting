@@ -2,7 +2,9 @@
 # [TECH-3481](https://kurtosys-prod-eng.atlassian.net/jira/software/c/projects/TECH/boards/795?selectedIssue=TECH-3481)
 
 > **Parent Epic:** TECH-3410
-> **Status:** To Do
+> **Status:** In Progress
+> **Working folder:** TECH-3481-theme-d-classification-topology-and-handover/
+> **All 6 original blocker questions closed. Classification finalised. Migration plan defined. 2 DoD items remaining: Confluence publishing.**
 
 ---
 
@@ -12,84 +14,102 @@ Using the classification and topology work completed in TECH-3563 during the TEC
 
 ---
 
-## Background
-
-TECH-3563 completed the topology map and preliminary classification across all components. 12 components were classified across 4 categories (Replace, Retire, Move, Investigate). A preliminary decommission recommendation was written — the server is not safe to decommission. 6 stakeholder questions (Q13, Q21, Q22, Q23, Q35, Q36) remain open and block any decommission date being set. This ticket finalises that classification once stakeholder answers are received, updates the topology diagram, and produces the handover package.
-
----
-
-## What Was Found in Discovery
+## What Was Found in Discovery (TECH-3563)
 
 | Component | Classification | Reason |
 |---|---|---|
 | DBA_VCC_AWS (KAPP monitoring) | Replace | Core KAPP observability — cannot retire |
 | DBA_VCC_MYSQL (MySQL monitoring) | Replace | Active MySQL/RDS monitoring |
-| DBA_VCC_COST (Cost tracking) | Replace | Confirmed client billing — 200+ clients |
-| DBA_VCC_MEMSQL (MemSQL monitoring) | Retire | All 7 jobs disabled since May 2026 — likely superseded |
-| DBA_VCC_ATLASSIAN (Jira integration) | Investigate | Unknown consumer |
-| KURTOSYS_BASELINE | Investigate | 51 GB — unknown active consumer |
-| SingleStore linked servers (90) | Retire | All MemSQL jobs disabled |
+| DBA_VCC_COST (Cost tracking) | Replace | Confirmed client billing — 280 clients |
+| DBA_VCC_MEMSQL (MemSQL monitoring) | Retire | All 7 jobs disabled since May 2026 — SingleStore decommissioned |
+| DBA_VCC_ATLASSIAN (Jira integration) | Retire | No writer, no consumer, frozen Dec 2023 |
+| KURTOSYS_BASELINE | Retire | No confirmed consumer |
+| SingleStore linked servers (63 dead) | Retire | Platform decommissioned |
 | SQL Server linked servers (active) | Move | Still needed for EW2P monitoring |
-| Grafana dashboards (74) | Replace / Move | 3 active admins, actively used as of June 2026 |
+| Grafana dashboards (74) | Replace / Move / Retire | 9 active, 35+ retire candidates, 4 replaceable by AWS/Zabbix |
 | VCC AWS jobs | Replace | Move to CloudWatch / native AWS monitoring |
-| VCC MemSQL jobs | Retire | All disabled |
+| VCC MemSQL jobs | Retire | All disabled — SingleStore decommissioned |
 | DBA Maintenance jobs | Move | Needed on any replacement host |
 
-**Decommission blockers (6 open questions):**
+---
 
-| # | Question | Who to Ask |
+## Blocker Questions — All Closed
+
+| # | Question | Status |
 |---|---|---|
-| Q13 | Who owns the KAPP monitoring data in DBA_VCC_AWS? Is it used for SLA reporting? | KAPP engineering / platform team |
-| Q21 | If this server went offline today, what would break immediately? | yogeshwar.phull / tashvir.babulal |
-| Q22 | Is any alerting dependent solely on this server — would anyone lose visibility? | yogeshwar.phull / tashvir.babulal |
-| Q23 | Is the VCC framework replicated anywhere else or is this the only instance? | DBA team |
-| Q35 | Who disabled the DBA_VCC_MEMSQL jobs in May 2026 and why? | yogeshwar.phull / tashvir.babulal |
-| Q36 | Has anyone noticed that DBA_VCC_COST billing data has been stale since 4 May 2026? | tashvir.babulal / rayhaan.suleyman |
+| Q13 | Who owns DBA_VCC_AWS KAPP monitoring data? | CLOSED — internal DBA team use. Not SLA-reporting |
+| Q21 | If this server went offline today, what would break? | CLOSED — 74 Grafana dashboards, EW2P-MSSQL-01/02 monitoring, KAPP billing dashboard, S3 backups, CloudWatch collection |
+| Q22 | Is any alerting solely dependent on this server? | CLOSED — alerts-data-operations never fired. alert-app-allow2fa-disabled does not exist. No active consumer |
+| Q23 | Is VCC framework replicated anywhere else? | CLOSED — unique to EW1R-REP-01. No VCC databases on EW2P-MSSQL-01/02 |
+| Q35 | Who disabled DBA_VCC_MEMSQL jobs May 2026? | CLOSED — SingleStore decommissioned. Deliberate action confirmed from timestamps |
+| Q36 | Has anyone noticed DBA_VCC_COST stale since May 2026? | CLOSED — stakeholders notified. Internal use only. No client disclosure risk |
 
 ---
 
 ## This Ticket Delivers
 
-- Finalised component classification table — updated once Q13, Q21, Q22, Q23 are answered
-- Validated topology diagram (drawio) — updated to reflect confirmed consumers, dead targets removed, active data flows confirmed
-- Decommission recommendation — final version with stakeholder answers incorporated
-- Handover package — all Confluence pages linked, all open questions resolved or escalated, all active failures documented with owner and action
-- Migration input — what must be replaced, what can be retired, what must move, in what order
-
----
-
-## Open Questions to Resolve in This Ticket
-
-| # | Question | Who to Ask |
-|---|---|---|
-| Q13 | Who owns the KAPP monitoring data in DBA_VCC_AWS? Is it used for SLA reporting? | KAPP engineering / platform team |
-| Q21 | If this server went offline today, what would break immediately? | yogeshwar.phull / tashvir.babulal |
-| Q22 | Is any alerting dependent solely on this server — would anyone lose visibility? | yogeshwar.phull / tashvir.babulal |
-| Q23 | Is the VCC framework replicated anywhere else or is this the only instance? | DBA team |
-| Q35 | Who disabled the DBA_VCC_MEMSQL jobs in May 2026 and why? | yogeshwar.phull / tashvir.babulal |
-| Q36 | Has anyone noticed that DBA_VCC_COST billing data has been stale since 4 May 2026? | tashvir.babulal / rayhaan.suleyman |
-
----
-
-## Definition of Done
-
-- [ ] All 6 decommission blocker questions answered or formally escalated with evidence
-- [ ] Component classification finalised — all 12 components confirmed as Replace, Retire, Move, or Investigate
-- [ ] Topology diagram updated — dead targets removed, confirmed consumers added, active data flows validated
-- [ ] Decommission recommendation finalised — safe or not safe, with conditions clearly stated
-- [ ] Handover package complete — all active failures documented with owner and next action
-- [ ] Migration input produced — ordered list of what must be replaced, retired, or moved before decommission
+- [x] Finalised component classification — all components confirmed as Replace, Retire, Move, or Confirm
+- [x] Validated topology diagram — dead targets removed, confirmed consumers added, active data flows confirmed
+- [x] Decommission recommendation — not safe today, 10–12 week migration plan defined
+- [x] Handover package — all active failures documented with owner and next action
+- [x] Migration input — ordered 5-phase plan with owners, dependencies, and timeline
 - [ ] All Confluence pages updated to reflect final classification and topology
 - [ ] Handover published to Confluence and shared with migration team
+
+> **Status:** 6 of 8 DoD items complete. 2 remaining: Confluence publishing.
+
+---
+
+## Active Failures — Must Fix Now (Phase 0)
+
+| # | Failure | Owner | Action |
+|---|---|---|---|
+| F1 | DBA_VCC_MYSQL jobs failing daily since 25 June 2026 | DBA team | Remove WPv2 steps. Drop SP_AUDIT_WPv2_CLIENTS_DETAILED. Drop 4 WPv2 linked servers |
+| F2 | DBA_VCC_COST data stale since 4 May 2026 — 280 client billing records | DBA team lead | Stakeholders notified. Replacement pipeline needed |
+| F3 | AWS cost ETL broken since Sept 2024 | DBA team | Identify failing step. Fix or retire — AWS Cost Explorer replaces this |
+| F4 | donovan.vangraan credentials in 4 Grafana datasources | DBA team | Revoke Grafana admin. Create grafana_readonly service account |
+| F5 | Default Grafana admin account active | DBA team | Disable immediately |
+| F6 | S3 backup encryption gaps | DBA team | Add --sse AES256. Fix KMS key NULL on EW1P-OCT backup |
+| F7 | KAPP Month End Reporting snapshot — permanent public URL (expires 2074) | tashvir.babulal | Confirm recipient. Delete if no longer needed |
+
+---
+
+## Migration Plan Summary
+
+| Phase | What Happens | Timeline |
+|---|---|---|
+| Phase 0 | Fix active failures — credentials, WPv2 jobs, encryption, dead linked servers | Week 1 |
+| Phase 1 | Confirm remaining open items (EW2P hosting type, AWS Security Group, pmmdev/pmmprod, etc.) | Weeks 1–2 |
+| Phase 2 | Set up replacement infrastructure (Amazon Managed Grafana, CloudWatch Agent, licensed RDS for DBA_VCC_COST, AWS Backup) | Weeks 3–6 |
+| Phase 3 | Migrate 9 active Grafana dashboards to Amazon Managed Grafana | Weeks 6–8 |
+| Phase 4 | Migrate DXM monitoring to new host | Weeks 8–10 |
+| Phase 5 | Decommission — retire databases, drop linked servers, switch off server | Weeks 10–12 |
+
+**Realistic total: 10–12 weeks from stakeholder sign-off on Phase 0.**
+
+---
+
+## Items Still Requiring Confirmation
+
+| # | Item | Who to Ask |
+|---|---|---|
+| C1 | AWS Security Group rules for EW1R-REP-01 | DevOps |
+| C2 | KAPP Month End Reporting snapshot recipient (expires 2074) | tashvir.babulal |
+| C3 | Database Engineering Sprint Reporting snapshot recipient (expires 2073) | tashvir.babulal |
+| C4 | pmmdev and pmmprod (Clickhouse) purpose and owner | DBA / Platform team |
+| C5 | ew1d-admin-01/02 permanently retired? | DBA team |
+| C6 | What SSIS packages does DBA - SSISStatusCheck monitor? | DBA team |
+| C7 | EW1P-OCT RDS backup job still needed post-decommission? | DBA team |
+| C8 | EW2P-MSSQL-01/02 — RDS or EC2-hosted? | DBA / DevOps |
 
 ---
 
 ## Dependencies
 
-- Themes A, B, and C (TECH-3478, TECH-3479, TECH-3480) must be complete before this ticket can be finalised
-- Q13, Q21, Q22, Q23 must be answered before classification can be confirmed and decommission recommendation written
-- Q35 must be answered before DBA_VCC_MEMSQL can be classified as Retire with confidence
-- Q36 must be disclosed to stakeholders before this ticket closes — billing data stale since May 2026
+- Themes A, B, and C (TECH-3478, TECH-3479, TECH-3480) complete — all findings incorporated
+- Phase 0 must start immediately — active failures are independent of decommission timeline
+- Phase 2 requires DevOps to provision Amazon Managed Grafana and confirm EW2P hosting type
+- Phase 3 requires 3 active Grafana admins to validate migrated dashboards before old Grafana is retired
 
 ---
 
