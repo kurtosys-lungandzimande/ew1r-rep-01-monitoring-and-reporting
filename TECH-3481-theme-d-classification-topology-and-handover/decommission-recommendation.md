@@ -7,9 +7,9 @@
 
 ## Executive Summary
 
-EW1R-REP-01 is **not safe to decommission today**. It is actively collecting production data every 30 minutes, serving 74 Grafana dashboards to 3 active users, and is the sole monitoring path for two production SQL Servers. However, the decommission plan is now fully defined. Every function this server performs has a confirmed replacement path. The server can be decommissioned in 10–12 weeks from stakeholder sign-off, provided the migration actions below are executed in order.
+EW1R-REP-01 is not safe to decommission today. It is actively collecting production data every 30 minutes, serving 74 Grafana dashboards to 3 active users, and is the sole monitoring path for two production SQL Servers. The purpose of this document is to lay out what the server does, what is broken right now, and what needs to happen step by step before decommission can proceed.
 
-The server was built in 2017 to solve a monitoring problem that AWS now solves natively. Every single thing it does has a direct AWS equivalent. The platform has moved to AWS — the monitoring should follow.
+The target is to have this server decommissioned by October 2026, with November 2026 as the hard deadline. The approach is deliberate — shut one thing down, let it run for a week, confirm nothing breaks, then move to the next. The replacement approach for each function has not been fully agreed yet and will be confirmed with the team at the start of the execution sprint.
 
 ---
 
@@ -221,15 +221,15 @@ SQL Server backups ────────────────────�
 | Phase | What Happens | Duration | Cumulative |
 |---|---|---|---|
 | Phase 0 | Fix active failures — credentials, WPv2 jobs, encryption | Week 1 | Week 1 |
-| Phase 1 | Confirm remaining open items | Weeks 1–2 | Week 2 |
-| Phase 2 | Set up replacement infrastructure | Weeks 3–6 | Week 6 |
-| Phase 3 | Migrate active Grafana dashboards | Weeks 6–8 | Week 8 |
-| Phase 4 | Migrate DXM monitoring | Weeks 8–10 | Week 10 |
-| Phase 5 | Decommission | Weeks 10–12 | Week 12 |
+| Phase 1 | Confirm remaining open items — let fixes run, confirm stable | Week 2 | Week 2 |
+| Phase 2 | Agree replacement approach + begin provisioning replacement infrastructure | Week 3–4 | Week 4 |
+| Phase 3 | Migrate active Grafana dashboards — run old and new in parallel, confirm each dashboard stable for 1 week before retiring old | Week 5–6 | Week 6 |
+| Phase 4 | Migrate DXM monitoring — confirm data flowing on new host for 1 week before retiring old jobs | Week 7 | Week 7 |
+| Phase 5 | Decommission — retire components one by one, 1 component per week, confirm nothing breaks before next step | Week 8 | Week 8 |
 
-**Realistic total: 10–12 weeks from stakeholder sign-off on Phase 0.**
+**Target: October 2026. Hard deadline: November 2026.**
 
-The critical path is Phase 2 — provisioning Amazon Managed Grafana and CloudWatch Agent on EW2P servers. Everything else can run in parallel once that infrastructure is in place.
+Each phase has a minimum 1-week confirmation window before moving to the next. Nothing is retired until the replacement has been running and confirmed stable. The pace is deliberate — shut something down, let it run for a week, confirm nothing breaks, then move on.
 
 ---
 
