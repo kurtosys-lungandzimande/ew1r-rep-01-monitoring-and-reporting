@@ -488,7 +488,7 @@ Three separate silent failures are causing dashboards to show stale or wrong dat
 ### 4. Duplicate Datasources and Dashboards  Cleanup Before Migration
 
 **What we found:**
-There are 2 DBA_VCC datasource entries pointing at the same target with different UIDs. There are multiple duplicate dashboards sitting in different folders  older versions that were never cleaned up. Migrating this mess as-is to Amazon Managed Grafana will create confusion.
+There are 2 DBA_VCC datasource entries pointing at the same target with different UIDs. There are multiple duplicate dashboards sitting in different folders — older versions that were never cleaned up. Migrating this mess as-is to a replacement Grafana will create confusion.
 
 **Supporting evidence:**
 - DBA_VCC datasource: UIDs a082f27e and e8597015  both point to localhost DBA_VCC
