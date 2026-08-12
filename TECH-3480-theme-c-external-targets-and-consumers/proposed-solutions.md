@@ -128,23 +128,21 @@ The procedures are called by Grafana dashboards only — no automated pipeline. 
 ## 7. Slack Alerts — Active Grafana Alerts, Not Zabbix
 
 **What we found:**
-Confirmed via Grafana UI (2026-08-12, Alerting > Contact points). 2 contact points exist:
-- grafana-default-email: Email, erroring — placeholder address configured, last delivery attempt 2026-08-12, 0s duration, error
+Confirmed via Grafana UI (2026-08-12, Alerting > Contact points). 3 contact points exist:
 - alerts-data-operations: Slack, No attempts — has never fired
+- alert-app-allow2fa-disabled: Slack, No attempts — has never fired
+- grafana-default-email: Email, No attempts — has never fired, placeholder address
 
-alert-app-allow2fa-disabled does not exist as a contact point in the current Grafana setup. It appeared in an older alert_configuration record in the database but was never carried forward to the active configuration.
-
-The alert pipeline documented in Confluence (DBA_VCC_MEMSQL_DAILY_CHECKS feeding REP_CLIENT_CONFIG_CHANGES_REPORT and REP_CLIENT_APP_AUTH_CONFIG_CHANGES_REPORT) is correctly described, but the alerts have never delivered to Slack. Since DBA_VCC_MEMSQL jobs were disabled in May 2026, the underlying data has been stale regardless.
+The alert pipeline documented in Confluence (DBA_VCC_MEMSQL_DAILY_CHECKS feeding REP_CLIENT_CONFIG_CHANGES_REPORT and REP_CLIENT_APP_AUTH_CONFIG_CHANGES_REPORT) is correctly described, but none of the contact points have ever delivered. Since DBA_VCC_MEMSQL jobs were disabled in May 2026, the underlying data has been stale regardless.
 
 **Why it matters:**
-No active alert consumer exists. No one loses visibility on decommission from the Slack alert side. The contact points and their associated alert rules and stored procedures should still be retired as part of the decommission cleanup.
+No active alert consumer exists. No one loses visibility on decommission. The contact points, their associated alert rules, and stored procedures should still be retired as part of the decommission cleanup.
 
 **Proposed actions:**
-- No Slack migration required — alerts-data-operations has never fired, no active consumer
+- No Slack migration required — neither alerts-data-operations nor alert-app-allow2fa-disabled has ever fired
 - Retire REP_CLIENT_CONFIG_CHANGES_REPORT and REP_CLIENT_APP_AUTH_CONFIG_CHANGES_REPORT stored procedures on decommission
 - Retire DBA_VCC_MEMSQL_DAILY_CHECKS steps SP_AUDIT_FP_Client_Sizes_DETAILED and SP_AUDIT_FP_Client_ApplicationConfiguration_Auth_DETAILED on decommission
-- Retire both Grafana contact points and any associated alert rules on decommission
-- grafana-default-email error is non-critical — placeholder address, not routed to by any active alert rule
+- Retire all 3 Grafana contact points and any associated alert rules on decommission
 
 ---
 
@@ -209,7 +207,7 @@ ZabbixProdOld linked server points to 10.120.8.120:3306 — TCP connection refus
 | DBA_VCC_COST collection pipeline | Fix then decide | Re-enable MEMSQL jobs to restore collection, then assess decommission path |
 | DBA_VCC_MEMSQL (7 jobs, 14 dashboards) | Confirm then retire | Confirm why disabled — if SingleStore decommissioned, retire all |
 | 33 REP_MONTHEND procedures | Confirm then decide | Who calls them and whether client-facing must be confirmed first |
-| Slack alerts (Grafana) | Retire on decommission | 2 contact points: alerts-data-operations (Slack, never fired) and grafana-default-email (Email, erroring — placeholder). alert-app-allow2fa-disabled does not exist. No active consumer. Retire contact points, stored procedures, and data collection steps on decommission. |
+| Slack alerts (Grafana) | Retire on decommission | 3 contact points confirmed via Grafana UI: alerts-data-operations (Slack, No attempts), alert-app-allow2fa-disabled (Slack, No attempts), grafana-default-email (Email, No attempts). None have ever fired. No active consumer. Retire all 3 contact points, stored procedures, and data collection steps on decommission. |
 | S3 backup encryption | Fix now | Encryption gaps are a compliance risk independent of decommission |
 | IAM role/key for Python caller | Revoke on decommission | Instance profile `KurtosysEC2InstanceProfileRoleRep` confirmed. No static key. Detach instance profile on decommission. |
 | ZabbixProdOld | Retire | Confirmed dead |
@@ -226,4 +224,4 @@ ZabbixProdOld linked server points to 10.120.8.120:3306 — TCP connection refus
 | B3 | Why were DBA_VCC_MEMSQL jobs disabled in May 2026 — is SingleStore decommissioned? | CLOSED — SingleStore is being decommissioned. All 7 MEMSQL jobs, DBA_VCC_MEMSQL, and 14 dependent dashboards are retire candidates |
 | B4 | What is the migration plan for EW2P-MSSQL-01/02 monitoring post-decommission? | CLOSED — EW2P-MSSQL-01 and EW2P-MSSQL-02 confirmed as SQLNCLI linked servers on this server only. No other monitoring path exists. Migration must be planned before decommission date is set |
 | B5 | Is the VCC framework replicated anywhere else or is this the only instance? | CLOSED — VCC framework is unique to this server. No VCC databases found on EW2P-MSSQL-01 or EW2P-MSSQL-02 |
-| B6 | Who receives alerts-data-operations and alert-app-allow2fa-disabled — would they lose visibility? | CLOSED — confirmed via Grafana UI 2026-08-12. alerts-data-operations (Slack) has never fired — No attempts. alert-app-allow2fa-disabled does not exist as a contact point. grafana-default-email erroring with placeholder address. No active consumer — no one loses visibility on decommission. |
+| B6 | Who receives alerts-data-operations and alert-app-allow2fa-disabled — would they lose visibility? | CLOSED — confirmed via Grafana UI 2026-08-12. 3 contact points: alerts-data-operations (Slack, No attempts), alert-app-allow2fa-disabled (Slack, No attempts), grafana-default-email (Email, No attempts). None have ever fired. No active consumer — no one loses visibility on decommission. |

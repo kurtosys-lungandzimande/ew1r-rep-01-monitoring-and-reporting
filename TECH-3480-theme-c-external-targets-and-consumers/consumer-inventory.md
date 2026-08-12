@@ -19,7 +19,7 @@
 | EW2P-MSSQL-01 monitoring | 16 VCC Audit Collection jobs + 8 VCC Server Monitoring jobs | Critical — production server | Active — no secondary monitoring path |
 | EW2P-MSSQL-02 monitoring | 16 VCC Audit Collection jobs + 8 VCC Server Monitoring jobs | Critical — production server | Active — no secondary monitoring path |
 | Zabbix (via ZabbixProdNew linked server) | Utilities.dbo.Zab_* tables — deadlock, sync check, AG lag | High | Active — Zabbix reads via linked server |
-| Slack alerts (via Grafana) | Grafana alerts — REP_CLIENT_CONFIG_CHANGES_REPORT, REP_CLIENT_APP_AUTH_CONFIG_CHANGES_REPORT | High | 2 contact points configured: alerts-data-operations (Slack, never fired — No attempts) and grafana-default-email (Email, erroring — placeholder address). alert-app-allow2fa-disabled does not exist as a contact point in current Grafana setup. Data fed by DBA_VCC_MEMSQL_DAILY_CHECKS — stale since May 2026. |
+| Slack alerts (via Grafana) | Grafana alerts — REP_CLIENT_CONFIG_CHANGES_REPORT, REP_CLIENT_APP_AUTH_CONFIG_CHANGES_REPORT | High | 3 contact points confirmed via Grafana UI 2026-08-12: alerts-data-operations (Slack, No attempts), alert-app-allow2fa-disabled (Slack, No attempts), grafana-default-email (Email, No attempts). None have ever fired. Data fed by DBA_VCC_MEMSQL_DAILY_CHECKS — stale since May 2026. |
 | AWS CloudWatch / S3 | Python API — DBA_VCC_AWS_15MIN_CHECKS, DBA_VCC_AWS_DAILY_CHECKS | High | Active — 30-min and daily jobs running |
 | Encore IIS / BNY IIS logs | DBA_VCC_HOURLY_CHECKS — CloudWatch ingestion | Medium | Active — hourly collection |
 | DXM client sizes | DBA_VCC_MYSQL — DXM audit jobs | Medium | Active — daily collection |
@@ -96,11 +96,11 @@
 
 | Channel | Source | Trigger | Status |
 |---|---|---|---|
-| alerts-data-operations | Grafana alert — REP_CLIENT_CONFIG_CHANGES_REPORT | Client config changes (enableDocumentEntitlement, enabledEntityTypeEntitlements, enabledCaseSensitive) — current vs 2 days ago | Slack contact point confirmed in Grafana UI — No attempts (never fired). Channel name encrypted in database. Data stale since May 2026. |
-| grafana-default-email | N/A | N/A | Email contact point — erroring. Placeholder address configured. Not routed to by any alert rule. |
-| alert-app-allow2fa-disabled | Grafana alert — REP_CLIENT_APP_AUTH_CONFIG_CHANGES_REPORT | Application 2FA config changes — current vs 2 days ago | Contact point does NOT exist in current Grafana setup. Documented in older alert_configuration record in database only. |
+| alerts-data-operations | Grafana alert — REP_CLIENT_CONFIG_CHANGES_REPORT | Client config changes (enableDocumentEntitlement, enabledEntityTypeEntitlements, enabledCaseSensitive) — current vs 2 days ago | Slack contact point confirmed in Grafana UI — No attempts (never fired). Data stale since May 2026. |
+| alert-app-allow2fa-disabled | Grafana alert — REP_CLIENT_APP_AUTH_CONFIG_CHANGES_REPORT | Application 2FA config changes — current vs 2 days ago | Slack contact point confirmed in Grafana UI — No attempts (never fired). Data stale since May 2026. |
+| grafana-default-email | N/A | N/A | Email contact point — No attempts. Placeholder address configured. Not routed to by any active alert rule. |
 
-> Q4(C) CLOSED — Confirmed via Grafana UI (2026-08-12). 2 contact points exist: alerts-data-operations (Slack, No attempts — never fired) and grafana-default-email (Email, erroring — placeholder address). alert-app-allow2fa-disabled does not exist as a contact point in the current Grafana setup. Alert pipeline documented via Confluence but alerts have never delivered. Both contact points must be retired on decommission.
+> Q4(C) CLOSED — Confirmed via Grafana UI (2026-08-12). 3 contact points exist: alerts-data-operations (Slack, No attempts), alert-app-allow2fa-disabled (Slack, No attempts), grafana-default-email (Email, No attempts). None have ever fired. Alert pipeline documented via Confluence but no alerts have ever delivered. All 3 contact points must be retired on decommission.
 
 ---
 
@@ -139,10 +139,10 @@
 | # | Question | Who to Ask | Status |
 |---|---|---|---|
 | Q3(C) | Who calls REP_MONTHEND_* procedures each month end — manually or automated? | DBA team | CLOSED — called by Grafana dashboards only. No SQL Agent job. Internal use only. |
-| Q4(C) | Who receives alerts-data-operations and alert-app-allow2fa-disabled Slack channels? | DBA team / ops team | CLOSED — confirmed via Grafana UI 2026-08-12. 2 contact points: alerts-data-operations (Slack, No attempts — never fired), grafana-default-email (Email, erroring). alert-app-allow2fa-disabled does not exist as a contact point. Nothing has ever been delivered. Retire both on decommission. |
+| Q4(C) | Who receives alerts-data-operations and alert-app-allow2fa-disabled Slack channels? | DBA team / ops team | CLOSED — confirmed via Grafana UI 2026-08-12. 3 contact points: alerts-data-operations (Slack, No attempts), alert-app-allow2fa-disabled (Slack, No attempts), grafana-default-email (Email, No attempts). None have ever fired. Retire all 3 on decommission. |
 | Q5(C) | What IAM role/key does the Python AWS API caller use? | DevOps / cloud team | CLOSED — IAM instance profile `KurtosysEC2InstanceProfileRoleRep`. No static key on disk. |
 | Q7(C) | Is ZabbixProdOld still active or confirmed safe to remove? | Infrastructure team | CLOSED — confirmed dead. Ping timed out 2026-08-06. Pending infrastructure sign-off to drop. |
 | Q18 | What firewall rules allow inbound/outbound connections to this server? | Infrastructure / DevOps | CLOSED — Windows Firewall rules documented 2026-08-11. AWS Security Group rules still needed from DevOps. See firewall-rules.md |
 | Q21 | If this server went offline today, what would break immediately? | DBA team | CLOSED — 74 Grafana dashboards, EW2P-MSSQL-01/02 monitoring, KAPP billing dashboard, S3 backups, CloudWatch collection. |
-| Q22 | Is any alerting dependent solely on this server — would anyone lose visibility? | DBA team | CLOSED — alerts-data-operations has never fired (No attempts confirmed via Grafana UI 2026-08-12). alert-app-allow2fa-disabled does not exist as a contact point. Email receiver erroring with placeholder. No active alert consumer — no one loses visibility on decommission. SQL Server severity alerts all silent. Zabbix deadlock and sync check data stops but no Slack consumer. |}
+| Q22 | Is any alerting dependent solely on this server — would anyone lose visibility? | DBA team | CLOSED — confirmed via Grafana UI 2026-08-12. All 3 contact points (alerts-data-operations, alert-app-allow2fa-disabled, grafana-default-email) show No attempts — none have ever fired. No active alert consumer — no one loses visibility on decommission. SQL Server severity alerts all silent. Zabbix deadlock and sync check data stops but no Slack consumer. |}
 | Q23 | Is the VCC framework replicated anywhere else or is this the only instance? | DBA team | CLOSED — VCC framework unique to EW1R-REP-01. No VCC databases on EW2P-MSSQL-01 or EW2P-MSSQL-02. |
