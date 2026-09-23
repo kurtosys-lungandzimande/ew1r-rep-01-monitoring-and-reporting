@@ -75,7 +75,7 @@ ORDER BY name;
 -- Expected: all 3 rows show ENABLED
 
 -- -----------------------------------------------------------------------------
--- Check 3: Databases offline — expect 7 OFFLINE, DBA_VCC_MEMSQL ONLINE
+-- Check 3: Databases offline — expect 6 OFFLINE, DBA_VCC and DBA_VCC_MEMSQL ONLINE
 -- -----------------------------------------------------------------------------
 PRINT '=== CHECK 3: Database states ===';
 SELECT
