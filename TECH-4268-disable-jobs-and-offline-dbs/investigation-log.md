@@ -81,3 +81,45 @@ Raise with network/infra team:
 3. Proceed to `04-reenable-2fa-job.sql`
 4. Monitor the next 06:00 run or trigger a manual run
 5. Run `T05-post-2fa-reenable.sql` to confirm data is flowing and Grafana alerts are healthy
+
+---
+
+## Execution progress — 2026-09-27
+
+### Step 02 — Disable jobs ✅ COMPLETE
+
+- 50 jobs disabled successfully
+- `DBA - Maintenance - SQL Backup EW1P-OCT` — confirmed ENABLED
+- `syspolicy_purge_history` — confirmed ENABLED
+- `DBA_VCC_MEMSQL_DAILY_CHECKS` — confirmed DISABLED (re-enable pending network fix)
+- `DBA - SSISStatusCheck` was missed in first run — manually disabled and confirmed
+
+### Step 03 — Databases offline ✅ COMPLETE
+
+| Database | State |
+|---|---|
+| DBA_VCC | ONLINE ✅ — Grafana 2FA connection proxy |
+| DBA_VCC_MEMSQL | ONLINE ✅ — 2FA job writes here |
+| DBA_VCC_ATLASSIAN | OFFLINE ✅ |
+| DBA_VCC_AWS | OFFLINE ✅ |
+| DBA_VCC_COST | OFFLINE ✅ |
+| DBA_VCC_MYSQL | OFFLINE ✅ |
+| KURTOSYS_BASELINE | OFFLINE ✅ |
+| Utilities | OFFLINE ✅ |
+
+### Step 04 — Re-enable DBA_VCC_MEMSQL_DAILY_CHECKS ⏳ BLOCKED
+
+Waiting on network team to restore port 3306 from EW1R-REP-01 to 10.77.x.x subnet.
+See Q35 section above for full details.
+
+### Definition of Done — current status
+
+- ✅ Pre-job state of all 63 jobs captured
+- ✅ Final backups taken and verified
+- ✅ All 50 jobs disabled
+- ✅ Retained jobs confirmed still enabled
+- ✅ 6 databases set OFFLINE
+- ✅ DBA_VCC confirmed ONLINE
+- ✅ DBA_VCC_MEMSQL confirmed ONLINE
+- ⏳ DBA_VCC_MEMSQL_DAILY_CHECKS re-enabled — blocked on network fix
+- ⏳ Grafana 2FA alerts confirmed — blocked on step 04
