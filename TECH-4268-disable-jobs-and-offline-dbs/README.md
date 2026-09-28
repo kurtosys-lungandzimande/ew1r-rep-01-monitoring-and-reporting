@@ -1,9 +1,54 @@
 # TECH-4268 — EW1R-REP-01: Disable non-2FA jobs and take databases offline
 
-**Parent epic:** TECH-3410  
-**Server:** EW1R-REP-01 — 10.72.8.216  
-**Purpose:** Reduce the server to the minimum footprint required for (a) the 2FA alerting chain, (b) Grafana, and (c) the EW1P-OCT Octopus backup job. Everything else is disabled and left offline ready for decommission.  
+**Parent epic:** TECH-3410
+**Server:** EW1R-REP-01 — 10.72.8.216
+**Executed by:** Lunga Ndzimande
+**Last updated:** 2026-09-28
+**Purpose:** Reduce EW1R-REP-01 to the minimum footprint required for (a) the 2FA alerting chain, (b) Grafana, and (c) the EW1P-OCT Octopus backup job. Everything else is disabled and left offline ready for decommission.
 **Nothing is dropped. All changes are reversible.**
+
+---
+
+## Current status
+
+| Step | Script | Status |
+|---|---|---|
+| 0 | `00-pre-change-state-capture.sql` | ✅ Complete |
+| 1 | `01-final-backups.sql` | ✅ Confirmed — automated backups in S3 (2026-09-26) |
+| 2 | `02-disable-jobs.sql` | ✅ Complete — 50 jobs disabled (2026-09-27) |
+| 3 | `03-databases-offline.sql` | ✅ Complete — 6 databases offline (2026-09-28) |
+| 4 | `04-reenable-2fa-job.sql` | ⏳ BLOCKED — see blocker section below |
+| 5 | `05-verify.sql` | ⏳ Pending — blocked on step 4 |
+
+---
+
+## Blocker — step 4 cannot proceed yet
+
+**Root cause:** `ew1r-aggr-03` was relaunched after 8 May 2026 with a new IP (`10.77.6.161`). EW1R-REP-01 cannot resolve `ew1r-aggr-03.rel.kurtosys-internal.net` because its VPC (`vpc-0312c2efa75e26a4d` — ew1r-shared) is not associated with the `rel.kurtosys-internal.net` Route53 private hosted zone.
+
+**Fix required:** Add inline policy to IAM role `KurtosysEC2InstanceProfileRoleRep` (account `649997393595`):
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [{
+    "Effect": "Allow",
+    "Action": "route53:AssociateVPCWithHostedZone",
+    "Resource": "arn:aws:route53:::hostedzone/Z089788836L79G874CNG8"
+  }]
+}
+```
+
+Then run from EW1R-REP-01 PowerShell (Session Manager):
+```powershell
+aws route53 associate-vpc-with-hosted-zone `
+  --hosted-zone-id Z089788836L79G874CNG8 `
+  --vpc VPCRegion=eu-west-1,VPCId=vpc-0312c2efa75e26a4d
+```
+
+**⚠️ Step 1 authorization expires 2026-10-05 — must be completed before then.**
+
+Full details in `investigation-log.md`. Run `testing/T07-blocker-evidence.sql` to demonstrate the blocker.
 
 ---
 
@@ -11,78 +56,60 @@
 
 | Component | Detail |
 |---|---|
-| DBA_VCC_MEMSQL | Database stays ONLINE — 2FA job writes to it |
-| DBA_VCC | Database stays ONLINE — Grafana datasource UID e8597015 connects to it as connection proxy for both 2FA alert queries (confirmed 2026-09-23) |
-| DBA_VCC_MEMSQL_DAILY_CHECKS | Re-enabled in step 04 — 06:00 UTC daily |
+| DBA_VCC_MEMSQL | ONLINE — 2FA job writes to it |
+| DBA_VCC | ONLINE — Grafana datasource UID e8597015 connects to it as 2FA connection proxy (confirmed 2026-09-23) |
+| DBA_VCC_MEMSQL_DAILY_CHECKS | Currently DISABLED — re-enabled in step 4 once blocker is resolved |
 | Grafana (grafana.exe, port 443) | Untouched — relocation tracked separately |
-| DBA - Maintenance - SQL Backup EW1P-OCT | Retained until replacement is delivered |
-| syspolicy_purge_history | System job — leave alone |
+| DBA - Maintenance - SQL Backup EW1P-OCT | ENABLED — retained until replacement is delivered |
+| syspolicy_purge_history | ENABLED — system job, leave alone |
 | SQL Server engine + SQL Agent | Untouched |
 
-## What gets disabled (50 jobs)
+---
 
-VCC AWS (3), VCC Core (4), VCC Audit Collection (16), VCC Server Monitoring (8), VCC MySQL/DXM (7), VCC Cost/Atlassian (2), Baseline (2), KAPP Schema (1), DBA Maintenance (6), SSIS (1).  
+## What was disabled (50 jobs) ✅
+
+VCC AWS (3), VCC Core (4), VCC Audit Collection (16), VCC Server Monitoring (8), VCC MySQL/DXM (7), VCC Cost/Atlassian (2), Baseline (2), KAPP Schema (1), DBA Maintenance (6), SSIS (1).
 The 6 MemSQL jobs and 4 DBA jobs that were already disabled before this ticket are left off — not touched.
 
-## What goes offline (6 databases)
+---
 
-DBA_VCC_AWS, DBA_VCC_MYSQL, DBA_VCC_COST, DBA_VCC_ATLASSIAN, KURTOSYS_BASELINE, Utilities.
+## What went offline (6 databases) ✅
 
-**DBA_VCC stays ONLINE** — confirmed 2026-09-23. Both 2FA Grafana alert rules use datasource UID `e8597015` which connects to DBA_VCC on localhost. The panel queries use 3-part names to reach DBA_VCC_MEMSQL directly:
-- `FROM DBA_VCC_MEMSQL..INFO_Client_FP_Detail`
-- `FROM [DBA_VCC_MEMSQL].[dbo].[INFO_Client_Application_Auth_Config_Detail]`
-- `EXEC [DBA_VCC_MEMSQL]..[REP_CLIENT_APP_AUTH_CONFIG_CHANGES_DETAILED_REPORT]`
+| Database | State | Reason offline |
+|---|---|---|
+| DBA_VCC_AWS | OFFLINE | KAPP API and AWS monitoring — no active consumer |
+| DBA_VCC_MYSQL | OFFLINE | MySQL/DXM monitoring — no active consumer |
+| DBA_VCC_COST | OFFLINE | Client billing data — stale since 4 May 2026, backup retained |
+| DBA_VCC_ATLASSIAN | OFFLINE | Jira reference data — no active consumer |
+| KURTOSYS_BASELINE | OFFLINE | Performance baselines — no active consumer |
+| Utilities | OFFLINE | DBA tooling — all dependent jobs disabled |
 
-DBA_VCC is the connection entry point — taking it offline causes SQL Server to reject the Grafana connection before the query reaches DBA_VCC_MEMSQL. Both 2FA alerts break immediately.
+**DBA_VCC stays ONLINE** — confirmed 2026-09-23. It is the Grafana connection entry point for both 2FA alert rules. Taking it offline breaks both alerts immediately.
 
 ---
 
-## Pre-checks — complete before running any script
+## Pre-checks status
 
-### Pre-check 1 — Grafana 2FA alert datasource dependency ✅ CLOSED 2026-09-23
-
-Both 2FA Grafana alert rules use datasource UID `e8597015-eb43-4adc-8da4-090eed43ee62` — the DBA_VCC mssql datasource on localhost. The panel queries use 3-part names to reach DBA_VCC_MEMSQL directly:
-- `FROM DBA_VCC_MEMSQL..INFO_Client_FP_Detail`
-- `FROM [DBA_VCC_MEMSQL].[dbo].[INFO_Client_Application_Auth_Config_Detail]`
-- `EXEC [DBA_VCC_MEMSQL]..[REP_CLIENT_APP_AUTH_CONFIG_CHANGES_DETAILED_REPORT]`
-
-DBA_VCC is the connection entry point. Taking it offline causes SQL Server to reject the Grafana connection before the query reaches DBA_VCC_MEMSQL — both 2FA alerts break immediately.
-
-**Resolution: DBA_VCC stays ONLINE. Removed from the databases-offline list. 6 databases go offline instead of 7.**
-
-### Pre-check 2 — Final backups
-
-All databases being taken offline must be backed up first. `01-final-backups.sql` handles this. Confirm each backup lands in `ksys-ew1r-db-backups` before proceeding to step 02.
-
-### Pre-check 3 — Capture current state
-
-Run `00-pre-change-state-capture.sql` and save the output. This is your rollback reference for the exact enabled/disabled state of all 63 jobs before any change.
-
-### Pre-check 4 — Notify stakeholders
-
-Before running:
-- Notify **DBA Team (Tashvir Babulal, Yogeshwar Phull, Rayhaan Suleyman)** — ~70 of 74 Grafana dashboards will stop returning data after this change. Only the two 2FA dashboards remain functional.
-- Notify **monitoring team** — Zabbix reads `Utilities.dbo.Zab_*` tables via linked server for deadlock, sync check, and AG lag checks. Those stop when Utilities goes offline.
-- Confirm **EW2P-MSSQL-01/02 monitoring gap is accepted** — the 24 VCC audit and server monitoring jobs are the only monitoring path for those two production servers. Arrange CloudWatch coverage first if the gap is not accepted.
-
-### Pre-check 5 — Q35 (MemSQL job failure root cause)
-
-Before re-enabling DBA_VCC_MEMSQL_DAILY_CHECKS in step 04, confirm with yogeshwar.phull / tashvir.babulal why the job was disabled on 2026-05-08 and what caused the last run failure. Do not re-enable without this answer.
+| Pre-check | Status |
+|---|---|
+| 1 — Grafana 2FA datasource dependency | ✅ CLOSED 2026-09-23 — DBA_VCC stays ONLINE |
+| 2 — Final backups | ✅ Confirmed — automated backups in S3 (2026-09-26) |
+| 3 — Capture current state | ✅ Done — 00-pre-change-state-capture.sql run |
+| 4 — Notify stakeholders | ❓ Pending confirmation |
+| 5 — Q35 root cause | ✅ CLOSED — fully investigated, documented in investigation-log.md |
 
 ---
 
-## Execution order
-
-Run scripts in this exact order. Do not skip steps.
+## Execution order — for reference
 
 | Step | Script | What it does |
 |---|---|---|
-| 1 | `00-pre-change-state-capture.sql` | Captures current state of all 63 jobs and all databases. Save the output. |
-| 2 | `01-final-backups.sql` | Takes FULL backups of all 8 databases and syncs to S3. Confirm each backup before proceeding. |
-| 3 | `02-disable-jobs.sql` | Disables all 50 non-retained jobs. Retained jobs are untouched. |
-| 4 | `03-databases-offline.sql` | Takes 6 databases offline. DBA_VCC stays ONLINE — confirmed 2026-09-23. |
-| 5 | `04-reenable-2fa-job.sql` | Re-enables DBA_VCC_MEMSQL_DAILY_CHECKS. Confirm Q35 is answered first. |
-| 6 | `05-verify.sql` | Runs all DoD checks. All 7 checks must pass before closing the ticket. |
+| 0 | `00-pre-change-state-capture.sql` | Captures current state of all 63 jobs and databases |
+| 1 | `01-final-backups.sql` | FULL backups of all 8 databases — confirmed in S3 |
+| 2 | `02-disable-jobs.sql` | Disables all 50 non-retained jobs |
+| 3 | `03-databases-offline.sql` | Takes 6 databases offline — DBA_VCC stays ONLINE |
+| 4 | `04-reenable-2fa-job.sql` | Re-enables DBA_VCC_MEMSQL_DAILY_CHECKS — ⏳ BLOCKED |
+| 5 | `05-verify.sql` | Post-change verification — all DoD checks |
 
 ---
 
@@ -90,8 +117,8 @@ Run scripts in this exact order. Do not skip steps.
 
 - ~70 Grafana dashboards stop returning data — only the two 2FA dashboards remain functional
 - EW2P-MSSQL-01/02 VCC monitoring stops
-- AWS/KAPP API collection into DBA_VCC_AWS stops — 297M+ row table frozen, growth halted
-- DBA_VCC_COST collection stops — already stale since 4 May 2026, no new impact
+- AWS/KAPP API collection into DBA_VCC_AWS stops — table frozen, growth halted
+- DBA_VCC_COST collection stops — already stale since 4 May 2026
 - Encore/BNY IIS CloudWatch ingestion, DXM client sizes, Jira sprint pull, and baseline captures all stop
 - Zabbix deadlock / sync / AG lag checks sourced from Utilities stop
 - 2 daily-failing MySQL WPv2 jobs stop failing
@@ -102,38 +129,36 @@ Run scripts in this exact order. Do not skip steps.
 
 Disabling the maintenance backup jobs means DBA_VCC_MEMSQL has no ongoing local backup while it stays live.
 
-**Decision required before step 03:**
-
 | Option | Detail |
 |---|---|
 | A — Accept no ongoing backup | Data is rebuilt daily from SingleStore source. Accept the gap for the observation period. |
-| B — Keep a scoped weekly FULL backup | Create a new single-step job that runs `DatabaseBackup` scoped to `DBA_VCC_MEMSQL` and system databases only, weekly. |
+| B — Keep a scoped weekly FULL backup | Create a new single-step job scoped to DBA_VCC_MEMSQL and system databases only, weekly. |
 
-Record which option was chosen and attach to this ticket.
+**❓ Decision not yet recorded — confirm Option A or B and attach to ticket.**
 
 ---
 
 ## Definition of Done
 
-- [ ] Pre-job state of all 63 jobs captured and attached to this ticket (output of `00-pre-change-state-capture.sql`)
-- [ ] Final FULL backups taken and verified in S3 for every database taken offline
-- [ ] Grafana 2FA alert datasource dependency confirmed and handled (Pre-check 1)
-- [ ] All 50 listed jobs disabled — confirmed by Check 1 in `05-verify.sql`
-- [ ] Retained jobs confirmed still enabled — confirmed by Check 2 in `05-verify.sql`
-- [ ] 6 listed databases set OFFLINE — confirmed by Check 3 in `05-verify.sql`
-- [ ] DBA_VCC confirmed ONLINE — 2FA alert connection proxy (Pre-check 1 closed 2026-09-23)
-- [ ] DBA_VCC_MEMSQL_DAILY_CHECKS re-enabled and a successful 06:00 run confirmed — Check 4
-- [ ] DBA_VCC_MEMSQL data freshness confirmed post re-enable — Check 5
-- [ ] Both 2FA Grafana alert rules confirmed evaluating without error — Check 6 (manual Grafana UI)
-- [ ] DBA Team and monitoring team notified
-- [ ] Backup decision (Option A or B) recorded and attached
-- [ ] Observation period agreed (suggest 2 weeks) with a follow-up check date noted
+- [x] Pre-job state of all 63 jobs captured
+- [x] Final FULL backups confirmed in S3 (automated — 2026-09-26)
+- [x] Grafana 2FA alert datasource dependency confirmed — DBA_VCC stays ONLINE
+- [x] All 50 listed jobs disabled
+- [x] Retained jobs confirmed still enabled
+- [x] 6 listed databases set OFFLINE
+- [x] DBA_VCC confirmed ONLINE
+- [ ] DBA_VCC_MEMSQL_DAILY_CHECKS re-enabled and successful 06:00 run confirmed — ⏳ BLOCKED
+- [ ] DBA_VCC_MEMSQL data freshness confirmed post re-enable — ⏳ BLOCKED
+- [ ] Both 2FA Grafana alert rules confirmed evaluating without error — ⏳ BLOCKED
+- [ ] DBA Team and monitoring team notified — ❓ Pending
+- [ ] Backup decision (Option A or B) recorded — ❓ Pending
+- [ ] Observation period agreed with follow-up date — ❓ Pending
 
 ---
 
 ## Rollback
 
-`06-rollback.sql` contains individually commented-out sections for every change made in this ticket:
+`06-rollback.sql` contains individually commented-out sections for every change:
 
 - **Rollback A** — bring a specific database back ONLINE
 - **Rollback B** — re-enable a specific SQL Agent job
@@ -152,7 +177,10 @@ Each section is independent. Uncomment only the line(s) needed, then investigate
 | `01-final-backups.sql` | FULL backups of all databases before going offline |
 | `02-disable-jobs.sql` | Disable all 50 non-retained SQL Agent jobs |
 | `03-databases-offline.sql` | Take 6 databases offline (DBA_VCC stays ONLINE) |
-| `04-reenable-2fa-job.sql` | Re-enable DBA_VCC_MEMSQL_DAILY_CHECKS |
+| `04-reenable-2fa-job.sql` | Re-enable DBA_VCC_MEMSQL_DAILY_CHECKS — ⏳ BLOCKED |
 | `05-verify.sql` | Post-change verification — all DoD checks |
 | `06-rollback.sql` | Reverse any change individually or full rollback |
+| `check-grafana-datasource.py` | Python script to confirm Grafana 2FA datasource UID |
+| `investigation-log.md` | Full investigation log — root cause, blocker, evidence |
+| `testing/` | Test scripts T01–T07 — run before, during and after each step |
 | `README.md` | This file |
