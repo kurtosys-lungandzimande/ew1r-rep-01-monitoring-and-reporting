@@ -84,9 +84,26 @@ Raise with network/infra team:
 
 ---
 
-## Execution progress — 2026-09-27
+## Execution progress — 2026-09-27 / 2026-09-28
 
-### Step 02 — Disable jobs ✅ COMPLETE
+### Backups — ✅ CONFIRMED
+
+Automated backup jobs confirmed backups in S3 for all 8 databases taken on 2026-09-26:
+
+| Database | Last Backup | Size |
+|---|---|---|
+| DBA_VCC | 2026-09-26 00:03 | 21.9 GB |
+| DBA_VCC_ATLASSIAN | 2026-09-26 00:04 | 61 MB |
+| DBA_VCC_AWS | 2026-09-26 00:18 | 90.2 GB |
+| DBA_VCC_COST | 2026-09-26 00:19 | 2.8 GB |
+| DBA_VCC_MEMSQL | 2026-09-26 00:33 | 77.2 GB |
+| DBA_VCC_MYSQL | 2026-09-26 00:41 | 27.1 GB |
+| KURTOSYS_BASELINE | 2026-09-26 00:49 | 53.1 GB |
+| Utilities | 2026-09-26 00:50 | 201 MB |
+
+S3 folders confirmed present in ksys-ew1r-db-backups. No manual backup required.
+
+### Step 02 — Disable jobs ✅ COMPLETE (2026-09-27)
 
 - 50 jobs disabled successfully
 - `DBA - Maintenance - SQL Backup EW1P-OCT` — confirmed ENABLED
@@ -94,7 +111,10 @@ Raise with network/infra team:
 - `DBA_VCC_MEMSQL_DAILY_CHECKS` — confirmed DISABLED (re-enable pending network fix)
 - `DBA - SSISStatusCheck` was missed in first run — manually disabled and confirmed
 
-### Step 03 — Databases offline ✅ COMPLETE
+### Step 03 — Databases offline ✅ COMPLETE (2026-09-28 05:18 UTC)
+
+Note: Databases were briefly brought back online on 2026-09-28 to verify backup status.
+Confirmed automated backups existed in S3. Databases taken offline again at 05:18 UTC.
 
 | Database | State |
 |---|---|
@@ -115,7 +135,7 @@ See Q35 section above for full details.
 ### Definition of Done — current status
 
 - ✅ Pre-job state of all 63 jobs captured
-- ✅ Final backups taken and verified
+- ✅ Final backups confirmed in S3 (automated — 2026-09-26)
 - ✅ All 50 jobs disabled
 - ✅ Retained jobs confirmed still enabled
 - ✅ 6 databases set OFFLINE
@@ -123,3 +143,7 @@ See Q35 section above for full details.
 - ✅ DBA_VCC_MEMSQL confirmed ONLINE
 - ⏳ DBA_VCC_MEMSQL_DAILY_CHECKS re-enabled — blocked on network fix
 - ⏳ Grafana 2FA alerts confirmed — blocked on step 04
+- ❓ DBA Team notified (Tashvir, Yogeshwar, Rayhaan) — confirm
+- ❓ Monitoring team notified — Zabbix checks stop — confirm
+- ❓ Backup decision Option A or B recorded
+- ❓ Observation period agreed with follow-up date
