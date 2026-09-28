@@ -115,6 +115,36 @@
 -- EXEC msdb.dbo.sp_update_job @job_name = 'DBA_VCC_MEMSQL_DAILY_CHECKS', @enabled = 0;
 
 -- =============================================================================
+-- ROLLBACK E: Revert linked server IPs back to hostnames (undo 07-update-linked-server-ips.sql)
+-- Only run this AFTER the Route53 VPC association fix is confirmed working.
+-- Reverts ew1r-aggr-03 and ew1r-aggr-04 from IP addresses back to DNS hostnames.
+-- =============================================================================
+
+/*
+EXEC sp_dropserver @server = N'ew1r-aggr-03', @droplogins = 'droplogins';
+EXEC sp_addlinkedserver
+    @server     = N'ew1r-aggr-03',
+    @srvproduct = N'MySQL',
+    @provider   = N'MSDASQL',
+    @datasrc    = N'ew1r-aggr-03.rel.kurtosys-internal.net:3306';
+
+EXEC sp_dropserver @server = N'ew1r-aggr-04', @droplogins = 'droplogins';
+EXEC sp_addlinkedserver
+    @server     = N'ew1r-aggr-04',
+    @srvproduct = N'MySQL',
+    @provider   = N'MSDASQL',
+    @datasrc    = N'ew1r-aggr-04.rel.kurtosys-internal.net:3306';
+
+-- Verify
+SELECT name, data_source FROM sys.servers
+WHERE name IN ('ew1r-aggr-03', 'ew1r-aggr-04');
+
+-- Test
+EXEC sp_testlinkedserver N'ew1r-aggr-03';
+EXEC sp_testlinkedserver N'ew1r-aggr-04';
+*/
+
+-- =============================================================================
 -- ROLLBACK D: Full rollback — restore server to pre-change state
 -- Brings all databases back online and re-enables all jobs that were
 -- enabled before this ticket. Run sections A and B together.
