@@ -74,13 +74,56 @@ Raise with network/infra team:
 
 ---
 
-### Next steps once connectivity is restored
+### Procedure analysis — SP_AUDIT_FP_Client_Sizes_DETAILED
 
-1. Re-run `sp_testlinkedserver` for all ew1r-aggr nodes — confirm all pass
-2. Re-run ping tests — confirm no packet loss
-3. Proceed to `04-reenable-2fa-job.sql`
-4. Monitor the next 06:00 run or trigger a manual run
-5. Run `T05-post-2fa-reenable.sql` to confirm data is flowing and Grafana alerts are healthy
+Investigated the stored procedure to understand which servers it connects to.
+The procedure does NOT hardcode linked server names — it dynamically picks servers by querying:
+- `DBA_VCC_MEMSQL..LU_Serverlist` — WHERE Role = 'Master Aggregator' AND SERVERNAME NOT LIKE '%gen%'
+- `DBA_VCC_MEMSQL.dbo.BAS_Ping_Stat` — only servers with Status = 1 within last 40 minutes
+- `DBA_VCC_MEMSQL.dbo.BAS_SQL_Status` — only servers with Status = 1 within last 40 minutes
+
+It then uses `OPENQUERY([SERVERNAME], ...)` to connect to each qualifying server.
+
+**Master Aggregators in LU_Serverlist (non-gen):**
+- ec1p-aggr-01
+- ew1d-admin-01
+- ew1d-aggr-05
+- EW1R-AGGR-03
+- ew2p-aggr-03
+- ue1p-aggr-03
+
+**BAS_Ping_Stat and BAS_SQL_Status last updated: 2026-05-08 12:00:00**
+All servers showed Status = 1 at that time — including EW1R-AGGR-03 and EW1R-AGGR-04.
+Data has been frozen since the job was disabled on 8 May 2026.
+
+**Conclusion:** The job was working correctly up to 8 May 2026. EW1R-AGGR-03 was reachable at that time. Something changed in the network between 8 May 2026 and now that broke connectivity from EW1R-REP-01 to the 10.77.x.x subnet.
+
+---
+
+### Cloudflare — endpoint required
+
+If the EW1R SingleStore cluster nodes are now behind Cloudflare, the linked server definitions on EW1R-REP-01 need to be updated to use the Cloudflare tunnel endpoint instead of the direct 10.77.x.x IP addresses.
+
+**Current linked server config (no longer reachable):**
+
+| Linked Server | Direct IP | Status |
+|---|---|---|
+| ew1r-aggr-01 | 10.77.0.130:3306 | ❌ Unreachable |
+| ew1r-aggr-02 | 10.77.1.253:3306 | ❌ Unreachable |
+| EW1R-AGGR-03 | unknown — needs checking | ❓ |
+| ew1r-aggr-04 | unknown — needs checking | ❓ |
+
+**Action required from network/infra team:**
+
+> *"Before 8 May 2026, EW1R-REP-01 (10.72.8.216) could reach EW1R-AGGR-03 and EW1R-AGGR-04 successfully — confirmed by job history and BAS_Ping_Stat data. Since then, 100% ping loss to 10.77.x.x subnet. If these nodes are now behind Cloudflare, the linked server definitions on EW1R-REP-01 need to be updated to use the Cloudflare tunnel hostname/IP instead of the direct 10.77.x.x addresses. Please confirm the current correct connection endpoint (hostname or IP + port) for EW1R-AGGR-03 and EW1R-AGGR-04 so we can update the linked server definitions and re-enable DBA_VCC_MEMSQL_DAILY_CHECKS (TECH-4268)."*
+
+**Once endpoint is confirmed:**
+1. Update the linked server definition for `EW1R-AGGR-03` with the new Cloudflare endpoint
+2. Run `sp_testlinkedserver N'EW1R-AGGR-03'` — confirm it passes
+3. Run ping/connectivity test to new endpoint — confirm no packet loss
+4. Proceed to `04-reenable-2fa-job.sql`
+5. Monitor the next 06:00 run or trigger a manual run
+6. Run `T05-post-2fa-reenable.sql` to confirm data is flowing and Grafana alerts are healthy
 
 ---
 
