@@ -26,8 +26,8 @@ WHERE name IN ('ew1r-aggr-03', 'ew1r-aggr-04')
 ORDER BY name;
 
 -- Expected before:
---   ew1r-aggr-03  |  10.77.0.130:3306  (or hostname)
---   ew1r-aggr-04  |  10.77.1.253:3306  (or hostname)
+--   ew1r-aggr-03  |  ew1r-aggr-03  |  MSDASQL
+--   ew1r-aggr-04  |  ew1r-aggr-04  |  MSDASQL
 
 -- =============================================================================
 -- STEP 2 — Update ew1r-aggr-03 to new IP
@@ -41,7 +41,7 @@ EXEC sp_addlinkedserver
     @server      = N'ew1r-aggr-03',
     @srvproduct  = N'MySQL',
     @provider    = N'MSDASQL',
-    @datasrc     = N'10.77.6.161:3306';
+    @datasrc     = N'10.77.6.161';
 
 -- =============================================================================
 -- STEP 3 — Update ew1r-aggr-04 to new IP
@@ -55,7 +55,7 @@ EXEC sp_addlinkedserver
     @server      = N'ew1r-aggr-04',
     @srvproduct  = N'MySQL',
     @provider    = N'MSDASQL',
-    @datasrc     = N'10.77.2.255:3306';
+    @datasrc     = N'10.77.2.255';
 
 -- =============================================================================
 -- STEP 4 — Verify updated data sources
@@ -67,8 +67,8 @@ WHERE name IN ('ew1r-aggr-03', 'ew1r-aggr-04')
 ORDER BY name;
 
 -- Expected after:
---   ew1r-aggr-03  |  10.77.6.161:3306
---   ew1r-aggr-04  |  10.77.2.255:3306
+--   ew1r-aggr-03  |  10.77.6.161  |  MSDASQL
+--   ew1r-aggr-04  |  10.77.2.255  |  MSDASQL
 
 -- =============================================================================
 -- STEP 5 — Test connectivity

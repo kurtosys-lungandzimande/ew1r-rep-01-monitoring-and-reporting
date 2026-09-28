@@ -126,14 +126,14 @@ EXEC sp_addlinkedserver
     @server     = N'ew1r-aggr-03',
     @srvproduct = N'MySQL',
     @provider   = N'MSDASQL',
-    @datasrc    = N'ew1r-aggr-03.rel.kurtosys-internal.net:3306';
+    @datasrc    = N'ew1r-aggr-03.rel.kurtosys-internal.net';
 
 EXEC sp_dropserver @server = N'ew1r-aggr-04', @droplogins = 'droplogins';
 EXEC sp_addlinkedserver
     @server     = N'ew1r-aggr-04',
     @srvproduct = N'MySQL',
     @provider   = N'MSDASQL',
-    @datasrc    = N'ew1r-aggr-04.rel.kurtosys-internal.net:3306';
+    @datasrc    = N'ew1r-aggr-04.rel.kurtosys-internal.net';
 
 -- Verify
 SELECT name, data_source FROM sys.servers
